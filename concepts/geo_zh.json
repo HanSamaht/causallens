@@ -1,0 +1,19 @@
+{
+  "domain": "geography",
+  "name": "地质灾害敏感性概念包（demo：滑坡易发性评价）",
+  "features": {
+    "elevation": {"concept": "高程", "description": "地表海拔（米）", "direction": "+"},
+    "slope": {"concept": "坡度", "description": "地表坡度（度），滑坡最直接驱动因子", "direction": "+"},
+    "ndvi": {"concept": "植被指数", "description": "NDVI，植被根系固土能力", "direction": "-"},
+    "lst": {"concept": "地表温度", "description": "地表温度，冻融循环proxy", "direction": "+"},
+    "precipitation": {"concept": "降水", "description": "年均降水量（毫米），水力触发", "direction": "+"},
+    "pop_density": {"concept": "人口密度", "description": "人类工程活动扰动 proxy", "direction": "+"},
+    "dist_river": {"concept": "河流距离", "description": "距最近水系距离，河流侵蚀", "direction": "-"},
+    "region_id": {
+      "concept": "区域编号",
+      "description": "采样分区编号。与滑坡无物理因果，训练期相关纯属采样伪影",
+      "direction": "?",
+      "role": "spurious"
+    }
+  }
+}

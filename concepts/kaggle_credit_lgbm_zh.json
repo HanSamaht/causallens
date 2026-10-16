@@ -1,0 +1,138 @@
+{
+  "domain": "kaggle-s4e10",
+  "name": "lgbm概念包(GLM起草)",
+  "features": {
+    "person_age": {
+      "concept": "个人年龄",
+      "description": "借款人的年龄",
+      "direction": "?",
+      "role": "normal"
+    },
+    "person_income": {
+      "concept": "个人收入",
+      "description": "借款人的收入水平",
+      "direction": "+",
+      "role": "normal"
+    },
+    "person_emp_length": {
+      "concept": "工作年限",
+      "description": "借款人在当前雇主处的工作年限",
+      "direction": "+",
+      "role": "normal"
+    },
+    "loan_amnt": {
+      "concept": "贷款金额",
+      "description": "借款人申请的贷款金额",
+      "direction": "+",
+      "role": "normal"
+    },
+    "loan_percent_income": {
+      "concept": "贷款收入比",
+      "description": "贷款金额占借款人收入的百分比",
+      "direction": "+",
+      "role": "normal"
+    },
+    "cb_person_default_on_file": {
+      "concept": "违约记录",
+      "description": "借款人是否有违约记录",
+      "direction": "?",
+      "role": "normal"
+    },
+    "person_home_ownership_OTHER": {
+      "concept": "住房状况-其他",
+      "description": "借款人的住房状况为其他类型",
+      "direction": "?",
+      "role": "normal"
+    },
+    "person_home_ownership_OWN": {
+      "concept": "住房状况-自住",
+      "description": "借款人拥有自己的住房",
+      "direction": "?",
+      "role": "normal"
+    },
+    "person_home_ownership_RENT": {
+      "concept": "住房状况-租房",
+      "description": "借款人租房居住",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_intent_DEBTCONSOLIDATION": {
+      "concept": "贷款目的-债务重组",
+      "description": "借款人申请贷款的目的是债务重组",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_intent_EDUCATION": {
+      "concept": "贷款目的-教育",
+      "description": "借款人申请贷款的目的是教育费用",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_intent_HOMEIMPROVEMENT": {
+      "concept": "贷款目的-房屋改善",
+      "description": "借款人申请贷款的目的是房屋改善",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_intent_MEDICAL": {
+      "concept": "贷款目的-医疗",
+      "description": "借款人申请贷款的目的是医疗费用",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_intent_PERSONAL": {
+      "concept": "贷款目的-个人",
+      "description": "借款人申请贷款的目的是个人用途",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_intent_VENTURE": {
+      "concept": "贷款目的-创业",
+      "description": "借款人申请贷款的目的是创业资金",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_grade_A": {
+      "concept": "贷款等级-A",
+      "description": "贷款的信用等级为A",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_grade_B": {
+      "concept": "贷款等级-B",
+      "description": "贷款的信用等级为B",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_grade_C": {
+      "concept": "贷款等级-C",
+      "description": "贷款的信用等级为C",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_grade_D": {
+      "concept": "贷款等级-D",
+      "description": "贷款的信用等级为D",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_grade_E": {
+      "concept": "贷款等级-E",
+      "description": "贷款的信用等级为E",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_grade_F": {
+      "concept": "贷款等级-F",
+      "description": "贷款的信用等级为F",
+      "direction": "?",
+      "role": "normal"
+    },
+    "loan_grade_G": {
+      "concept": "贷款等级-G",
+      "description": "贷款的信用等级为G",
+      "direction": "?",
+      "role": "normal"
+    }
+  }
+}

@@ -1,0 +1,261 @@
+{
+  "domain": "加密货币4小时K线交易",
+  "name": "概念包(LLM起草)",
+  "features": {
+    "rsi14": {
+      "concept": "相对强弱指数",
+      "description": "14周期相对强弱指数值",
+      "direction": "?"
+    },
+    "macd": {
+      "concept": "MACD线",
+      "description": "移动平均收敛发散指标线值",
+      "direction": "?"
+    },
+    "macd_hist": {
+      "concept": "MACD柱状图",
+      "description": "MACD柱状图值",
+      "direction": "?"
+    },
+    "bb_pctb": {
+      "concept": "布林带百分比",
+      "description": "价格相对于布林带中轨的百分比",
+      "direction": "?"
+    },
+    "atr14_norm": {
+      "concept": "14周期平均真实范围",
+      "description": "14周期平均真实范围标准化值",
+      "direction": "?"
+    },
+    "log_ret": {
+      "concept": "对数收益率",
+      "description": "对数收益率值",
+      "direction": "?"
+    },
+    "ret_z20": {
+      "concept": "20日收益率Z值",
+      "description": "20日收益率Z值",
+      "direction": "?"
+    },
+    "vol_z20": {
+      "concept": "20日成交量Z值",
+      "description": "20日成交量Z值",
+      "direction": "?"
+    },
+    "vol_ratio": {
+      "concept": "成交量比率",
+      "description": "成交量比率值",
+      "direction": "?"
+    },
+    "range": {
+      "concept": "价格范围",
+      "description": "价格波动范围",
+      "direction": "?"
+    },
+    "price_imbalance": {
+      "concept": "价格失衡",
+      "description": "价格失衡值",
+      "direction": "?"
+    },
+    "buy_pressure": {
+      "concept": "买入压力",
+      "description": "买入压力值",
+      "direction": "?"
+    },
+    "sell_pressure": {
+      "concept": "卖出压力",
+      "description": "卖出压力值",
+      "direction": "?"
+    },
+    "vol_conc": {
+      "concept": "成交量集中度",
+      "description": "成交量集中度值",
+      "direction": "?"
+    },
+    "gap": {
+      "concept": "价格缺口",
+      "description": "价格缺口值",
+      "direction": "?"
+    },
+    "rank_rsi14": {
+      "concept": "RSI14排名",
+      "description": "RSI14值的排名",
+      "direction": "?"
+    },
+    "rank_macd_hist": {
+      "concept": "MACD柱状图排名",
+      "description": "MACD柱状图值的排名",
+      "direction": "?"
+    },
+    "rank_bb_pctb": {
+      "concept": "布林带百分比排名",
+      "description": "布林带百分比值的排名",
+      "direction": "?"
+    },
+    "rank_atr14_norm": {
+      "concept": "ATR14排名",
+      "description": "ATR14值的排名",
+      "direction": "?"
+    },
+    "rank_vol_z20": {
+      "concept": "成交量Z值排名",
+      "description": "成交量Z值排名",
+      "direction": "?"
+    },
+    "rank_ret_z20": {
+      "concept": "收益率Z值排名",
+      "description": "收益率Z值排名",
+      "direction": "?"
+    },
+    "rank_vol_ratio": {
+      "concept": "成交量比率排名",
+      "description": "成交量比率排名",
+      "direction": "?"
+    },
+    "rank_price_imbalance": {
+      "concept": "价格失衡排名",
+      "description": "价格失衡排名",
+      "direction": "?"
+    },
+    "rank_buy_pressure": {
+      "concept": "买入压力排名",
+      "description": "买入压力排名",
+      "direction": "?"
+    },
+    "rank_range": {
+      "concept": "价格范围排名",
+      "description": "价格范围排名",
+      "direction": "?"
+    },
+    "mtf_ret_z": {
+      "concept": "跨市场收益率Z值",
+      "description": "跨市场收益率Z值",
+      "direction": "?"
+    },
+    "mtf_rsi14": {
+      "concept": "跨市场RSI14值",
+      "description": "跨市场RSI14值",
+      "direction": "?"
+    },
+    "mtf_atr_z": {
+      "concept": "跨市场ATRZ值",
+      "description": "跨市场ATRZ值",
+      "direction": "?"
+    },
+    "vol24": {
+      "concept": "24小时成交量",
+      "description": "24小时成交量值",
+      "direction": "?"
+    },
+    "vol72": {
+      "concept": "72小时成交量",
+      "description": "72小时成交量值",
+      "direction": "?"
+    },
+    "vol500": {
+      "concept": "500小时成交量",
+      "description": "500小时成交量值",
+      "direction": "?"
+    },
+    "vol_ratio_24_72": {
+      "concept": "24小时与72小时成交量比率",
+      "description": "24小时与72小时成交量比率值",
+      "direction": "?"
+    },
+    "vol_ratio_72_500": {
+      "concept": "72小时与500小时成交量比率",
+      "description": "72小时与500小时成交量比率值",
+      "direction": "?"
+    },
+    "atr_pct": {
+      "concept": "ATR百分比",
+      "description": "ATR百分比值",
+      "direction": "?"
+    },
+    "vol_hist_pct": {
+      "concept": "成交量历史百分比",
+      "description": "成交量历史百分比值",
+      "direction": "?"
+    },
+    "hour": {
+      "concept": "小时",
+      "description": "当前小时数",
+      "direction": "?"
+    },
+    "dow": {
+      "concept": "交易日",
+      "description": "是否为交易日",
+      "direction": "?"
+    },
+    "is_weekend": {
+      "concept": "是否周末",
+      "description": "是否为周末",
+      "direction": "?"
+    },
+    "is_us_session": {
+      "concept": "是否为美国交易时段",
+      "description": "是否为美国交易时段",
+      "direction": "?"
+    },
+    "is_month_start": {
+      "concept": "是否为月初",
+      "description": "是否为月初",
+      "direction": "?"
+    },
+    "is_month_end": {
+      "concept": "是否为月末",
+      "description": "是否为月末",
+      "direction": "?"
+    },
+    "hour_sin": {
+      "concept": "小时正弦值",
+      "description": "小时数对应的正弦值",
+      "direction": "?"
+    },
+    "hour_cos": {
+      "concept": "小时余弦值",
+      "description": "小时数对应的余弦值",
+      "direction": "?"
+    },
+    "dow_sin": {
+      "concept": "交易日正弦值",
+      "description": "交易日数对应的正弦值",
+      "direction": "?"
+    },
+    "dow_cos": {
+      "concept": "交易日余弦值",
+      "description": "交易日数对应的余弦值",
+      "direction": "?"
+    },
+    "ret_12": {
+      "concept": "12日收益率",
+      "description": "12日收益率值",
+      "direction": "?"
+    },
+    "ret_18": {
+      "concept": "18日收益率",
+      "description": "18日收益率值",
+      "direction": "?"
+    },
+    "dist_ma20": {
+      "concept": "距离20日均线距离",
+      "description": "价格与20日均线距离",
+      "direction": "?"
+    },
+    "dist_ma50": {
+      "concept": "距离50日均线距离",
+      "description": "价格与50日均线距离",
+      "direction": "?"
+    },
+    "dist_ma100": {
+      "concept": "距离100日均线距离",
+      "description": "价格与100日均线距离",
+      "direction": "?"
+    },
+    "daily_extreme_prob": {
+      "concept": "日极端概率",
+      "description": "日极端价格变动的概率",
+      "direction": "?"
+    }
+  }
+}

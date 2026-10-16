@@ -1,0 +1,36 @@
+{
+  "domain": "environment",
+  "name": "德里AQI概念包(GLM起草)",
+  "features": {
+    "Date": {
+      "concept": "日期",
+      "description": "空气质量指数预测的具体日期",
+      "direction": "?",
+      "role": "normal"
+    },
+    "Month": {
+      "concept": "月份",
+      "description": "空气质量指数预测的月份",
+      "direction": "?",
+      "role": "normal"
+    },
+    "Year": {
+      "concept": "年份",
+      "description": "空气质量指数预测的年份",
+      "direction": "?",
+      "role": "normal"
+    },
+    "Holidays_Count": {
+      "concept": "节假日数量",
+      "description": "预测期间节假日的数量，可能影响空气质量",
+      "direction": "+",
+      "role": "normal"
+    },
+    "Days": {
+      "concept": "天数",
+      "description": "空气质量指数预测的天数范围",
+      "direction": "?",
+      "role": "normal"
+    }
+  }
+}

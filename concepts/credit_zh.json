@@ -1,0 +1,27 @@
+{
+  "domain": "credit-risk",
+  "name": "德国信用风险概念包（OpenML credit-g）",
+  "features": {
+    "checking_status": {"concept": "支票账户状态", "description": "活期账户余额等级（序数编码），信用风险最强单因子之一", "direction": "-"},
+    "duration": {"concept": "贷款期限", "description": "月数", "direction": "+"},
+    "credit_history": {"concept": "信用历史", "description": "历史还款记录等级", "direction": "-"},
+    "purpose": {"concept": "贷款用途", "description": "购车/家电/经商等（类别编码）", "direction": "?"},
+    "credit_amount": {"concept": "贷款金额", "description": "马克", "direction": "+"},
+    "savings_status": {"concept": "储蓄状态", "description": "储蓄账户余额等级", "direction": "-"},
+    "employment": {"concept": "就业年限", "description": "当前工作年限等级", "direction": "-"},
+    "installment_commitment": {"concept": "分期占收入比", "description": "月供/可支配收入（%）", "direction": "+"},
+    "personal_status": {"concept": "婚姻性别状态", "description": "类别编码；注意公平性审查场景", "direction": "?", "role": "proxy"},
+    "other_parties": {"concept": "共同债务人", "description": "担保人/共同借款人", "direction": "-"},
+    "residence_since": {"concept": "居住年限", "description": "现址居住年数", "direction": "-"},
+    "property_magnitude": {"concept": "资产规模", "description": "不动产/人寿保险/汽车等级", "direction": "-"},
+    "age": {"concept": "年龄", "description": "岁；公平性审查关注特征", "direction": "-"},
+    "other_payment_plans": {"concept": "其他还款渠道", "description": "银行外分期（如商店）", "direction": "+"},
+    "housing": {"concept": "住房状态", "description": "自有/租住/免租", "direction": "-"},
+    "existing_credits": {"concept": "在贷笔数", "description": "本行现有贷款数", "direction": "+"},
+    "job": {"concept": "职业等级", "description": "技能/管理层级", "direction": "-"},
+    "num_dependents": {"concept": "抚养人数", "description": "被抚养人数量", "direction": "+"},
+    "own_telephone": {"concept": "有无电话", "description": "none/yes", "direction": "-"},
+    "foreign_worker": {"concept": "外籍劳工", "description": "yes/no；少数群体特征，公平性重点审查对象", "direction": "+", "role": "proxy"}
+  },
+  "_note": "was_missing_* 前缀的特征是注入缺失的指示器：若其在归因中占比高，说明模型利用了缺失模式本身（MNAR 风险信号）"
+}

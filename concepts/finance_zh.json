@@ -1,0 +1,54 @@
+{
+  "domain": "finance",
+  "name": "A股风格因子概念包（demo）",
+  "features": {
+    "momentum": {
+      "concept": "动量",
+      "description": "过去20日累计收益率，捕捉趋势延续",
+      "direction": "+",
+      "role": "normal"
+    },
+    "value": {
+      "concept": "估值",
+      "description": "EP/BP 复合值，低估值溢价",
+      "direction": "+",
+      "role": "normal"
+    },
+    "volatility": {
+      "concept": "波动率",
+      "description": "过去60日收益标准差，低波动异象",
+      "direction": "-",
+      "role": "normal"
+    },
+    "liquidity": {
+      "concept": "流动性",
+      "description": "换手率/成交额因子，注意与动量存在观测相关",
+      "direction": "+",
+      "role": "proxy"
+    },
+    "reversal": {
+      "concept": "反转",
+      "description": "短期反转因子",
+      "direction": "-",
+      "role": "normal"
+    },
+    "size": {
+      "concept": "市值",
+      "description": "对数市值，小市值效应",
+      "direction": "-",
+      "role": "normal"
+    },
+    "earnings_yield": {
+      "concept": "盈利收益率",
+      "description": "E/P",
+      "direction": "+",
+      "role": "normal"
+    },
+    "month_index": {
+      "concept": "日历月份",
+      "description": "样本采集月份序号。与收益无经济因果，训练期表现纯属数据伪影",
+      "direction": "?",
+      "role": "spurious"
+    }
+  }
+}

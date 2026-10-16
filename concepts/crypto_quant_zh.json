@@ -1,0 +1,256 @@
+{
+  "domain": "crypto-quant",
+  "name": "加密货币多因子选币概念包",
+  "features": {
+    "ret_7d": {
+      "concept": "近7日收益率",
+      "description": "过去7天的收益表现",
+      "direction": "+"
+    },
+    "ret_14d": {
+      "concept": "近14日收益率",
+      "description": "过去14天的收益表现",
+      "direction": "+"
+    },
+    "ret_30d": {
+      "concept": "近30日收益率",
+      "description": "过去30天的收益表现",
+      "direction": "+"
+    },
+    "vol_7d": {
+      "concept": "近7日成交量",
+      "description": "过去7天的成交量",
+      "direction": "+"
+    },
+    "vol_30d": {
+      "concept": "近30日成交量",
+      "description": "过去30天的成交量",
+      "direction": "+"
+    },
+    "rsi_14": {
+      "concept": "14日相对强弱指数",
+      "description": "衡量近14天价格变动的速度和变化幅度",
+      "direction": "?"
+    },
+    "macd_line": {
+      "concept": "MACD线",
+      "description": "MACD平滑异同移动平均线",
+      "direction": "?"
+    },
+    "macd_signal": {
+      "concept": "信号线",
+      "description": "MACD的信号线，用于判断趋势的转折点",
+      "direction": "?"
+    },
+    "macd_hist": {
+      "concept": "MACD柱状图",
+      "description": "MACD柱状图，显示MACD线与信号线之间的差异",
+      "direction": "?"
+    },
+    "max_dd_30": {
+      "concept": "30日最大回撤",
+      "description": "过去30天内的最大回撤",
+      "direction": "-"
+    },
+    "trend_slope": {
+      "concept": "趋势斜率",
+      "description": "价格趋势的斜率",
+      "direction": "+"
+    },
+    "atr_14": {
+      "concept": "14日平均真实范围",
+      "description": "过去14天的平均真实范围",
+      "direction": "+"
+    },
+    "adx_14": {
+      "concept": "14日平均方向性指数",
+      "description": "衡量趋势强度的指标",
+      "direction": "+"
+    },
+    "willr_14": {
+      "concept": "14日威廉指标",
+      "description": "衡量超买超卖状态的指标",
+      "direction": "?"
+    },
+    "stoch_d": {
+      "concept": "随机指标D值",
+      "description": "随机指标D值，用于判断超买超卖状态",
+      "direction": "?"
+    },
+    "cci_20": {
+      "concept": "20日顺势指标",
+      "description": "衡量价格偏离平均线的程度",
+      "direction": "+"
+    },
+    "obv_change": {
+      "concept": "OBV变化率",
+      "description": "OBV（能量潮）的变化率，用于判断市场趋势",
+      "direction": "+"
+    },
+    "trix": {
+      "concept": "三重指数平滑异同移动平均线",
+      "description": "三重指数平滑异同移动平均线，用于判断趋势的转折点",
+      "direction": "?"
+    },
+    "cmf_20": {
+      "concept": "20日量价趋势指标",
+      "description": "衡量成交量与价格趋势的关系",
+      "direction": "+"
+    },
+    "ret_skew": {
+      "concept": "收益率偏度",
+      "description": "收益率分布的偏度，衡量收益率的对称性",
+      "direction": "?"
+    },
+    "ret_kurt": {
+      "concept": "收益率峰度",
+      "description": "收益率分布的峰度，衡量收益率的尖峭程度",
+      "direction": "?"
+    },
+    "ret_autocorr": {
+      "concept": "收益率自相关",
+      "description": "收益率的时间序列自相关性",
+      "direction": "?"
+    },
+    "vwap_dev": {
+      "concept": "VWAP偏离度",
+      "description": "VWAP（成交量加权平均价格）的偏离度",
+      "direction": "?"
+    },
+    "rank_ret_7d": {
+      "concept": "近7日收益率排名",
+      "description": "近7日收益率的排名",
+      "direction": "+"
+    },
+    "rank_vol_30d": {
+      "concept": "近30日成交量排名",
+      "description": "近30日成交量的排名",
+      "direction": "+"
+    },
+    "z_ret_7d": {
+      "concept": "近7日收益率Z值",
+      "description": "近7日收益率的Z值，用于判断异常值",
+      "direction": "?"
+    },
+    "z_vol_30d": {
+      "concept": "近30日成交量Z值",
+      "description": "近30日成交量的Z值，用于判断异常值",
+      "direction": "?"
+    },
+    "rank_atr": {
+      "concept": "ATR排名",
+      "description": "ATR（平均真实范围）的排名",
+      "direction": "+"
+    },
+    "rank_adx": {
+      "concept": "ADX排名",
+      "description": "ADX（平均方向性指数）的排名",
+      "direction": "+"
+    },
+    "rank_mfi": {
+      "concept": "MFI排名",
+      "description": "MFI（资金流量指标）的排名",
+      "direction": "+"
+    },
+    "btc_beta": {
+      "concept": "比特币Beta值",
+      "description": "与比特币的相关性系数，衡量与比特币的联动性",
+      "direction": "+"
+    },
+    "btc_corr": {
+      "concept": "比特币相关性",
+      "description": "与比特币的相关性系数，衡量与比特币的联动性",
+      "direction": "+"
+    },
+    "avg_corr": {
+      "concept": "平均相关性",
+      "description": "与其他资产的平均相关性系数",
+      "direction": "+"
+    },
+    "n_strong_corr": {
+      "concept": "强相关性数量",
+      "description": "与其他资产强相关性的数量",
+      "direction": "+"
+    },
+    "btc_ret_7d": {
+      "concept": "比特币近7日收益率",
+      "description": "比特币过去7天的收益表现",
+      "direction": "+"
+    },
+    "btc_ret_30d": {
+      "concept": "比特币近30日收益率",
+      "description": "比特币过去30天的收益表现",
+      "direction": "+"
+    },
+    "btc_vol_30d": {
+      "concept": "比特币近30日成交量",
+      "description": "比特币过去30天的成交量",
+      "direction": "+"
+    },
+    "market_breadth": {
+      "concept": "市场宽度",
+      "description": "市场宽度，衡量市场参与者的广泛程度",
+      "direction": "+"
+    },
+    "market_dispersion": {
+      "concept": "市场分散度",
+      "description": "市场分散度，衡量市场波动性的程度",
+      "direction": "+"
+    },
+    "market_momentum": {
+      "concept": "市场动量",
+      "description": "市场动量，衡量市场趋势的强度",
+      "direction": "+"
+    },
+    "btc_lag1_ret": {
+      "concept": "比特币滞后1日收益率",
+      "description": "比特币滞后1日的收益表现",
+      "direction": "+"
+    },
+    "btc_lag2_ret": {
+      "concept": "比特币滞后2日收益率",
+      "description": "比特币滞后2日的收益表现",
+      "direction": "+"
+    },
+    "btc_lag3_ret": {
+      "concept": "比特币滞后3日收益率",
+      "description": "比特币滞后3日的收益表现",
+      "direction": "+"
+    },
+    "btc_lag1_x_corr": {
+      "concept": "比特币滞后1日相关性",
+      "description": "比特币滞后1日与其他资产的相关性系数",
+      "direction": "+"
+    },
+    "eth_lag1_ret": {
+      "concept": "以太坊滞后1日收益率",
+      "description": "以太坊滞后1日的收益表现",
+      "direction": "+"
+    },
+    "atr_adx": {
+      "concept": "ATR与ADX比值",
+      "description": "ATR与ADX的比值，用于判断趋势的强度",
+      "direction": "+"
+    },
+    "macd_vol": {
+      "concept": "MACD成交量",
+      "description": "MACD柱状图的成交量",
+      "direction": "+"
+    },
+    "tail_risk": {
+      "concept": "尾部风险",
+      "description": "市场尾部风险，衡量极端市场事件的可能性",
+      "direction": "-"
+    },
+    "trend_mom": {
+      "concept": "趋势动量",
+      "description": "趋势动量，衡量趋势的强度",
+      "direction": "+"
+    },
+    "dd_recovery": {
+      "concept": "回撤恢复",
+      "description": "从最大回撤中恢复的程度",
+      "direction": "+"
+    }
+  }
+}

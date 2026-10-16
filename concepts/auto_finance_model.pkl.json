@@ -1,0 +1,46 @@
+{
+  "domain": "A股量化选股",
+  "name": "概念包(LLM起草)",
+  "features": {
+    "momentum": {
+      "concept": "动量",
+      "description": "股票价格在一定时期内的上涨或下跌趋势。",
+      "direction": "+"
+    },
+    "value": {
+      "concept": "价值",
+      "description": "根据股票的内在价值评估股票的吸引力。",
+      "direction": "+/-"
+    },
+    "volatility": {
+      "concept": "波动率",
+      "description": "股票价格变动的幅度和频率。",
+      "direction": "+/-"
+    },
+    "liquidity": {
+      "concept": "流动性",
+      "description": "股票买卖的容易程度和价格变动的小幅度。",
+      "direction": "+"
+    },
+    "reversal": {
+      "concept": "反转",
+      "description": "股票价格趋势的逆转。",
+      "direction": "?"
+    },
+    "size": {
+      "concept": "规模",
+      "description": "公司的市值或股票的流通量。",
+      "direction": "+/-"
+    },
+    "earnings_yield": {
+      "concept": "股息率",
+      "description": "公司派发的股息与股票价格的比率。",
+      "direction": "+"
+    },
+    "month_index": {
+      "concept": "月度指数",
+      "description": "反映股票市场整体表现的月度指数。",
+      "direction": "+/-"
+    }
+  }
+}

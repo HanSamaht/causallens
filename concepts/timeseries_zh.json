@@ -1,0 +1,24 @@
+{
+  "domain": "finance-timeseries",
+  "name": "量化时序因子概念包（demo，GRU 收益率预测）",
+  "features": {
+    "ts_momentum": {
+      "concept": "动量序列",
+      "description": "随机游走累积的动量因子；真实因果系数 +0.5（近4步均值）",
+      "direction": "+",
+      "role": "normal"
+    },
+    "ts_reversion": {
+      "concept": "均值回归因子",
+      "description": "持续性回归因子；真实因果系数 -0.7（近2步均值）",
+      "direction": "-",
+      "role": "normal"
+    },
+    "ts_noise": {
+      "concept": "噪声因子",
+      "description": "与收益无因果关系的噪声序列（真实系数仅 0.02）",
+      "direction": "?",
+      "role": "spurious"
+    }
+  }
+}
