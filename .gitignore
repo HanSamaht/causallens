@@ -1,0 +1,15 @@
+# 密钥与本地配置
+.env
+
+# 产物
+examples/artifacts/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+examples/kaggle_models/
+*.zip
+*.db
+examples/artifacts/

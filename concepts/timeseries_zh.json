@@ -1,0 +1,24 @@
+{
+  "domain": "finance-timeseries",
+  "name": "demoGRU ",
+  "features": {
+    "ts_momentum": {
+      "concept": "ts_momentum",
+      "description": "",
+      "direction": "+",
+      "role": "normal"
+    },
+    "ts_reversion": {
+      "concept": "ts_reversion",
+      "description": "",
+      "direction": "-",
+      "role": "normal"
+    },
+    "ts_noise": {
+      "concept": "ts_noise",
+      "description": "",
+      "direction": "?",
+      "role": "spurious"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "domain": "A",
+  "name": "(LLM)",
+  "features": {
+    "momentum": {
+      "concept": "momentum",
+      "description": "",
+      "direction": "+"
+    },
+    "value": {
+      "concept": "value",
+      "description": "",
+      "direction": "+/-"
+    },
+    "volatility": {
+      "concept": "volatility",
+      "description": "",
+      "direction": "+/-"
+    },
+    "liquidity": {
+      "concept": "liquidity",
+      "description": "",
+      "direction": "+"
+    },
+    "reversal": {
+      "concept": "reversal",
+      "description": "",
+      "direction": "?"
+    },
+    "size": {
+      "concept": "size",
+      "description": "",
+      "direction": "+/-"
+    },
+    "earnings_yield": {
+      "concept": "earnings_yield",
+      "description": "",
+      "direction": "+"
+    },
+    "month_index": {
+      "concept": "month_index",
+      "description": "",
+      "direction": "+/-"
+    }
+  }
+}

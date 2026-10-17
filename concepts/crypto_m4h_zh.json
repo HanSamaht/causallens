@@ -1,0 +1,261 @@
+{
+  "domain": "4K",
+  "name": "(LLM)",
+  "features": {
+    "rsi14": {
+      "concept": "rsi14",
+      "description": "",
+      "direction": "?"
+    },
+    "macd": {
+      "concept": "macd",
+      "description": "",
+      "direction": "?"
+    },
+    "macd_hist": {
+      "concept": "macd_hist",
+      "description": "",
+      "direction": "?"
+    },
+    "bb_pctb": {
+      "concept": "bb_pctb",
+      "description": "",
+      "direction": "?"
+    },
+    "atr14_norm": {
+      "concept": "atr14_norm",
+      "description": "",
+      "direction": "?"
+    },
+    "log_ret": {
+      "concept": "log_ret",
+      "description": "",
+      "direction": "?"
+    },
+    "ret_z20": {
+      "concept": "ret_z20",
+      "description": "",
+      "direction": "?"
+    },
+    "vol_z20": {
+      "concept": "vol_z20",
+      "description": "",
+      "direction": "?"
+    },
+    "vol_ratio": {
+      "concept": "vol_ratio",
+      "description": "",
+      "direction": "?"
+    },
+    "range": {
+      "concept": "range",
+      "description": "",
+      "direction": "?"
+    },
+    "price_imbalance": {
+      "concept": "price_imbalance",
+      "description": "",
+      "direction": "?"
+    },
+    "buy_pressure": {
+      "concept": "buy_pressure",
+      "description": "",
+      "direction": "?"
+    },
+    "sell_pressure": {
+      "concept": "sell_pressure",
+      "description": "",
+      "direction": "?"
+    },
+    "vol_conc": {
+      "concept": "vol_conc",
+      "description": "",
+      "direction": "?"
+    },
+    "gap": {
+      "concept": "gap",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_rsi14": {
+      "concept": "rank_rsi14",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_macd_hist": {
+      "concept": "rank_macd_hist",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_bb_pctb": {
+      "concept": "rank_bb_pctb",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_atr14_norm": {
+      "concept": "rank_atr14_norm",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_vol_z20": {
+      "concept": "rank_vol_z20",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_ret_z20": {
+      "concept": "rank_ret_z20",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_vol_ratio": {
+      "concept": "rank_vol_ratio",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_price_imbalance": {
+      "concept": "rank_price_imbalance",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_buy_pressure": {
+      "concept": "rank_buy_pressure",
+      "description": "",
+      "direction": "?"
+    },
+    "rank_range": {
+      "concept": "rank_range",
+      "description": "",
+      "direction": "?"
+    },
+    "mtf_ret_z": {
+      "concept": "mtf_ret_z",
+      "description": "",
+      "direction": "?"
+    },
+    "mtf_rsi14": {
+      "concept": "mtf_rsi14",
+      "description": "",
+      "direction": "?"
+    },
+    "mtf_atr_z": {
+      "concept": "mtf_atr_z",
+      "description": "",
+      "direction": "?"
+    },
+    "vol24": {
+      "concept": "vol24",
+      "description": "",
+      "direction": "?"
+    },
+    "vol72": {
+      "concept": "vol72",
+      "description": "",
+      "direction": "?"
+    },
+    "vol500": {
+      "concept": "vol500",
+      "description": "",
+      "direction": "?"
+    },
+    "vol_ratio_24_72": {
+      "concept": "vol_ratio_24_72",
+      "description": "",
+      "direction": "?"
+    },
+    "vol_ratio_72_500": {
+      "concept": "vol_ratio_72_500",
+      "description": "",
+      "direction": "?"
+    },
+    "atr_pct": {
+      "concept": "atr_pct",
+      "description": "",
+      "direction": "?"
+    },
+    "vol_hist_pct": {
+      "concept": "vol_hist_pct",
+      "description": "",
+      "direction": "?"
+    },
+    "hour": {
+      "concept": "hour",
+      "description": "",
+      "direction": "?"
+    },
+    "dow": {
+      "concept": "dow",
+      "description": "",
+      "direction": "?"
+    },
+    "is_weekend": {
+      "concept": "is_weekend",
+      "description": "",
+      "direction": "?"
+    },
+    "is_us_session": {
+      "concept": "is_us_session",
+      "description": "",
+      "direction": "?"
+    },
+    "is_month_start": {
+      "concept": "is_month_start",
+      "description": "",
+      "direction": "?"
+    },
+    "is_month_end": {
+      "concept": "is_month_end",
+      "description": "",
+      "direction": "?"
+    },
+    "hour_sin": {
+      "concept": "hour_sin",
+      "description": "",
+      "direction": "?"
+    },
+    "hour_cos": {
+      "concept": "hour_cos",
+      "description": "",
+      "direction": "?"
+    },
+    "dow_sin": {
+      "concept": "dow_sin",
+      "description": "",
+      "direction": "?"
+    },
+    "dow_cos": {
+      "concept": "dow_cos",
+      "description": "",
+      "direction": "?"
+    },
+    "ret_12": {
+      "concept": "ret_12",
+      "description": "",
+      "direction": "?"
+    },
+    "ret_18": {
+      "concept": "ret_18",
+      "description": "",
+      "direction": "?"
+    },
+    "dist_ma20": {
+      "concept": "dist_ma20",
+      "description": "",
+      "direction": "?"
+    },
+    "dist_ma50": {
+      "concept": "dist_ma50",
+      "description": "",
+      "direction": "?"
+    },
+    "dist_ma100": {
+      "concept": "dist_ma100",
+      "description": "",
+      "direction": "?"
+    },
+    "daily_extreme_prob": {
+      "concept": "daily_extreme_prob",
+      "description": "",
+      "direction": "?"
+    }
+  }
+}

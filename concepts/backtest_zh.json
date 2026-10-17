@@ -1,0 +1,37 @@
+{
+  "domain": "backtest-audit",
+  "name": "concept_pack",
+  "features": {
+    "fill_market": {
+      "concept": "fill_market",
+      "description": "",
+      "direction": "-",
+      "role": "spurious"
+    },
+    "stop_pct": {
+      "concept": "stop_pct",
+      "description": "",
+      "direction": "?"
+    },
+    "tp_pct": {
+      "concept": "tp_pct",
+      "description": "",
+      "direction": "+"
+    },
+    "fee_bps": {
+      "concept": "fee_bps",
+      "description": "",
+      "direction": "-"
+    },
+    "slippage_bps": {
+      "concept": "slippage_bps",
+      "description": "",
+      "direction": "-"
+    },
+    "entry_every": {
+      "concept": "entry_every",
+      "description": "",
+      "direction": "?"
+    }
+  }
+}

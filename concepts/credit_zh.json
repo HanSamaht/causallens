@@ -1,0 +1,108 @@
+{
+  "domain": "credit-risk",
+  "name": "OpenML credit-g",
+  "features": {
+    "checking_status": {
+      "concept": "checking_status",
+      "description": "",
+      "direction": "-"
+    },
+    "duration": {
+      "concept": "duration",
+      "description": "",
+      "direction": "+"
+    },
+    "credit_history": {
+      "concept": "credit_history",
+      "description": "",
+      "direction": "-"
+    },
+    "purpose": {
+      "concept": "purpose",
+      "description": "",
+      "direction": "?"
+    },
+    "credit_amount": {
+      "concept": "credit_amount",
+      "description": "",
+      "direction": "+"
+    },
+    "savings_status": {
+      "concept": "savings_status",
+      "description": "",
+      "direction": "-"
+    },
+    "employment": {
+      "concept": "employment",
+      "description": "",
+      "direction": "-"
+    },
+    "installment_commitment": {
+      "concept": "installment_commitment",
+      "description": "",
+      "direction": "+"
+    },
+    "personal_status": {
+      "concept": "personal_status",
+      "description": "",
+      "direction": "?",
+      "role": "proxy"
+    },
+    "other_parties": {
+      "concept": "other_parties",
+      "description": "",
+      "direction": "-"
+    },
+    "residence_since": {
+      "concept": "residence_since",
+      "description": "",
+      "direction": "-"
+    },
+    "property_magnitude": {
+      "concept": "property_magnitude",
+      "description": "",
+      "direction": "-"
+    },
+    "age": {
+      "concept": "age",
+      "description": "",
+      "direction": "-"
+    },
+    "other_payment_plans": {
+      "concept": "other_payment_plans",
+      "description": "",
+      "direction": "+"
+    },
+    "housing": {
+      "concept": "housing",
+      "description": "",
+      "direction": "-"
+    },
+    "existing_credits": {
+      "concept": "existing_credits",
+      "description": "",
+      "direction": "+"
+    },
+    "job": {
+      "concept": "job",
+      "description": "",
+      "direction": "-"
+    },
+    "num_dependents": {
+      "concept": "num_dependents",
+      "description": "",
+      "direction": "+"
+    },
+    "own_telephone": {
+      "concept": "own_telephone",
+      "description": "",
+      "direction": "-"
+    },
+    "foreign_worker": {
+      "concept": "foreign_worker",
+      "description": "",
+      "direction": "+",
+      "role": "proxy"
+    }
+  }
+}

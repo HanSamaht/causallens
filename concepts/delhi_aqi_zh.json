@@ -1,0 +1,36 @@
+{
+  "domain": "environment",
+  "name": "AQI(GLM)",
+  "features": {
+    "Date": {
+      "concept": "Date",
+      "description": "",
+      "direction": "?",
+      "role": "normal"
+    },
+    "Month": {
+      "concept": "Month",
+      "description": "",
+      "direction": "?",
+      "role": "normal"
+    },
+    "Year": {
+      "concept": "Year",
+      "description": "",
+      "direction": "?",
+      "role": "normal"
+    },
+    "Holidays_Count": {
+      "concept": "Holidays_Count",
+      "description": "",
+      "direction": "+",
+      "role": "normal"
+    },
+    "Days": {
+      "concept": "Days",
+      "description": "",
+      "direction": "?",
+      "role": "normal"
+    }
+  }
+}
