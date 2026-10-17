@@ -55,11 +55,15 @@ CREATE TABLE IF NOT EXISTS corrections(
 
 
 def _now() -> str:
+    """Return current timestamp string."""
+    """Now."""
     return datetime.now().isoformat(timespec="seconds")
 
 
 class Ledger:
+    """Ledger."""
     def __init__(self, path: str = "mic_ledger.db"):
+        """Init."""
         self.conn = sqlite3.connect(path)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(_SCHEMA)
@@ -67,6 +71,7 @@ class Ledger:
 
     # ---------------- ----------------
     def open_case(self, model_name: str, model_version: str = "v1") -> int:
+        """Open case."""
         row = self.conn.execute(
             "SELECT id FROM cases WHERE model_name=? AND model_version=?",
             (model_name, model_version),
@@ -82,6 +87,7 @@ class Ledger:
 
     # ---------------- evidence() ----------------
     def append_evidence(self, case_id: int, tool: str, payload: dict) -> dict:
+        """Append evidence."""
         last = self.conn.execute(
             "SELECT hash FROM evidence WHERE case_id=? ORDER BY id DESC LIMIT 1", (case_id,)
         ).fetchone()
@@ -97,6 +103,7 @@ class Ledger:
         return {"ts": ts, "tool": tool, "hash": h}
 
     def verify_chain(self, case_id: int) -> dict:
+        """Verify chain."""
         rows = self.conn.execute(
             "SELECT * FROM evidence WHERE case_id=? ORDER BY id", (case_id,)
         ).fetchall()
@@ -113,6 +120,7 @@ class Ledger:
     # ---------------- hypothesis( + prior) ----------------
     def record_hypothesis(self, case_id: int, statement: str, verdict: str,
                           posterior: float, supersede_same_model: bool = True) -> None:
+        """Record hypothesis."""
         ts = _now()
         if supersede_same_model:
             # modelmoreinhypothesis(disable)
@@ -155,6 +163,7 @@ class Ledger:
     # ---------------- ----------------
     def record_correction(self, case_id: int, edge: str, operation: str,
                           note: str, verification: dict | None) -> None:
+        """Record correction."""
         self.conn.execute(
             "INSERT INTO corrections(case_id, edge, operation, note, verification_json, ts)"
             " VALUES(?,?,?,?,?,?)",
@@ -165,6 +174,7 @@ class Ledger:
 
     # ---------------- ----------------
     def history(self, model_name: str | None = None) -> list[dict]:
+        """History."""
         q = """SELECT c.*, COUNT(DISTINCT e.id) n_evidence,
                       (SELECT COUNT(*) FROM hypotheses h WHERE h.case_id=c.id) n_hypotheses,
                       (SELECT COUNT(*) FROM corrections r WHERE r.case_id=c.id) n_corrections
@@ -177,6 +187,7 @@ class Ledger:
         return [dict(r) for r in self.conn.execute(q, args).fetchall()]
 
     def case_summary(self, case_id: int) -> dict:
+        """Case summary."""
         case = dict(self.conn.execute("SELECT * FROM cases WHERE id=?", (case_id,)).fetchone())
         case["chain"] = self.verify_chain(case_id)
         case["hypotheses"] = [

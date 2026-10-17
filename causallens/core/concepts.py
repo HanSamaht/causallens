@@ -13,6 +13,7 @@ from typing import Optional
 
 @dataclass
 class ConceptEntry:
+    """Conceptentry."""
     concept: str # concept(ChineseorEnglish)
     description: str = ""
     direction: str = "" # domainpriordirection:"+", "-", "?"(,notconclusion)
@@ -21,19 +22,23 @@ class ConceptEntry:
 
 @dataclass
 class ConceptPack:
+    """Conceptpack."""
     domain: str = "generic"
     name: str = ""
     features: dict[str, ConceptEntry] = field(default_factory=dict)
 
     def ground(self, feature: str) -> Optional[ConceptEntry]:
+        """Ground."""
         return self.features.get(feature)
 
     def concept_of(self, feature: str) -> str:
+        """Concept of."""
         e = self.features.get(feature)
         return e.concept if e else feature
 
     @classmethod
     def load(cls, path: str) -> "ConceptPack":
+        """Load."""
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         feats = {
@@ -49,6 +54,7 @@ class ConceptPack:
 
     @classmethod
     def from_dict(cls, data: dict) -> "ConceptPack":
+        """From dict."""
         feats = {
             k: ConceptEntry(
                 concept=v.get("concept", k),

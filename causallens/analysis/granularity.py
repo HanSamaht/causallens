@@ -14,6 +14,7 @@ from .attribution import shap_matrix
 
 
 def _flat_to_matrix(flat: np.ndarray, T: int, F: int) -> np.ndarray:
+    """Flat to matrix."""
     return flat.reshape(T, F)
 
 

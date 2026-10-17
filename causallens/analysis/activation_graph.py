@@ -24,6 +24,7 @@ def build_activation_graph(
     reference_index: int,
     top_units: int = 6,
 ) -> dict:
+    """Build activation graph."""
     assert drv.kind in ("torch", "timeseries"), "activationcausal graphsupport torch (MLP/)"
     x = drv.sample_at(sample_index)
     x_ref = drv.sample_at(reference_index)
@@ -39,6 +40,7 @@ def build_activation_graph(
     edges = []
 
     def _patched_pred(layer: str, replacement: np.ndarray) -> float:
+        """Patched pred."""
         drv._patch_plan[layer] = replacement
         try:
             return drv.predict_one(x_ref)
@@ -95,6 +97,7 @@ def build_activation_graph(
         units = list(range(H)) if H <= 32 else _pre_rank_units(base_act, clean_act, 32)
 
         def _seq_eff(u, persistent):
+            """Seq eff."""
             mod = np.copy(base_act)
             if persistent:
                 mod[0, :, u] = clean_act[0, :, u] # :unit

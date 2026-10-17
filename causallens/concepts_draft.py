@@ -23,6 +23,7 @@ def draft_concept_pack(feature_names: list[str], llm=None, domain_hint: str = ""
 
 
 def _draft_with_llm(feature_names: list[str], llm, domain_hint: str) -> dict:
+    """Draft with llm."""
     prompt = f"""is{domain_hint or ''}domain.asbelowmodelfeatureChineseconceptgrounding.
 output JSON(not markdown,not):
 {{"domain": "{domain_hint or 'generic'}", "name": "concept pack(LLM)",

@@ -19,11 +19,14 @@ from .providers import Provider, detect_provider
 
 
 class LLMConfigError(RuntimeError):
+    """Llmconfigerror."""
     pass
 
 
 class LLMClient:
+    """Llmclient."""
     def __init__(self, base_url: str | None = None, api_key: str | None = None, model: str | None = None):
+        """Init."""
         provider, key = detect_provider()
         self.provider: Optional[Provider] = provider
         self.base_url = base_url or os.environ.get("MIC_LLM_BASE_URL") or (provider.base_url if provider else None)
@@ -59,6 +62,7 @@ class LLMClient:
     # ------------------------------------------------------------------
     def chat(self, messages: list[dict], tools: Optional[list[dict]] = None, temperature: float = 0.2,
              max_retries: int = 2) -> dict:
+        """Chat."""
         import requests
 
         payload: dict[str, Any] = {

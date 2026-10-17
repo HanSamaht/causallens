@@ -14,6 +14,7 @@ from ..core.session import MicSession
 
 
 def serve_http(session: MicSession, host: str = "127.0.0.1", port: int = 8765) -> None:
+    """Serve http."""
     try:
         from mcp.server.fastmcp import FastMCP # mcp v1.x
     except ImportError:
@@ -32,6 +33,7 @@ def serve_http(session: MicSession, host: str = "127.0.0.1", port: int = 8765) -
         tool_name, desc = fn["name"], fn.get("description", "")
 
         def _handler(tool_name=tool_name, **kwargs):
+            """Handler."""
             return json.dumps(
                 interrogator._execute_tool(tool_name, kwargs), ensure_ascii=False, default=str
             )

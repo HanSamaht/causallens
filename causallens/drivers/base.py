@@ -29,6 +29,7 @@ class MicDriver:
         background: np.ndarray,
         name: str = "unnamed_model",
     ):
+        """Init."""
         self.model = model
         self.feature_names = list(feature_names)
         self.background = np.asarray(background, dtype=float)
@@ -47,9 +48,11 @@ class MicDriver:
         return np.argmax(self.predict_full(X), axis=1)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict."""
         raise NotImplementedError
 
     def predict_one(self, x: np.ndarray) -> float:
+        """Predict one."""
         return float(self.predict(np.asarray(x, dtype=float).reshape(1, -1))[0])
 
     # ---- intervention(intervention):causalanalysis ------------------------
@@ -62,19 +65,23 @@ class MicDriver:
 
     # ---- backgrounddistributiontool ----------------------------------------------------
     def feature_bounds(self, feature: str, lo: float = 0.005, hi: float = 0.995) -> tuple[float, float]:
+        """Feature bounds."""
         j = self.feature_names.index(feature)
         col = self.background[:, j]
         return float(np.quantile(col, lo)), float(np.quantile(col, hi))
 
     def quantile_of(self, feature: str, q: float) -> float:
+        """Quantile of."""
         j = self.feature_names.index(feature)
         return float(np.quantile(self.background[:, j], q))
 
     def sample_at(self, idx: int) -> np.ndarray:
+        """Sample at."""
         return self.background[idx % len(self.background)].copy()
 
     # ---- ----------------------------------------------------------
     def describe(self) -> dict:
+        """Describe."""
         return {
             "name": self.name,
             "kind": self.kind,

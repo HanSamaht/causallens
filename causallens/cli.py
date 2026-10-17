@@ -20,6 +20,7 @@ import pandas as pd
 
 
 def _save_artifacts(tag: str, model, features, background: np.ndarray, auc: float, extra=None):
+    """Save artifacts."""
     os.makedirs("examples/artifacts", exist_ok=True)
     path_model = f"examples/artifacts/{tag}_model.pkl"
     path_bg = f"examples/artifacts/{tag}_background.csv"
@@ -32,6 +33,7 @@ def _save_artifacts(tag: str, model, features, background: np.ndarray, auc: floa
 
 
 def _load_session(args):
+    """Load session."""
     from causallens.core import ConceptPack, MicSession
     from causallens.drivers import detect_driver
 
@@ -120,6 +122,7 @@ def _load_session(args):
 
 
 def cmd_demo(args):
+    """Cmd demo."""
     if args.demo == "finance":
         from causallens.demos import train_finance_demo
 
@@ -149,17 +152,20 @@ def cmd_demo(args):
 
 
 def cmd_report(args):
+    """Cmd report."""
     session = _load_session(args)
     print(session.offline_report(args.sample))
 
 
 def cmd_audit(args):
+    """Cmd audit."""
     session = _load_session(args)
     result = session.audit(args.sample)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 def cmd_chat(args):
+    """Cmd chat."""
     from causallens.agents import Interrogator, LLMClient
 
     try:
@@ -212,6 +218,7 @@ def cmd_attach(args):
 
 
 def _load_session_with(args, pack):
+    """Load session with."""
     from causallens.core import MicSession
 
     ns = argparse.Namespace(**vars(args))
@@ -220,6 +227,7 @@ def _load_session_with(args, pack):
 
 
 def cmd_visualize(args):
+    """Cmd visualize."""
     session = _load_session(args)
     path = session.visualize(args.sample, args.out)
     print(f"[mic] HTML interrogationreportgenerate - {path}")
@@ -228,6 +236,7 @@ def cmd_visualize(args):
 
 
 def cmd_ask(args):
+    """Cmd ask."""
     from causallens.ask import AskEngine
     from causallens.agents import LLMClient
 
@@ -241,6 +250,7 @@ def cmd_ask(args):
 
 
 def cmd_graph_export(args):
+    """Cmd graph export."""
     from causallens.core.graph_review import export_graph
 
     session = _load_session(args)
@@ -248,6 +258,7 @@ def cmd_graph_export(args):
 
 
 def cmd_graph_apply(args):
+    """Cmd graph apply."""
     from causallens.core.graph_review import apply_corrections
 
     session = _load_session(args)
@@ -256,6 +267,7 @@ def cmd_graph_apply(args):
 
 
 def cmd_history(args):
+    """Cmd history."""
     from causallens.ledger import Ledger
 
     led = Ledger(args.ledger)
@@ -346,6 +358,7 @@ def cmd_llm_check(args):
 
 
 def cmd_drift(args):
+    """Cmd drift."""
     session = _load_session(args)
     new = pd.read_csv(args.new).values
     print(json.dumps(session.check_drift(new), ensure_ascii=False, indent=2))
@@ -384,6 +397,7 @@ def cmd_diff(args):
 
 
 def _finance_with_seed(seed: int):
+    """Finance with seed."""
     import causallens.demos as demos
     import numpy as np
     from sklearn.ensemble import GradientBoostingClassifier
@@ -397,6 +411,7 @@ def _finance_with_seed(seed: int):
 
 
 def cmd_probe(args):
+    """Cmd probe."""
     from causallens.probes import run_probes
 
     results = run_probes()
@@ -409,6 +424,7 @@ def cmd_probe(args):
 
 
 def cmd_serve(args):
+    """Cmd serve."""
     session = _load_session(args)
     if getattr(args, "http", False):
         from causallens.server.http_mcp import serve_http
@@ -422,6 +438,7 @@ def cmd_serve(args):
 
 
 def main(argv=None):
+    """Main."""
     p = argparse.ArgumentParser(prog="mic", description="MIC model —— model")
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -430,6 +447,7 @@ def main(argv=None):
     demo.set_defaults(func=cmd_demo)
 
     def add_model_args(sp, need_model=True):
+        """Add model args."""
         g = sp.add_mutually_exclusive_group(required=need_model)
         g.add_argument("--model", help="pickle model(sklearn )")
         g.add_argument("--demo", choices=["finance", "medicine", "torch", "timeseries", "geo", "backtest", "credit", "iris", "agent"], help=" demo model")

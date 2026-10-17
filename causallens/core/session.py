@@ -25,7 +25,9 @@ from .concepts import ConceptPack
 
 
 class MicSession:
+    """Micsession."""
     def __init__(self, driver: MicDriver, pack: ConceptPack | None = None):
+        """Init."""
         self.driver = driver
         self.pack = pack or ConceptPack()
         self.evidence_log: list[dict] = []
@@ -58,15 +60,19 @@ class MicSession:
     # ================= Investigator (hypothesis + evidencethreshold) =================
 
     def form_hypotheses(self, statements: list[str]) -> dict:
+        """Form hypotheses."""
         return self._log("form_hypotheses", self.investigation.form(statements))
 
     def get_hypotheses(self) -> dict:
+        """Get hypotheses."""
         return self._log("get_hypotheses", self.investigation.snapshot())
 
     def update_hypotheses(self, updates: list[dict]) -> dict:
+        """Update hypotheses."""
         return self._log("update_hypotheses", self.investigation.update(updates))
 
     def conclude_investigation(self) -> dict:
+        """Conclude investigation."""
         v = self.investigation.verdict()
         if self.ledger is not None and self.case_id is not None:
             snap = self.investigation.snapshot()["hypotheses"]
@@ -204,12 +210,16 @@ class MicSession:
         return result
 
     def _match_hyp(self, keyword: str) -> str:
+        """Match hyp."""
         for h in self.investigation.hypotheses.values():
             if keyword in h.statement:
                 return h.hid
         return next(iter(self.investigation.hypotheses), "H1")
 
     def _log(self, tool: str, payload: dict) -> dict:
+        """Log tool call to evidence log."""
+        """Log."""
+        """Log tool call to evidence log."""
         self.evidence_log.append({"tool": tool, "payload": payload})
         if self.ledger is not None and self.case_id is not None:
             try:
@@ -228,6 +238,7 @@ class MicSession:
         return self._log("set_target_class", {"target_class": int(k), "n_classes": getattr(self.driver, "n_classes", 2)})
 
     def describe_model(self) -> dict:
+        """Describe model."""
         d = self.driver.describe()
         d["domain"] = self.pack.domain
         d["concept_pack"] = self.pack.name or "(loading, featureconcept)"
@@ -253,6 +264,7 @@ class MicSession:
         )
 
     def get_attribution(self, sample_index: int) -> dict:
+        """Get attribution."""
         x = self.driver.sample_at(sample_index)
         p = self.driver.predict_one(x)
         attrs = explain_sample(self.driver, x, self.pack)
@@ -292,6 +304,7 @@ class MicSession:
         )
 
     def get_causal_graph(self, sample_index: int | None = None) -> dict:
+        """Get causal graph."""
         anchor = (
             self.driver.sample_at(sample_index)
             if sample_index is not None
@@ -314,6 +327,7 @@ class MicSession:
         )
 
     def run_counterfactual(self, sample_index: int) -> dict:
+        """Run counterfactual."""
         x = self.driver.sample_at(sample_index)
         paths = search_counterfactuals(self.driver, x, self.pack)
         threshold = default_threshold(self.driver)
@@ -391,6 +405,7 @@ class MicSession:
         })
 
     def run_faithfulness(self, sample_index: int) -> dict:
+        """Run faithfulness."""
         x = self.driver.sample_at(sample_index)
         rep = evaluate_faithfulness(self.driver, x)
         return self._log("run_faithfulness", rep.to_dict())
@@ -416,6 +431,7 @@ class MicSession:
         return self._log("register_data", {"name": name, "shape": list(self.datasets[name].shape)})
 
     def list_datasets(self) -> dict:
+        """List datasets."""
         return self._log(
             "list_datasets",
             {"datasets": {k: list(v.shape) for k, v in getattr(self, "datasets", {}).items()}},
@@ -454,6 +470,7 @@ class MicSession:
         return self._log("symbolic_distill", symbolic_distill(self.driver, n_samples=n_samples))
 
     def has_torch_internals(self) -> bool:
+        """Has torch internals."""
         return self.driver.kind in ("torch", "timeseries")
 
     def activation_graph(self, sample_index: int, reference_index: int) -> dict:
@@ -547,6 +564,7 @@ class MicSession:
     # ================= evaluateinterrogation(BacktestDriver ) =================
 
     def has_backtest_internals(self) -> bool:
+        """Has backtest internals."""
         return self.driver.kind == "backtest"
 
     def slippage_stress(self) -> dict:
@@ -571,9 +589,11 @@ class MicSession:
 
     # ---- Torch tool(in) --------------------------------
     def has_activation_tools(self) -> bool:
+        """Has activation tools."""
         return self.driver.kind in ("torch", "timeseries")
 
     def get_activations(self, sample_index: int) -> dict:
+        """Get activations."""
         drv = self.driver
         assert drv.kind == "torch", "activationtoolsupport torch "
         x = drv.sample_at(sample_index)
@@ -614,6 +634,7 @@ class MicSession:
     # ================= interrogationreport( LLM, ) ========================
 
     def offline_report(self, sample_index: int) -> str:
+        """Offline report."""
         attr = self.get_attribution(sample_index)
         cf = self.run_counterfactual(sample_index)
         faith = self.run_faithfulness(sample_index)

@@ -24,6 +24,7 @@ from .analysis.faithfulness import _spearman
 
 
 def _make_pack(names: dict[str, str]) -> ConceptPack:
+    """Make pack."""
     return ConceptPack.from_dict(
         {
             "domain": "probe",
@@ -33,6 +34,7 @@ def _make_pack(names: dict[str, str]) -> ConceptPack:
 
 
 def probe_linear() -> tuple[bool, str]:
+    """Probe linear."""
     coef = {"x1": 1.8, "x2": -1.3, "x3": 0.9, "x4": -0.4, "x5": 0.1}
     rng = np.random.default_rng(0)
     X = rng.normal(size=(3000, 5))
@@ -60,6 +62,7 @@ def probe_linear() -> tuple[bool, str]:
 
 
 def probe_leak() -> tuple[bool, str]:
+    """Probe leak."""
     rng = np.random.default_rng(1)
     X = rng.normal(size=(3000, 4))
     leak = rng.normal(size=3000)
@@ -89,6 +92,7 @@ def probe_leak() -> tuple[bool, str]:
 
 
 def probe_interact() -> tuple[bool, str]:
+    """Probe interact."""
     rng = np.random.default_rng(2)
     X = rng.normal(size=(3000, 4))
     logit = 2.0 * X[:, 0] * X[:, 1] + 0.1 * X[:, 2] + 0.2 * rng.normal(size=3000) #
@@ -107,6 +111,7 @@ PROBES = {"linear": probe_linear, "leak": probe_leak, "interact": probe_interact
 
 
 def run_probes() -> dict:
+    """Run probes."""
     results = {}
     for name, fn in PROBES.items():
         try:

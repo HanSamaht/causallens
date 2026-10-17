@@ -16,13 +16,16 @@ MAX_TOOL_ROUNDS = 8
 
 
 class Interrogator:
+    """Interrogator."""
     def __init__(self, session: MicSession, llm: LLMClient | None = None, role: str = "translator"):
+        """Init."""
         self.session = session
         self.llm = llm
         self.role = role if role in ROLE_PROMPTS else "translator"
 
     # ---- LLM tool(OpenAI function calling ) -------------
     def tool_schemas(self) -> list[dict]:
+        """Tool schemas."""
         tools = [
             {
                 "type": "function",
@@ -423,6 +426,7 @@ class Interrogator:
         return tools
 
     def _execute_tool(self, name: str, args: dict) -> dict:
+        """Execute tool."""
         s = self.session
         dispatch = {
             "describe_model": lambda: s.describe_model(),
@@ -472,6 +476,7 @@ class Interrogator:
 
     # ---- -------------------------------------------------------
     def ask(self, question: str) -> str:
+        """Run tool-calling loop to answer a question about the model."""
         if self.llm is None:
             return self._offline_answer(question)
 
@@ -527,6 +532,7 @@ class Interrogator:
 
     # ---- LLM ------------------------------------------------------
     def _offline_answer(self, question: str) -> str:
+        """Offline answer."""
         samples = self.session.list_samples(5)["samples"]
         idx = samples[0]["index"] if samples else 0
         if self.role == "auditor":

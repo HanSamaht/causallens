@@ -42,13 +42,16 @@ def _tool_defs(session: MicSession) -> list[dict]:
 
 
 def _execute(session: MicSession, name: str, args: dict) -> dict:
+    """Execute."""
     return Interrogator(session)._execute_tool(name, args)
 
 
 def serve_stdio(session: MicSession) -> None:
+    """Serve stdio."""
     out = sys.stdout
 
     def send(payload: dict) -> None:
+        """Send."""
         out.write(json.dumps(payload, ensure_ascii=False, default=str) + "\n")
         out.flush()
 

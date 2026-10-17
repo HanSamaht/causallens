@@ -20,14 +20,17 @@ from .torch_model import TorchDriver
 
 
 def make_flat_names(feature_names: list[str], seq_len: int) -> list[str]:
+    """Make flat names."""
     return [f"{f}@lag{seq_len - 1 - t}" for t in range(seq_len) for f in feature_names]
 
 
 class TimeSeriesDriver(TorchDriver):
+    """Timeseriesdriver."""
     kind = "timeseries"
     prediction_semantics = "score" # default(prediction);
 
     def __init__(self, model, feature_names, background, name="ts_model", seq_len: int | None = None):
+        """Init."""
         bg = np.asarray(background, dtype=float)
         if bg.ndim == 3:
             seq_len = seq_len or bg.shape[1]
@@ -48,6 +51,7 @@ class TimeSeriesDriver(TorchDriver):
 
     # ---- input:flat -> (B, T, F) ------------------------------------
     def _to_tensor(self, X: np.ndarray):
+        """To tensor."""
         X = np.asarray(X, dtype=float)
         if X.ndim == 1:
             X = X.reshape(1, -1)
@@ -90,6 +94,7 @@ class TimeSeriesDriver(TorchDriver):
 
     # ---- ------------------------------------------------------------
     def describe(self) -> dict:
+        """Describe."""
         d = super().describe()
         d["seq_len"] = self.seq_len
         d["base_features"] = self.base_feature_names

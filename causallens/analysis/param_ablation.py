@@ -15,6 +15,7 @@ import numpy as np
 
 
 def _capability(drv, metric: str, n_samples: int) -> float:
+    """Capability."""
     X = drv.background[:n_samples]
     if metric == "early_window_share" and drv.kind == "timeseries":
         shares = []
@@ -105,6 +106,7 @@ def discover_circuit(drv, capability_samples: int = 20, tolerance: float = 0.02,
     p0 = drv.predict(X)
 
     def _behavior_delta() -> float:
+        """Behavior delta."""
         return float(np.mean(np.abs(drv.predict(X) - p0)))
 
     width = drv.get_activations(drv.background[0])[target].shape[-1]

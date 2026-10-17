@@ -18,6 +18,7 @@ import numpy as np
 
 
 def export_graph(session, path: str, sample_index: int | None = None) -> dict:
+    """Export graph."""
     from ..analysis.causal_graph import build_causal_graph
 
     g = build_causal_graph(session.driver,
@@ -84,6 +85,7 @@ def _verify_edge_feature_to_feature(session, source: str, target: str) -> dict:
 
 
 def apply_corrections(session, path: str) -> dict:
+    """Apply corrections."""
     with open(path, "r", encoding="utf-8") as f:
         doc = json.load(f)
     feats = set(session.driver.feature_names)

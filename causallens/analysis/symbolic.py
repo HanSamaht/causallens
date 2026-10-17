@@ -16,10 +16,12 @@ from .attribution import shap_matrix
 
 
 def _fmt(v: float) -> str:
+    """Format float for display."""
     return f"{v:+.3f}"
 
 
 def symbolic_distill(driver: MicDriver, n_samples: int = 400, top_k: int = 6) -> dict:
+    """Distill model behavior into interpretable formula."""
     X = driver.background[: min(n_samples, len(driver.background))]
     y = driver.predict(X)
 

@@ -44,6 +44,7 @@ def neuron_ranking(drv, sample_index: int, layer: str | None = None, top_k: int 
 
         def _selector(u):
             # layeroutput (output,hidden) : h_T u unit;layerdirect
+            """Selector."""
             return (lambda out: out[0][0, -1, u]) if drv.kind == "timeseries" else (lambda out: out.reshape(-1)[u])
 
         contribs = [float(ng.attribute(xt, neuron_selector=_selector(u)).abs().sum()) for u in range(width)]
@@ -72,6 +73,7 @@ def neuron_ranking(drv, sample_index: int, layer: str | None = None, top_k: int 
 
 
 def _layer_width(drv, xt, layer) -> int:
+    """Layer width."""
     acts = drv.get_activations(drv.background[0])
     a = acts[layer]
     return int(a.shape[-1])
@@ -83,6 +85,7 @@ def _act_grad(drv, xt, layer):
     captured = {}
 
     def _hook(_m, _i, out):
+        """Hook."""
         if isinstance(out, (tuple, list)):
             out = out[0]
         out.retain_grad() # : backward .grad

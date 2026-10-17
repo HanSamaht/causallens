@@ -32,6 +32,7 @@ def evaluate_faithfulness(
     n_random: int = 20,
     seed: int = 0,
 ) -> FaithfulnessReport:
+    """Evaluate faithfulness."""
     x = np.asarray(x, dtype=float).ravel()
     if attributions is None:
         attributions = explain_sample(driver, x)
@@ -96,6 +97,8 @@ def aggregate_faithfulness(
         n_pass += int(rep.passed)
 
     def q(a: list[float], p: float) -> float:
+        """Return percentile of list."""
+        """Q."""
         return float(np.quantile(a, p))
 
     profile = {
@@ -169,6 +172,7 @@ def _spearman(a: np.ndarray, b: np.ndarray) -> float | None:
         return None
 
     def ranks(v: np.ndarray) -> np.ndarray:
+        """Ranks."""
         order = np.argsort(v)
         r = np.empty_like(order, dtype=float)
         r[order] = np.arange(1, len(v) + 1)

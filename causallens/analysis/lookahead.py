@@ -18,6 +18,7 @@ import numpy as np
 
 
 def _rank_ic(a: np.ndarray, b: np.ndarray) -> float:
+    """Rank ic."""
     m = ~(np.isnan(a) | np.isnan(b))
     if m.sum() < 20:
         return np.nan

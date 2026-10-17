@@ -28,6 +28,7 @@ MEDICINE_CONCEPT_KEYS = None # fromfeature
 
 
 def make_finance_data(n: int = 4000, seed: int = 7):
+    """Make finance data."""
     rng = np.random.default_rng(seed)
     X = rng.normal(size=(n, len(FINANCE_FEATURES)))
     X[:, 5] = -abs(X[:, 5]) # size ,morevalue
@@ -50,6 +51,7 @@ def make_finance_data(n: int = 4000, seed: int = 7):
 
 
 def train_finance_demo():
+    """Train finance demo."""
     X, y = make_finance_data()
     X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, random_state=0)
     model = GradientBoostingClassifier(n_estimators=150, max_depth=3, learning_rate=0.08, random_state=0)
@@ -59,6 +61,7 @@ def train_finance_demo():
 
 
 def train_medicine_demo():
+    """Train medicine demo."""
     data = load_breast_cancer()
     X, y = data.data, data.target
     names = [c.replace(" ", "_") for c in data.feature_names]
@@ -98,6 +101,7 @@ TS_FEATURES = ["ts_momentum", "ts_reversion", "ts_noise"]
 
 
 def _make_windows(series: np.ndarray, labels: np.ndarray, seq_len: int = 16):
+    """Make windows."""
     X, Y = [], []
     for s, y in zip(series, labels):
         for t in range(seq_len, len(y)):
@@ -107,15 +111,19 @@ def _make_windows(series: np.ndarray, labels: np.ndarray, seq_len: int = 16):
 
 
 def build_ts_model(n_features: int = 3, hidden: int = 16, seed: int = 0):
+    """Build ts model."""
     import torch
 
     class GRUNet(torch.nn.Module):
+        """Grunet."""
         def __init__(self):
+            """Init."""
             super().__init__()
             self.gru = torch.nn.GRU(n_features, hidden, batch_first=True)
             self.head = torch.nn.Linear(hidden, 1)
 
         def forward(self, x): # (B, T, F)
+            """Forward pass through GRU and head."""
             out, _ = self.gru(x)
             return self.head(out[:, -1]).squeeze(-1)
 
@@ -124,7 +132,7 @@ def build_ts_model(n_features: int = 3, hidden: int = 16, seed: int = 0):
 
 
 def train_timeseries_demo(seq_len: int = 16, epochs: int = 60, seed: int = 11):
-    """training GRU prediction(),return (model, base_features, background, test_R²)."""
+    """Forward."""
     import torch
 
     series, labels = make_timeseries_data(seed=seed)
@@ -298,6 +306,7 @@ class FinanceMLP:
 
     @staticmethod
     def build(n_features: int = 8, seed: int = 0):
+        """Build."""
         import torch
 
         torch.manual_seed(seed)
@@ -312,6 +321,7 @@ class FinanceMLP:
 
     @staticmethod
     def train(epochs: int = 200, seed: int = 7):
+        """Train."""
         import torch
 
         X, y = make_finance_data(seed=seed)

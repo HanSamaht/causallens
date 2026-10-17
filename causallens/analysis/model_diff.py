@@ -21,6 +21,7 @@ def diff_sessions(
     pack: ConceptPack | None = None,
     max_cases: int = 3,
 ) -> dict:
+    """Diff sessions."""
     assert driver_old.feature_names == driver_new.feature_names, "versionfeaturemustconsistent"
     pack = pack or ConceptPack()
     n = min(len(driver_old.background), len(driver_new.background), 500)

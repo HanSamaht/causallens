@@ -11,6 +11,7 @@ _EULER_GAMMA = 0.5772156649015329
 
 
 def _norm_cdf(x: float) -> float:
+    """Norm cdf."""
     return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 

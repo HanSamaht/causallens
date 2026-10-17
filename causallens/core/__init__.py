@@ -9,6 +9,7 @@ from .types import (
 
 
 def __getattr__(name: str):
+    """Lazy import to avoid circular dependency."""
     # MicSession analysis ;by core ↔ analysis
     if name == "MicSession":
         from .session import MicSession

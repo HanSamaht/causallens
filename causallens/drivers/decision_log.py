@@ -17,6 +17,7 @@ from .tree import TreeDriver
 
 
 class DecisionLogDriver(TreeDriver):
+    """Decisionlogdriver."""
     kind = "decision-log"
     tree_compatible = True # attribution layerthis TreeExplainer
 
@@ -60,6 +61,7 @@ class DecisionLogDriver(TreeDriver):
         super().__init__(surrogate, feature_names, X_te, name=name)
 
     def describe(self) -> dict:
+        """Describe."""
         d = super().describe()
         d["surrogate_fidelity"] = self.fidelity
         d["note"] = (

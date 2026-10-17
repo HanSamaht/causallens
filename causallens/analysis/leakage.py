@@ -90,6 +90,7 @@ def single_feature_leak_scan(y, X, feature_names, model_auc: float | None = None
 
 
 def label_distribution_check(y_train, y_test) -> dict:
+    """Label distribution check."""
     a, b = np.asarray(y_train, dtype=float), np.asarray(y_test, dtype=float)
     pos_tr, pos_te = float((a > 0).mean()), float((b > 0).mean())
     gap = abs(pos_te - pos_tr)

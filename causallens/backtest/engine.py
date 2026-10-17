@@ -18,6 +18,7 @@ import numpy as np
 
 @dataclass
 class BTParams:
+    """Btparams."""
     fill_market: float = 1.0 # 0=() 1=();0.5=(value)
     stop_pct: float = 0.03 # (value - stop_pct)
     tp_pct: float = 0.12 #

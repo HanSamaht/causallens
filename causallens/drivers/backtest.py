@@ -21,10 +21,12 @@ PARAM_NAMES = ["fill_market", "stop_pct", "tp_pct", "fee_bps", "slippage_bps", "
 
 
 class BacktestDriver(MicDriver):
+    """Backtestdriver."""
     kind = "backtest"
     prediction_semantics = "score" # PF:1.0 =
 
     def __init__(self, ohlc: np.ndarray, feature_names=None, background=None, name="backtest_engine"):
+        """Init."""
         self.ohlc = np.asarray(ohlc, dtype=float)
         feature_names = list(feature_names or PARAM_NAMES)
         if background is None:
@@ -48,6 +50,7 @@ class BacktestDriver(MicDriver):
 
     # ---- "":parameter -> PF -------------------------------------------
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict."""
         X = np.asarray(X, dtype=float)
         if X.ndim == 1:
             X = X.reshape(1, -1)
@@ -64,6 +67,7 @@ class BacktestDriver(MicDriver):
         return run_backtest(self.ohlc, BTParams(**merged))
 
     def describe(self) -> dict:
+        """Describe."""
         d = super().describe()
         d["note"] = (
             "interrogationobjectisbacktestengine:feature=executeparameterhypothesis,prediction=PF(1.0as)."

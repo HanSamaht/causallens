@@ -14,10 +14,12 @@ from .base import MicDriver
 
 
 class OnnxDriver(MicDriver):
+    """Onnxdriver."""
     kind = "onnx"
     prediction_semantics = "probability"
 
     def __init__(self, onnx_path: str, feature_names, background, name="onnx_model", semantics=None):
+        """Init."""
         import onnxruntime as ort
 
         self.sess = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
@@ -33,6 +35,7 @@ class OnnxDriver(MicDriver):
         super().__init__(self.sess, feature_names, background, name)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict."""
         X = np.asarray(X, dtype=np.float32)
         flat = X.reshape(len(X), -1)
         if self._proba_name is not None:

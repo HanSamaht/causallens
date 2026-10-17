@@ -26,6 +26,7 @@ def build_causal_graph(
     interaction_threshold: float | None = None,
     correlational: bool = True,
 ) -> CausalGraph:
+    """Build causal graph."""
     anchor = np.asarray(anchor, dtype=float).ravel()
     feats = driver.feature_names
 

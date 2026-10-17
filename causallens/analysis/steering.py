@@ -17,6 +17,7 @@ from .attribution import shap_matrix
 
 
 def _feature_share(session: MicSession, feature: str) -> float:
+    """Feature share."""
     bg = session.driver.background[:200]
     sm = np.abs(shap_matrix(session.driver, bg)).mean(axis=0)
     j = session.driver.feature_names.index(feature)
@@ -24,6 +25,7 @@ def _feature_share(session: MicSession, feature: str) -> float:
 
 
 def _mean_activation(drv: TorchDriver, idxs: np.ndarray, layer: str) -> np.ndarray:
+    """Mean activation."""
     acts = []
     for i in idxs:
         acts.append(drv.get_activations(drv.sample_at(int(i)))[layer])

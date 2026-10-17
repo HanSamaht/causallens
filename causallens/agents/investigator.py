@@ -22,12 +22,14 @@ MAX_EVIDENCE_UPDATES = 12 # evidence
 
 @dataclass
 class Hypothesis:
+    """Hypothesis."""
     hid: str
     statement: str
     log_odds: float = 0.0 # prior log-odds
     evidence: list[dict] = field(default_factory=list)
 
     def to_dict(self) -> dict:
+        """To dict."""
         return {
             "id": self.hid,
             "statement": self.statement,
@@ -38,12 +40,15 @@ class Hypothesis:
 
 
 class HypothesisTracker:
+    """Hypothesistracker."""
     def __init__(self):
+        """Init."""
         self.hypotheses: dict[str, Hypothesis] = {}
         self.n_updates = 0
 
     # ---- ----
     def form(self, statements: list[str]) -> dict:
+        """Form."""
         if not 2 <= len(statements) <= 4:
             raise ValueError("hypothesisrequire 2-4 ")
         self.hypotheses = {
@@ -54,6 +59,7 @@ class HypothesisTracker:
 
     # ---- update(,LLM only) ----
     def update(self, updates: list[dict]) -> dict:
+        """Update."""
         for u in updates:
             hid = u.get("hypothesis_id")
             if hid not in self.hypotheses:
@@ -78,6 +84,7 @@ class HypothesisTracker:
 
     # ---- posterior ----
     def posteriors(self) -> dict[str, float]:
+        """Posteriors."""
         los = {h: hyp.log_odds for h, hyp in self.hypotheses.items()}
         m = max(los.values())
         exp = {h: math.exp(v - m) for h, v in los.items()}
@@ -85,6 +92,7 @@ class HypothesisTracker:
         return {h: v / z for h, v in exp.items()}
 
     def snapshot(self) -> dict:
+        """Snapshot."""
         post = self.posteriors()
         out = {h: hyp.to_dict() for h, hyp in self.hypotheses.items()}
         for h in out:
@@ -93,6 +101,7 @@ class HypothesisTracker:
 
     # ---- conclusion ----
     def verdict(self) -> dict:
+        """Verdict."""
         if not self.hypotheses:
             return {"verdict": "no_hypotheses", "note": "hypothesis"}
         post = self.posteriors()

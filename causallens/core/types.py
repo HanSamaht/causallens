@@ -21,6 +21,7 @@ class Attribution:
 
     @property
     def signed_pct(self) -> str:
+        """Signed pct."""
         return f"{self.shap_value:+.3f}"
 
 
@@ -36,6 +37,7 @@ class CounterfactualResult:
     method: str = "quantile_sweep"
 
     def to_dict(self) -> dict[str, Any]:
+        """To dict."""
         return dataclasses.asdict(self)
 
 
@@ -57,6 +59,7 @@ class CausalEdge:
     detail: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
+        """To dict."""
         return dataclasses.asdict(self)
 
 
@@ -70,13 +73,16 @@ class CausalGraph:
 
     @property
     def direct_edges(self) -> list[CausalEdge]:
+        """Direct edges."""
         return [e for e in self.edges if e.kind == "direct"]
 
     @property
     def interaction_edges(self) -> list[CausalEdge]:
+        """Interaction edges."""
         return [e for e in self.edges if e.kind == "interaction"]
 
     def to_dict(self) -> dict[str, Any]:
+        """To dict."""
         return {
             "nodes": self.nodes,
             "edges": [e.to_dict() for e in self.edges],
@@ -101,4 +107,5 @@ class FaithfulnessReport:
     notes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
+        """To dict."""
         return dataclasses.asdict(self)

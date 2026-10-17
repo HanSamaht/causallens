@@ -32,6 +32,7 @@ _load_dotenv()
 
 @dataclass
 class Provider:
+    """Provider."""
     name: str #
     base_url: str
     default_model: str

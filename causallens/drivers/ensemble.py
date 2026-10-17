@@ -15,6 +15,7 @@ class _EnsembleExplainer:
     """shap.TreeExplainer ( attribution layer)."""
 
     def __init__(self, members: list[tuple], weights: np.ndarray):
+        """Init."""
         import shap
         import warnings
 
@@ -31,6 +32,7 @@ class _EnsembleExplainer:
         self.expected_value = base
 
     def shap_values(self, X: np.ndarray) -> np.ndarray:
+        """Shap values."""
         X = np.asarray(X, dtype=float)
         out = None
         for w, ex in zip(self.weights, self.explainers):
@@ -40,6 +42,7 @@ class _EnsembleExplainer:
 
 
 class EnsembleTreeDriver(TreeDriver):
+    """Ensembletreedriver."""
     kind = "ensemble-tree"
 
     def __init__(self, members: list, feature_names, background, name="ensemble"):
@@ -50,6 +53,7 @@ class EnsembleTreeDriver(TreeDriver):
         super().__init__(self.members, feature_names, background, name=name)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict."""
         X = np.asarray(X, dtype=float)
         out = None
         for w, m in zip(self.weights, self.members):

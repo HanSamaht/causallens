@@ -9,6 +9,7 @@ import json
 
 
 def run_hero() -> None:
+    """Run hero."""
     from causallens.backtest import make_synthetic_4h
     mic_line = "=" * 64
     print(mic_line)
@@ -56,4 +57,5 @@ def run_hero() -> None:
 
 
 def cmd_hero(args):
+    """Cmd hero."""
     run_hero()

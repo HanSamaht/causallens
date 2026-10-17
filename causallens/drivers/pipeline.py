@@ -20,6 +20,7 @@ class PipelineDriver(GenericSklearnDriver):
 
     def __init__(self, pipeline, feature_names, background, name="pipeline_model",
                  semantics=None):
+        """Init."""
         self.pipeline = pipeline
         # inferinputwidth:, estimator
         n_feat = None
@@ -36,6 +37,7 @@ class PipelineDriver(GenericSklearnDriver):
         super().__init__(pipeline, feature_names, background, name=name, semantics=semantics)
 
     def describe(self) -> dict:
+        """Describe."""
         d = super().describe()
         steps = []
         for step_name, step in getattr(self.pipeline, "steps", []):

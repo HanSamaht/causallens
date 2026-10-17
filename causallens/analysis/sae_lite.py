@@ -29,6 +29,7 @@ def collect_hidden(drv, layer: str | None = None, n: int = 300) -> np.ndarray:
 
 def train_sae(hidden: np.ndarray, expand: int = 4, l1: float = 0.01, epochs: int = 300,
               seed: int = 0) -> dict:
+    """Train sae."""
     t = __import__("torch")
     t.manual_seed(seed)
     X = t.tensor(hidden, dtype=t.float32)

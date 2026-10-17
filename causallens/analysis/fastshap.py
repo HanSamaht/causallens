@@ -18,6 +18,7 @@ class AmortizedExplainer:
     """
 
     def __init__(self, n_features: int, hidden: int = 128, seed: int = 0):
+        """Init."""
         import torch
 
         self.torch = torch

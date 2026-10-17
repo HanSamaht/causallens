@@ -17,10 +17,12 @@ from .base import MicDriver
 
 
 class TorchDriver(MicDriver):
+    """PyTorch driver with activation patching, steering, and gradient attribution."""
     kind = "torch"
     prediction_semantics = "probability"
 
     def __init__(self, model, feature_names, background, name="torch_model", positive_class=True):
+        """Install hooks and set up activation cache."""
         import torch # : torch model
 
         self.torch = torch
@@ -35,10 +37,12 @@ class TorchDriver(MicDriver):
 
     # ---- -------------------------------------------------------
     def _to_tensor(self, X: np.ndarray):
+        """Convert numpy array to torch tensor."""
         t = self.torch.tensor(np.asarray(X, dtype=np.float32))
         return t
 
     def _forward(self, X: np.ndarray) -> np.ndarray:
+        """Run forward pass with no gradient."""
         model = self.model
         was_training = model.training
         model.eval()
@@ -58,15 +62,19 @@ class TorchDriver(MicDriver):
         return arr.astype(float)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Return model predictions."""
         return self._forward(X)
 
     # ---- activation --------------------------------------------------------
     def _install_hooks(self):
+        """Register forward hooks on all named modules."""
         for layer_name, module in self.model.named_modules():
             if layer_name == "":
                 continue
             def _mk(nm):
+                """Create hook factory for layer."""
                 def hook(_m, _inp, out):
+                    """Capture, cache, and optionally patch layer output."""
                     # RNN outputas (output, hidden) ——onlyinterrogation/
                     is_seq = isinstance(out, (tuple, list))
                     core = out[0] if is_seq else out
@@ -93,6 +101,7 @@ class TorchDriver(MicDriver):
             self._hooks.append(module.register_forward_hook(_mk(layer_name)))
 
     def list_layers(self) -> list[str]:
+        """Return list of hookable layer names."""
         return [n for n, _ in self.model.named_modules() if n != ""]
 
     def get_activations(self, x: np.ndarray) -> dict[str, np.ndarray]:
@@ -155,6 +164,7 @@ class TorchDriver(MicDriver):
 
     # ---- ×inputattribution -----------------------------------------------------
     def input_attribution(self, x: np.ndarray) -> np.ndarray:
+        """Gradient times input attribution."""
         t = self._to_tensor(np.asarray(x, dtype=float).reshape(1, -1))
         t.requires_grad_(True)
         out = self.model(t)
@@ -169,6 +179,7 @@ class TorchDriver(MicDriver):
 
     # ---- ------------------------------------------------------------
     def describe(self) -> dict:
+        """Return driver metadata."""
         d = super().describe()
         d["layers"] = self.list_layers()
         return d

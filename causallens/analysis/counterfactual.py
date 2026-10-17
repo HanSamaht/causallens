@@ -28,11 +28,13 @@ def default_threshold(driver: MicDriver) -> float:
 
 
 def _normalized_l1(driver: MicDriver, x: np.ndarray, x2: np.ndarray) -> float:
+    """Normalized l1."""
     rng = np.maximum(driver.background.max(axis=0) - driver.background.min(axis=0), 1e-9)
     return float(np.abs(x2 - x).sum() / len(x) / np.mean(rng))
 
 
 def _flipped(p: float, p_base: float, threshold: float) -> bool:
+    """Flipped."""
     return (p - threshold) * (p_base - threshold) < 0
 
 
@@ -58,6 +60,7 @@ def _eval_flip(driver: MicDriver, x: np.ndarray, assignments: dict,
 
 
 def _make_result(driver, x, p_base, assignments, p_cf, method) -> CounterfactualResult:
+    """Make result."""
     x2 = driver.intervene(x, assignments)
     return CounterfactualResult(
         base_prediction=p_base,

@@ -11,9 +11,11 @@ from .base import MicDriver
 
 
 class TreeDriver(MicDriver):
+    """Treedriver."""
     kind = "tree"
 
     def __init__(self, model, feature_names, background, name="tree_model", semantics=None):
+        """Init."""
         self.model = model
         # : predict_proba width; proba -> output
         if hasattr(model, "predict_proba"):
@@ -33,6 +35,7 @@ class TreeDriver(MicDriver):
         return self.model.predict(X).reshape(-1, 1)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict."""
         full = self.predict_full(X)
         if full.shape[1] == 1:
             return full[:, 0]

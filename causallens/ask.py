@@ -20,12 +20,16 @@ import numpy as np
 
 
 class AskEngine:
+    """Askengine."""
     def __init__(self, session, llm=None):
+        """Init."""
         self.session = session
         self.llm = llm
 
     # ------------------------------------------------------------------
     def ask(self, question: str) -> str:
+        """Process a what-if question and return formatted answer."""
+        """Ask."""
         drv = self.session.driver
         plan = self._parse_with_llm(question) if self.llm else None
         if plan is None:
@@ -100,6 +104,7 @@ class AskEngine:
     # ------------------------------------------------------------------
     # sample:index:N / extreme_high / extreme_low / median
     def _resolve_sample(self, selector) -> int:
+        """Resolve sample."""
         drv = self.session.driver
         s = str(selector or "extreme_high")
         p = drv.predict(drv.background[:500])
@@ -113,6 +118,7 @@ class AskEngine:
 
     # value:LLM only"",inthis()
     def _resolve_assignments(self, raw: list[dict], x: np.ndarray) -> dict[str, float]:
+        """Resolve assignments."""
         drv = self.session.driver
         out = {}
         for a in raw:
@@ -132,6 +138,7 @@ class AskEngine:
         return out
 
     def _match_feature(self, text: str) -> str | None:
+        """Match feature."""
         names = self.session.driver.feature_names
         bases = {n.split("@")[0] for n in names}
         pack = self.session.pack
@@ -149,6 +156,7 @@ class AskEngine:
 
     # ------------------------------------------------------------------
     def _parse_with_llm(self, question: str) -> dict | None:
+        """Parse with llm."""
         pack = self.session.pack
         vocab = {
             f: (pack.ground(f.split("@")[0]).concept if pack.ground(f.split("@")[0]) else f)
@@ -180,6 +188,7 @@ problem:{question}
     _PAT_SAMPLE = re.compile(r"sample\s+(\d+)", re.I)
 
     def _parse_deterministic(self, question: str) -> dict:
+        """Parse deterministic."""
         assignments = []
         m = self._PAT_SCALE.search(question)
         if m:

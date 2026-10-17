@@ -109,6 +109,7 @@ td{{padding:6px 10px;border-bottom:1px solid #21262d}}
 
 
 def _bar(val: float, max_abs: float, cls: str) -> str:
+    """Return HTML bar element."""
     w = int(abs(val) / max_abs * 120) if max_abs > 0 else 0
     return f'<span class="bar {cls}" style="width:{w}px"></span>'
 
