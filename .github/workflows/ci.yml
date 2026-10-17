@@ -23,8 +23,7 @@ jobs:
           pip install numpy scikit-learn shap pandas requests lightgbm pytest
           pip install torch --index-url https://download.pytorch.org/whl/cpu
       - name: Unit tests
-        run: python -m pytest tests/ -q --timeout=600
-        continue-on-error: false
+        run: python -m pytest tests/ -q
       - name: Self-validation probes
         run: python -m causallens probe
         continue-on-error: true
