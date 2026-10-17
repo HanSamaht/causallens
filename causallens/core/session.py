@@ -536,6 +536,32 @@ class MicSession:
 
     # ================= leakageandcontamination =================
 
+    def counterfactual_fairness(self, sample_index: int, protected_feature: str,
+                                contrast_values: list[float],
+                                n_samples: int = 20) -> dict:
+        """Audit counterfactual fairness: would the same individual get a
+        different outcome if only the protected attribute changed?
+
+        Uses intervene() to change only the protected feature while holding
+        all other features fixed. A prediction flip indicates the model
+        violates counterfactual fairness (Kusner et al. 2017).
+        """
+        from ..analysis.fairness import counterfactual_fairness_check
+
+        rng = np.random.default_rng(0)
+        indices = rng.choice(
+            len(self.driver.background),
+            size=min(n_samples, len(self.driver.background)),
+            replace=False,
+        ).tolist()
+        if sample_index not in indices:
+            indices[0] = sample_index
+
+        result = counterfactual_fairness_check(
+            self.driver, indices, protected_feature, contrast_values
+        )
+        return self._log("counterfactual_fairness", result)
+
     def check_contamination(self, new_data=None, data_ref: str | None = None,
                             y_bg=None, y_new=None) -> dict:
         """trainingbackground vs : + (training/testcontamination). """
