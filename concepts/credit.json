@@ -1,21 +1,21 @@
 {
-  "domain": "credit-risk",
-  "name": "OpenML credit-g",
+  "domain": "credit",
+  "name": "credit concept pack",
   "features": {
     "checking_status": {
       "concept": "checking_status",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "duration": {
       "concept": "duration",
       "description": "",
-      "direction": "+"
+      "direction": "?"
     },
     "credit_history": {
       "concept": "credit_history",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "purpose": {
       "concept": "purpose",
@@ -25,22 +25,22 @@
     "credit_amount": {
       "concept": "credit_amount",
       "description": "",
-      "direction": "+"
+      "direction": "?"
     },
     "savings_status": {
       "concept": "savings_status",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "employment": {
       "concept": "employment",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "installment_commitment": {
       "concept": "installment_commitment",
       "description": "",
-      "direction": "+"
+      "direction": "?"
     },
     "personal_status": {
       "concept": "personal_status",
@@ -51,57 +51,57 @@
     "other_parties": {
       "concept": "other_parties",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "residence_since": {
       "concept": "residence_since",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "property_magnitude": {
       "concept": "property_magnitude",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "age": {
       "concept": "age",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "other_payment_plans": {
       "concept": "other_payment_plans",
       "description": "",
-      "direction": "+"
+      "direction": "?"
     },
     "housing": {
       "concept": "housing",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "existing_credits": {
       "concept": "existing_credits",
       "description": "",
-      "direction": "+"
+      "direction": "?"
     },
     "job": {
       "concept": "job",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "num_dependents": {
       "concept": "num_dependents",
       "description": "",
-      "direction": "+"
+      "direction": "?"
     },
     "own_telephone": {
       "concept": "own_telephone",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "foreign_worker": {
       "concept": "foreign_worker",
       "description": "",
-      "direction": "+",
+      "direction": "?",
       "role": "proxy"
     }
   }

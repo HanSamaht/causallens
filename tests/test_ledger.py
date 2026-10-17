@@ -59,7 +59,7 @@ def test_session_autopersist_and_priors(tmp_path):
 
     led = Ledger(str(tmp_path / "l.db"))
     model, feats, bg, _ = train_finance_demo()
-    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance_zh.json"))
+    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json"))
 
     s1 = MicSession(detect_driver(model, feats, bg, name="led_test"), pack)
     s1.attach_ledger(led, "v1")
@@ -91,7 +91,7 @@ def test_correction_recorded(tmp_path):
     led = Ledger(str(tmp_path / "l2.db"))
     model, feats, bg, _ = train_finance_demo()
     s = MicSession(detect_driver(model, feats, bg, name="corr_test"),
-                   ConceptPack.load(os.path.join(_HERE, "concepts", "finance_zh.json")))
+                   ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json")))
     s.attach_ledger(led, "v1")
     out = tmp_path / "g.json"
     export_graph(s, str(out))

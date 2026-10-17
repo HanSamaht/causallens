@@ -17,7 +17,7 @@ print(f"模型 auc = {auc:.4f}")
 
 # 2) 插上麦克风：自动识别驱动器 + 加载领域概念包
 driver = detect_driver(model, feats, background, name="my_quant_model")
-pack = ConceptPack.load(os.path.join("concepts", "finance_zh.json"))
+pack = ConceptPack.load(os.path.join("concepts", "finance.json"))
 mic = MicSession(driver, pack)
 
 # 3) 让模型开口：一句话拿到单样本完整解释（含中文概念接地）

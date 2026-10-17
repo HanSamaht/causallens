@@ -2,7 +2,7 @@
 
     python -m mic demo-finance # training demo model
     python -m mic demo-medicine # training demo model
-    python -m mic report --model ... --sample 3 --concepts concepts/finance_zh.json
+    python -m mic report --model ... --sample 3 --concepts concepts/finance.json
     python -m mic audit --model ...
     python -m mic chat --model ... --role auditor # requireconfiguration LLM
     python -m mic serve --model ... # MCP stdio server
@@ -342,7 +342,7 @@ def cmd_llm_check(args):
         print(f"[mic] ✗ 2/3 : {e}")
         sys.exit(1)
 
-    print("\n[mic] allpassed —— can: python -m mic chat --demo finance --concepts concepts/finance_zh.json --role auditor")
+    print("\n[mic] allpassed —— can: python -m mic chat --demo finance --concepts concepts/finance.json --role auditor")
 
 
 def cmd_drift(args):

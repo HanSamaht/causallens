@@ -20,7 +20,7 @@ def geo_session():
     from causallens.drivers import detect_driver
 
     model, feats, bg, _ = train_geo_demo()
-    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "geo_zh.json"))
+    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "geo.json"))
     return MicSession(detect_driver(model, feats, bg, name="geo"), pack)
 
 

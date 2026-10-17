@@ -1,18 +1,16 @@
 {
-  "domain": "finance-timeseries",
-  "name": "demoGRU ",
+  "domain": "timeseries",
+  "name": "timeseries concept pack",
   "features": {
     "ts_momentum": {
       "concept": "ts_momentum",
       "description": "",
-      "direction": "+",
-      "role": "normal"
+      "direction": "?"
     },
     "ts_reversion": {
       "concept": "ts_reversion",
       "description": "",
-      "direction": "-",
-      "role": "normal"
+      "direction": "?"
     },
     "ts_noise": {
       "concept": "ts_noise",

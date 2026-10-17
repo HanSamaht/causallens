@@ -1,48 +1,42 @@
 {
   "domain": "finance",
-  "name": "Ademo",
+  "name": "finance concept pack",
   "features": {
     "momentum": {
       "concept": "momentum",
       "description": "",
-      "direction": "+",
-      "role": "normal"
+      "direction": "?"
     },
     "value": {
       "concept": "value",
       "description": "",
-      "direction": "+",
-      "role": "normal"
+      "direction": "?"
     },
     "volatility": {
       "concept": "volatility",
       "description": "",
-      "direction": "-",
-      "role": "normal"
+      "direction": "?"
     },
     "liquidity": {
       "concept": "liquidity",
       "description": "",
-      "direction": "+",
+      "direction": "?",
       "role": "proxy"
     },
     "reversal": {
       "concept": "reversal",
       "description": "",
-      "direction": "-",
-      "role": "normal"
+      "direction": "?"
     },
     "size": {
       "concept": "size",
       "description": "",
-      "direction": "-",
-      "role": "normal"
+      "direction": "?"
     },
     "earnings_yield": {
       "concept": "earnings_yield",
       "description": "",
-      "direction": "+",
-      "role": "normal"
+      "direction": "?"
     },
     "month_index": {
       "concept": "month_index",

@@ -17,7 +17,7 @@ print(f"MLP auc = {auc:.4f}")
 
 # 2) Torch 驱动器自带激活武器库
 drv = TorchDriver(net, feats, background, name="quant_mlp")
-mic = MicSession(drv, ConceptPack.load(os.path.join("concepts", "finance_zh.json")))
+mic = MicSession(drv, ConceptPack.load(os.path.join("concepts", "finance.json")))
 
 print("层列表:", drv.list_layers())
 

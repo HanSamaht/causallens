@@ -1,0 +1,126 @@
+{
+  "domain": "medicine",
+  "name": "medicine concept pack",
+  "features": {
+    "mean_radius": {
+      "concept": "mean_radius",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_texture": {
+      "concept": "mean_texture",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_perimeter": {
+      "concept": "mean_perimeter",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_area": {
+      "concept": "mean_area",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_smoothness": {
+      "concept": "mean_smoothness",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_compactness": {
+      "concept": "mean_compactness",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_concavity": {
+      "concept": "mean_concavity",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_concave_points": {
+      "concept": "mean_concave_points",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_symmetry": {
+      "concept": "mean_symmetry",
+      "description": "",
+      "direction": "?"
+    },
+    "mean_fractal_dimension": {
+      "concept": "mean_fractal_dimension",
+      "description": "",
+      "direction": "?"
+    },
+    "radius_error": {
+      "concept": "radius_error",
+      "description": "",
+      "direction": "?"
+    },
+    "texture_error": {
+      "concept": "texture_error",
+      "description": "",
+      "direction": "?"
+    },
+    "perimeter_error": {
+      "concept": "perimeter_error",
+      "description": "",
+      "direction": "?"
+    },
+    "area_error": {
+      "concept": "area_error",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_radius": {
+      "concept": "worst_radius",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_texture": {
+      "concept": "worst_texture",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_perimeter": {
+      "concept": "worst_perimeter",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_area": {
+      "concept": "worst_area",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_smoothness": {
+      "concept": "worst_smoothness",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_compactness": {
+      "concept": "worst_compactness",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_concavity": {
+      "concept": "worst_concavity",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_concave_points": {
+      "concept": "worst_concave_points",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_symmetry": {
+      "concept": "worst_symmetry",
+      "description": "",
+      "direction": "?"
+    },
+    "worst_fractal_dimension": {
+      "concept": "worst_fractal_dimension",
+      "description": "",
+      "direction": "?"
+    }
+  }
+}

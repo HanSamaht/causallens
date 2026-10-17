@@ -29,7 +29,7 @@ _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def finance_env():
     model, feats, bg, auc = train_finance_demo()
     driver = detect_driver(model, feats, bg, name="fin_test")
-    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance_zh.json"))
+    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json"))
     return MicSession(driver, pack), auc
 
 
@@ -200,7 +200,7 @@ def test_timeseries_driver_end_to_end():
     assert len(drv.feature_names) == drv.seq_len * len(feats)
     assert drv.feature_names[0].endswith(f"@lag{drv.seq_len - 1}")
 
-    session = MicSession(drv, ConceptPack.load(os.path.join(_HERE, "concepts", "timeseries_zh.json")))
+    session = MicSession(drv, ConceptPack.load(os.path.join(_HERE, "concepts", "timeseries.json")))
 
     # attribution(:ts_momentum@lag0 -> )
     attr = session.get_attribution(0)
@@ -307,7 +307,7 @@ def test_steering_repair():
 
     net, feats, bg, _ = FinanceMLP.train(epochs=40)
     drv = TorchDriver(net, feats, bg, name="steer_test")
-    session = MicSession(drv, ConceptPack.load(os.path.join(_HERE, "concepts", "finance_zh.json")))
+    session = MicSession(drv, ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json")))
 
     report = session.steering_repair(sample_index=None, feature="month_index")
     assert "diagnosis" in report and "follow_up" in report
@@ -326,7 +326,7 @@ def test_geo_demo():
     assert auc > 0.8
     session = MicSession(
         detect_driver(model, feats, bg, name="geo_demo"),
-        ConceptPack.load(os.path.join(_HERE, "concepts", "geo_zh.json")),
+        ConceptPack.load(os.path.join(_HERE, "concepts", "geo.json")),
     )
     result = session.audit(None)
     codes = {f["code"] for f in result["findings"]}
@@ -375,7 +375,7 @@ def test_onnx_driver():
 def MicSessionSafe(drv):
     from causallens.core import ConceptPack, MicSession
 
-    return MicSession(drv, ConceptPack.load(os.path.join(_HERE, "concepts", "finance_zh.json")))
+    return MicSession(drv, ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json")))
 
 
 # ---------- LLM (,/) ----------

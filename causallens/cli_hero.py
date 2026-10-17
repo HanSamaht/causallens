@@ -20,7 +20,7 @@ def run_hero() -> None:
     from causallens.drivers.backtest import BacktestDriver
 
     drv = BacktestDriver(make_synthetic_4h(8000, seed=7), name="bt_engine")
-    session = MicSession(drv, ConceptPack.load("concepts/backtest_zh.json"))
+    session = MicSession(drv, ConceptPack.load("concepts/backtest.json"))
 
     print("\n[1] :thisbacktest PF≈5, 56% —— is\n")
     ladder = drv.run(fill_market=0.0)
@@ -51,7 +51,7 @@ def run_hero() -> None:
     print(f"\n{mic_line}")
     print(" thisnot,isinterventionreasoning:(model/backtest/log),")
     print(" MIC causal graph,—— X,Y .")
-    print(" : python -m mic report --demo finance --concepts concepts/finance_zh.json")
+    print(" : python -m mic report --demo finance --concepts concepts/finance.json")
     print(mic_line)
 
 

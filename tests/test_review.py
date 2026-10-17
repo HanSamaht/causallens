@@ -73,7 +73,7 @@ def fin_session():
     from causallens.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
-    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance_zh.json"))
+    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json"))
     return MicSession(detect_driver(model, feats, bg, name="fin_review"), pack)
 
 

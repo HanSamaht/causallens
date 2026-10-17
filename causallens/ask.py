@@ -1,6 +1,6 @@
 """`mic ask` —— causal reasoningengine.
 
-    python -m mic ask --demo geo --concepts concepts/geo_zh.json \
+    python -m mic ask --demo geo --concepts concepts/geo.json \
         "ifincreases50%,mostsample?"
 
 locate:auditis"generatereport",reasoningis"problem".

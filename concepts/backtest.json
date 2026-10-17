@@ -1,11 +1,11 @@
 {
-  "domain": "backtest-audit",
-  "name": "concept_pack",
+  "domain": "backtest",
+  "name": "backtest concept pack",
   "features": {
     "fill_market": {
       "concept": "fill_market",
       "description": "",
-      "direction": "-",
+      "direction": "?",
       "role": "spurious"
     },
     "stop_pct": {
@@ -16,17 +16,17 @@
     "tp_pct": {
       "concept": "tp_pct",
       "description": "",
-      "direction": "+"
+      "direction": "?"
     },
     "fee_bps": {
       "concept": "fee_bps",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "slippage_bps": {
       "concept": "slippage_bps",
       "description": "",
-      "direction": "-"
+      "direction": "?"
     },
     "entry_every": {
       "concept": "entry_every",

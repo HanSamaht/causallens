@@ -10,7 +10,7 @@ configuration(claude_desktop_config.json):
           "args": ["-m", "mic", "serve",
                    "--model", "examples/artifacts/finance_model.pkl",
                    "--background", "examples/artifacts/finance_background.csv",
-                   "--concepts", "concepts/finance_zh.json"]
+                   "--concepts", "concepts/finance.json"]
         }
       }
     }

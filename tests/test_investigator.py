@@ -66,7 +66,7 @@ def test_session_investigate_finance():
     from causallens.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
-    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance_zh.json"))
+    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json"))
     session = MicSession(detect_driver(model, feats, bg, name="inv_fin"), pack)
 
     result = session.investigate(n_samples=6)
@@ -118,7 +118,7 @@ def test_credit_demo_dirty_path():
     from causallens.core import ConceptPack, MicSession
     from causallens.drivers import detect_driver
 
-    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "credit_zh.json"))
+    pack = ConceptPack.load(os.path.join(_HERE, "concepts", "credit.json"))
     session = MicSession(detect_driver(model, feats, bg, name="credit"), pack)
     report = session.offline_report(0)
     for kw in ["", "", ""]:

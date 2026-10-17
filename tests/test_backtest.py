@@ -22,7 +22,7 @@ from causallens.drivers.backtest import BacktestDriver
 def bt_session():
     ohlc = make_synthetic_4h(2000, seed=7)
     drv = BacktestDriver(ohlc, name="bt_test")
-    pack = ConceptPack.load(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "concepts", "backtest_zh.json"))
+    pack = ConceptPack.load(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "concepts", "backtest.json"))
     return MicSession(drv, pack)
 
 

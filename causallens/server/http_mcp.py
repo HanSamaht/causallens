@@ -1,6 +1,6 @@
 """MCP Streamable HTTP Server( mcp SDK, v1 FastMCP / v2 MCPServer).
 
-    python -m mic serve --demo finance --concepts concepts/finance_zh.json \
+    python -m mic serve --demo finance --concepts concepts/finance.json \
            --http --port 8765
 
 then MCP by URL http://127.0.0.1:8765/mcp .
