@@ -395,6 +395,22 @@ class MicSession:
         result["sample_index"] = int(sample_index)
         return self._log("ts_attribution", result)
 
+    def identify_real_effect(self, treatment: str, outcome: str = "prediction",
+                              edges: list[tuple[str, str]] | None = None,
+                              n_samples: int = 500) -> dict:
+        """Identify and estimate the real world causal effect via DoWhy.
+
+        The intervention tools say what the model does. This says what
+        the data licenses: backdoor or front-door criteria decide, a
+        latent common cause between treatment and outcome is refused
+        rather than estimated naively.
+        """
+        from ..analysis.identifiability import identify_real_effect as _idf
+
+        result = _idf(self.driver, treatment, outcome=outcome, edges=edges,
+                      n_samples=n_samples)
+        return self._log("identify_real_effect", result)
+
     def temporal_causal_graph(self, max_lag: int = 4, alpha: float = 0.05,
                               n_windows: int = 256, annotate_model: bool = True) -> dict:
         """Discover lagged channel causes with pairwise Granger tests.

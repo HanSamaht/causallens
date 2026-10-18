@@ -3,6 +3,7 @@ from .causal_graph import build_causal_graph
 from .counterfactual import default_threshold, search_counterfactual, search_counterfactuals
 from .discovery import discovery_edges
 from .faithfulness import aggregate_faithfulness, evaluate_faithfulness, explain_simulate_score
+from .identifiability import identify_real_effect
 
 __all__ = [
     "explain_sample",
@@ -15,4 +16,5 @@ __all__ = [
     "evaluate_faithfulness",
     "aggregate_faithfulness",
     "explain_simulate_score",
+    "identify_real_effect",
 ]
