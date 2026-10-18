@@ -534,7 +534,15 @@ class MicSession:
         result["sample_index"] = sample_index
         return self._log("steering_repair", result)
 
-    # ================= leakageandcontamination =================
+    # ================= counterfactual diversity =================
+
+    def diverse_counterfactuals(self, sample_index: int, n_paths: int = 3) -> list:
+        """Generate multiple distinct counterfactual paths (DiCE-style diversity)."""
+        from ..analysis.counterfactual_diverse import diverse_counterfactuals
+        x = self.driver.sample_at(sample_index)
+        paths = diverse_counterfactuals(self.driver, x, self.pack, n_paths=n_paths)
+        self._log("diverse_counterfactuals", {"sample_index": sample_index, "paths": paths})
+        return paths
 
     def circuit_with_confidence(self, n_bootstrap: int = 20, tolerance: float = 0.02,
                                  layer: str | None = None) -> dict:
