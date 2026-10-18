@@ -152,6 +152,98 @@ class TextDriver(MicDriver):
             "method": "token_swap",
         }
 
+
+    def attention_rollout(self, text, use_gradients=True):
+        """Attention rollout with optional gradient augmentation.
+
+        Recursively propagates attention weights from the output layer back
+        to input tokens. When use_gradients=True, multiplies attention by
+        gradient magnitudes for sharper attribution (Chefer et al. 2021).
+
+        Faster than occlusion: one forward pass + one backward pass.
+        """
+        import torch
+
+        enc = self.tokenizer(text, return_tensors="pt", truncation=True,
+                            max_length=self.max_length)
+        input_ids = enc["input_ids"].to(self.device)
+
+        # Store attention weights
+        attentions = []
+        hooks = []
+        for name, module in self.model.named_modules():
+            if "attention" in name and hasattr(module, "output") and hasattr(module.output, "dropout"):
+                def _mk(nm):
+                    def hook(_m, _i, out):
+                        if isinstance(out, tuple):
+                            attentions.append(out[1].detach().cpu())
+                    return hook
+                hooks.append(module.output.register_forward_hook(_mk(name)))
+
+        embed_layer = self._get_embedding_layer()
+        embeddings = embed_layer(input_ids).detach()
+        embeddings.requires_grad_(True)
+
+        outputs = self.model(inputs_embeds=embeddings, output_attentions=True)
+        logits = outputs.logits if hasattr(outputs, "logits") else outputs[0]
+        probs = torch.softmax(logits, dim=-1)
+        probs[0, self.target_class].backward()
+
+        grad = embeddings.grad[0].detach().cpu()
+        grad_norm = grad.norm(dim=-1, keepdim=True)
+        grad_norm = grad_norm / (grad_norm.max() + 1e-8)
+
+        if hasattr(outputs, "attentions") and outputs.attentions:
+            att_list = [a.detach().cpu() for a in outputs.attentions]
+        elif attentions:
+            att_list = attentions
+        else:
+            for h in hooks:
+                h.remove()
+            return self._occlusion_fallback(text)
+
+        for h in hooks:
+            h.remove()
+
+        seq_len = att_list[0].shape[1]
+        result = np.eye(seq_len)
+        for att in att_list:
+            att_avg = att[0].mean(dim=0).numpy()
+            if use_gradients:
+                gn = grad_norm[:seq_len, 0].numpy()
+                att_avg = att_avg * gn[np.newaxis, :]
+                row_sums = att_avg.sum(axis=1, keepdims=True) + 1e-8
+                att_avg = att_avg / row_sums
+            else:
+                att_avg = att_avg + np.eye(seq_len)
+                att_avg = att_avg / att_avg.sum(axis=1, keepdims=True)
+            result = att_avg @ result
+
+        token_scores = result[0]
+        tokens = self.tokenizer.convert_ids_to_tokens(input_ids[0].cpu())
+
+        results = []
+        for i, (tok, score) in enumerate(zip(tokens, token_scores)):
+            if tok not in ("[CLS]", "[SEP]", "[PAD]", "<s>", "</s>", "<pad>"):
+                results.append({
+                    "token": self.tokenizer.convert_tokens_to_string([tok]).strip(),
+                    "position": i,
+                    "attribution": round(float(score), 6),
+                })
+
+        results.sort(key=lambda r: -r["attribution"])
+        p_base = float(probs[0, self.target_class].detach().cpu())
+        return {
+            "text": text,
+            "prediction": round(p_base, 4),
+            "tokens": results,
+            "method": "gradient_attention_rollout" if use_gradients else "attention_rollout",
+        }
+
+    def _occlusion_fallback(self, text):
+        """Fallback to occlusion when attention weights are unavailable."""
+        return self.token_attribution(text, method="occlusion")
+
     def describe(self):
         d = super().describe()
         d["model_type"] = type(self.model).__name__
