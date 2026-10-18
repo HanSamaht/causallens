@@ -153,6 +153,13 @@ class TextDriver(MicDriver):
         }
 
 
+    def phrase_counterfactual(self, text, target_label=None, max_edits=2, top_k=3):
+        """Typed phrase level edits that flip the prediction, verified."""
+        from ..analysis.phrase_cf import phrase_counterfactual
+
+        return phrase_counterfactual(self, text, target_label=target_label,
+                                     max_edits=max_edits, top_k=top_k)
+
     def attention_rollout(self, text, use_gradients=True):
         """Attention rollout with optional gradient augmentation.
 

@@ -395,6 +395,19 @@ class MicSession:
         result["sample_index"] = int(sample_index)
         return self._log("ts_attribution", result)
 
+    def phrase_counterfactual(self, text: str, max_edits: int = 2, top_k: int = 3) -> dict:
+        """Typed phrase level counterfactuals for a text driver.
+
+        Negation toggles, intensity shifts, antonym swaps, deletions,
+        and contrastive clause appends under an edit budget, each flip
+        verified against the model.
+        """
+        from ..analysis.phrase_cf import phrase_counterfactual
+
+        assert self.driver.kind == "text", "phrase counterfactuals require a text driver"
+        result = phrase_counterfactual(self.driver, text, max_edits=max_edits, top_k=top_k)
+        return self._log("phrase_counterfactual", result)
+
     def plan_next_intervention(self, n_candidates: int = 16, top_k: int = 5) -> dict:
         """Rank candidate interventions by expected information gain.
 
