@@ -14,7 +14,11 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis.temporal_causal import granger_pairwise, temporal_causal_graph
+from causallens.analysis.temporal_causal import (
+    granger_pairwise,
+    pcmci_edges,
+    temporal_causal_graph,
+)
 
 
 def _var_windows(n_series=40, length=200, seed=3, seq_len=20):
@@ -122,3 +126,51 @@ def test_end_to_end_with_trained_ts_model():
         assert "model_reliance" in e
         assert 0.0 <= e["model_reliance"] <= 1.0
     assert "NO TEMPORAL CAUSES" in out["verdict"] or "significant" in out["verdict"]
+
+def _tigramite_available():
+    try:
+        import tigramite  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+@pytest.mark.skipif(not _tigramite_available(), reason="tigramite is not installed")
+def test_pcmci_finds_conditional_link():
+    series = _var_windows()
+    results = pcmci_edges(series, ["x1", "x2", "x3"], max_lag=4)
+    assert results, "expected at least one conditional link"
+    top = results[0]
+    assert top["p_value"] < 1e-4
+    # the planted structure: x1 -> x2 at lag 1 must appear
+    assert any(r["source"] == 0 and r["target"] == 1 and r["lag"] == 1
+               for r in results if r["p_value"] < 1e-4)
+    # the independent noise channel must stay silent
+    assert not any(2 in (r["source"], r["target"])
+                   for r in results if r["p_value"] < 1e-4)
+
+
+@pytest.mark.skipif(not _tigramite_available(), reason="tigramite is not installed")
+def test_pcmci_through_session():
+    pytest.importorskip("torch")
+    from causallens.core import MicSession
+    from causallens.demos import train_timeseries_demo
+    from causallens.drivers.timeseries import TimeSeriesDriver
+
+    model, feats, bg, _ = train_timeseries_demo(epochs=5)
+    driver = TimeSeriesDriver(model, feats, bg, name="ts_pcmci")
+    session = MicSession(driver)
+    out = session.temporal_causal_graph(max_lag=3, method="pcmci",
+                                        annotate_model=True, n_windows=64)
+    assert out["method"] == "pcmci"
+    assert "Runge" in out["reference"]
+    # demo channels are independent: a clean negative control
+    assert out["n_significant"] <= 1
+
+
+def test_unknown_method_rejected():
+    rng = np.random.default_rng(9)
+    series = rng.normal(size=(20, 20, 3))
+    driver = _FakeTsDriver(series)
+    with pytest.raises(ValueError, match="unknown method"):
+        temporal_causal_graph(driver, method="nope", annotate_model=False)

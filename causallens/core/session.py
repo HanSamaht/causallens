@@ -412,18 +412,22 @@ class MicSession:
         return self._log("identify_real_effect", result)
 
     def temporal_causal_graph(self, max_lag: int = 4, alpha: float = 0.05,
-                              n_windows: int = 256, annotate_model: bool = True) -> dict:
-        """Discover lagged channel causes with pairwise Granger tests.
+                              n_windows: int = 256, annotate_model: bool = True,
+                              method: str = "granger") -> dict:
+        """Discover lagged channel causes with Granger or PCMCI.
 
         Each surviving edge channel j at lag k -> channel i at now is
         annotated with the model's attribution mass on that lag, so the
         report shows both what the data causes and what the model uses.
+        method "pcmci" conditions each test on the system's full past
+        and needs the tigramite extra.
         """
         from ..analysis.temporal_causal import temporal_causal_graph
 
         assert self.driver.kind == "timeseries", "temporal discovery requires a timeseries driver"
         result = temporal_causal_graph(self.driver, max_lag=max_lag, alpha=alpha,
-                                       n_windows=n_windows, annotate_model=annotate_model)
+                                       n_windows=n_windows, annotate_model=annotate_model,
+                                       method=method)
         return self._log("temporal_causal_graph", result)
 
     def fit_fastshap(self, n_samples: int = 150, epochs: int = 200) -> dict:

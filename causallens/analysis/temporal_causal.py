@@ -101,6 +101,53 @@ def granger_pairwise(series: np.ndarray, max_lag: int = 4,
     return results
 
 
+def pcmci_edges(series: np.ndarray, names: list[str], max_lag: int = 4,
+                alpha: float = 0.05) -> list[dict]:
+    """Conditional lagged edges via PCMCI (Tigramite).
+
+    Pairwise Granger asks whether one channel helps predict another
+    beyond its own lags. PCMCI conditions each test on the full
+    relevant past, so a link survives only when it carries information
+    the rest of the system does not already contain.
+
+    PCMCI needs one continuous series; the windowed background is
+    reconstructed by concatenating non-overlapping windows. Each join
+    can contaminate at most max_lag rows, which is disclosed here
+    rather than hidden.
+    """
+    try:
+        from tigramite.data_processing import DataFrame as TigDataFrame
+        from tigramite.independence_tests.parcorr import ParCorr
+        from tigramite.pcmci import PCMCI
+    except Exception as e:  # pragma: no cover - exercised only without the library
+        raise ImportError("tigramite is not installed. Install it with: pip install tigramite") from e
+
+    n, T, _ = series.shape
+    long_series = np.concatenate(list(series[::T]), axis=0)
+    df = TigDataFrame(long_series, var_names=list(names))
+    pcmci = PCMCI(dataframe=df, cond_ind_test=ParCorr(), verbosity=0)
+    res = pcmci.run_pcmci(tau_max=max_lag, pc_alpha=alpha)
+    graph, val, pmat = res["graph"], res["val_matrix"], res["p_matrix"]
+
+    rows = []
+    n_vars = len(names)
+    for tgt in range(n_vars):
+        for src in range(n_vars):
+            if src == tgt:
+                continue  # autoregressive self links are not cross causes
+            for lag in range(1, max_lag + 1):
+                if graph[src, tgt, lag] not in ("", "--"):
+                    rows.append({
+                        "source": src,
+                        "target": tgt,
+                        "lag": lag,
+                        "strength": float(abs(val[src, tgt, lag])),
+                        "p_value": float(pmat[src, tgt, lag]),
+                    })
+    rows.sort(key=lambda r: r["p_value"])
+    return rows
+
+
 def _model_lag_reliance(driver, n_samples: int = 8) -> dict:
     """Mean absolute window attribution mass per (channel, lag).
 
@@ -126,18 +173,34 @@ def _model_lag_reliance(driver, n_samples: int = 8) -> dict:
 
 def temporal_causal_graph(driver, max_lag: int = 4, alpha: float = 0.05,
                           n_windows: int = 256, annotate_model: bool = True,
-                          bonferroni: bool = True) -> dict:
+                          bonferroni: bool = True, method: str = "granger") -> dict:
     """Discover lagged channel causes in the driver background.
 
-    Runs pairwise Granger over the raw channels, applies Bonferroni
-    correction across all ordered pairs, and annotates each surviving
-    edge with the model's attribution mass on that (channel, lag).
+    method "granger" runs the pairwise F tests. method "pcmci" runs
+    Tigramite PCMCI, which conditions each link test on the rest of
+    the system's past, at the cost of the extra dependency and the
+    window concatenation caveat documented in pcmci_edges.
+
+    Both apply Bonferroni correction across the tested links and
+    annotate each surviving edge with the model's attribution mass on
+    that (channel, lag).
     """
     bg = driver.background[:n_windows]
     series = bg.reshape(len(bg), driver.seq_len, driver.n_features_raw)
     names = list(driver.base_feature_names)
 
-    pairs = granger_pairwise(series, max_lag=max_lag)
+    if method == "pcmci":
+        raw = pcmci_edges(series, names, max_lag=max_lag, alpha=alpha)
+        pairs = [
+            {"source": r["source"], "target": r["target"], "best_lag": r["lag"],
+             "f_stat": round(r["strength"], 4), "p_value": r["p_value"],
+             "delta_r2": None}
+            for r in raw
+        ]
+    elif method == "granger":
+        pairs = granger_pairwise(series, max_lag=max_lag)
+    else:
+        raise ValueError(f"unknown method {method!r}, expected granger or pcmci")
     n_tests = max(len(pairs), 1)
     threshold = alpha / n_tests if bonferroni else alpha
 
@@ -195,6 +258,11 @@ def temporal_causal_graph(driver, max_lag: int = 4, alpha: float = 0.05,
         "edges": edges,
         "significant_edges": survivors,
         "verdict": verdict,
-        "method": "pairwise_granger_f_test",
-        "reference": "Granger (1969) Investigating Causal Relations by Econometric Models",
+        "method": ("pcmci" if method == "pcmci" else "pairwise_granger_f_test"),
+        "reference": (
+            "Runge et al. (2019) Detecting and quantifying causal associations"
+            " in large nonlinear time series, Science Advances"
+            if method == "pcmci"
+            else "Granger (1969) Investigating Causal Relations by Econometric Models"
+        ),
     }
