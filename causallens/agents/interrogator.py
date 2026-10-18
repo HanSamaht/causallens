@@ -251,6 +251,21 @@ class Interrogator:
             {
                 "type": "function",
                 "function": {
+                    "name": "plan_next_intervention",
+                    "description": (
+                        "rank candidate interventions by expected information "
+                        "gain over the standing hypotheses; call this when "
+                        "unsure which experiment to run next"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
                     "name": "set_causal_prior",
                     "description": (
                         "record your domain prior as explicit causal edges "
@@ -499,6 +514,7 @@ class Interrogator:
             "get_hypotheses": lambda: s.get_hypotheses(),
             "update_hypotheses": lambda: s.update_hypotheses(args["updates"]),
             "conclude_investigation": lambda: s.conclude_investigation(),
+            "plan_next_intervention": lambda: s.plan_next_intervention(),
             "set_causal_prior": lambda: s.set_causal_prior(args["edges"]),
             "test_causal_prior": lambda: s.test_causal_prior(),
             "slippage_stress": lambda: s.slippage_stress(),

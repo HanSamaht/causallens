@@ -395,6 +395,19 @@ class MicSession:
         result["sample_index"] = int(sample_index)
         return self._log("ts_attribution", result)
 
+    def plan_next_intervention(self, n_candidates: int = 16, top_k: int = 5) -> dict:
+        """Rank candidate interventions by expected information gain.
+
+        Active experiment design for the investigator loop: candidates
+        are extreme quantile interventions on top attribution features,
+        ranked by how much the expected outcome reduces entropy over
+        the standing hypotheses.
+        """
+        from ..analysis.experiment_planner import plan_next_intervention
+
+        result = plan_next_intervention(self, n_candidates=n_candidates, top_k=top_k)
+        return self._log("plan_next_intervention", result)
+
     def transcoder_features(self, block: tuple[str, str] | None = None,
                              top_k: int = 8, epochs: int = 300, n: int = 200) -> dict:
         """Dictionary over one MLP block, input side to output side.
