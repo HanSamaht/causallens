@@ -100,10 +100,25 @@ def discovery_edges(
     names = list(driver.feature_names) + ["prediction"]
     target_idx = len(names) - 1
 
+    # discovery backends choke on degenerate matrices: a constant one-hot
+    # column makes the correlation matrix singular and PC never terminates.
+    stds = data.std(axis=0)
+    keep_idx = np.where(stds > 1e-12)[0]
+    dropped = [names[j] for j in np.where(stds <= 1e-12)[0]]
+    if len(keep_idx) < 3:
+        raise ValueError("fewer than 3 non-constant columns, nothing to discover")
+    if dropped:
+        data = data[:, keep_idx]
+        names = [names[j] for j in keep_idx]
+        target_idx = names.index("prediction") if "prediction" in names else -1
+
     directed: list[tuple[int, int, float, bool]] = []
 
     if method == "pc":
-        res = _pc(data, alpha=alpha, indep_test="fisherz", show_progress=False)
+        # max_cond_size caps the conditioning set size: PC is exponential
+        # in it and dense one-hot backgrounds push it to order 6 and beyond
+        res = _pc(data, alpha=alpha, indep_test="fisherz",
+                  max_cond_size=3, show_progress=False)
         directed = _cpdag_edges(res.G.graph, names)
     elif method == "ges":
         res = _ges(data, score_func="local_score_BIC")

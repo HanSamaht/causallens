@@ -95,3 +95,31 @@ def test_session_causal_graph_discovery():
     out = session.get_causal_graph(discovery="pc")
     assert "discovered_edges" in out
     assert out["method"].endswith("pc_discovery")
+
+
+def test_discovery_drops_constant_columns():
+    """Zero variance one-hot columns must be dropped or PC never terminates."""
+    rng = np.random.default_rng(5)
+    n = 300
+    a = rng.normal(size=n)
+    b = 0.8 * a + rng.normal(0, 0.4, size=n)
+    y = (0.5 * a + b + rng.normal(0, 0.4, size=n) > 0).astype(int)
+    X = np.column_stack([a, b, np.zeros(n)])  # third column constant
+    model = LogisticRegression().fit(X, y)
+    driver = detect_driver(model, ["a", "b", "dead_col"], X, name="const_col")
+
+    edges = discovery_edges(driver, method="pc")
+    assert len(edges) > 0
+    assert not any("dead_col" in (e.source, e.target) for e in edges)
+
+
+def test_discovery_all_constant_rejected():
+    rng = np.random.default_rng(5)
+    X = np.column_stack([np.zeros(100), np.ones(100)])
+    model = LogisticRegression().fit(np.column_stack([np.zeros(100), np.ones(100),
+                                                      rng.normal(size=100)]),
+                                     rng.integers(0, 2, size=100))
+    driver = detect_driver(model, ["z1", "z2", "r"], np.column_stack(
+        [np.zeros(100), np.ones(100), rng.normal(size=100)]), name="dead")
+    with pytest.raises(ValueError, match="non-constant"):
+        discovery_edges(driver, method="pc")
