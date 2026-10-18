@@ -8,6 +8,7 @@ import numpy as np
 from .base import MicDriver
 from .pipeline import PipelineDriver
 from .sklearn_generic import GenericSklearnDriver
+from .text import TextDriver
 from .tree import TreeDriver
 
 
@@ -65,4 +66,4 @@ def detect_driver(
     return d
 
 
-__all__ = ["MicDriver", "TreeDriver", "GenericSklearnDriver", "detect_driver"]
+__all__ = ["MicDriver", "TreeDriver", "GenericSklearnDriver", "TextDriver", "detect_driver"]
