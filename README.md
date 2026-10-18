@@ -1,5 +1,10 @@
 # CausalLens: Make All Black-Box Models Transparent
 
+[![PyPI](https://img.shields.io/pypi/v/causallens.svg)](https://pypi.org/project/causallens/)
+[![CI](https://github.com/HanSamaht/causallens/actions/workflows/ci.yml/badge.svg)](https://github.com/HanSamaht/causallens/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-teal.svg)](https://hansamaht.github.io/causallens/)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+
 CausalLens is a framework for interrogating black-box models. It accepts any model with a `predict` function and runs intervention experiments, faithfulness verification, and (with LLM configured) Bayesian hypothesis testing.
 
 Given a model file and background data, it produces:
@@ -10,6 +15,16 @@ Given a model file and background data, it produces:
 - Faithfulness verification of its own explanations
 - Leakage detection: train/test contamination, label leakage, look-ahead bias
 - Distribution drift monitoring
+
+## Install
+
+```
+pip install causallens
+```
+
+Optional extras: `causallens[torch]`, `causallens[causal-learn]`, `causallens[all]`.
+
+Documentation: quickstart, API reference, and the technical report at https://hansamaht.github.io/causallens/
 
 ## Example: credit risk model
 

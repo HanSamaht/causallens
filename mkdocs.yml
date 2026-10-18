@@ -1,0 +1,27 @@
+site_name: CausalLens
+site_description: Make all black-box models transparent through causal interrogation
+site_url: https://hansamaht.github.io/causallens/
+repo_url: https://github.com/HanSamaht/causallens
+repo_name: HanSamaht/causallens
+theme:
+  name: material
+  palette:
+    primary: deep purple
+    accent: teal
+  features:
+    - content.code.copy
+    - navigation.sections
+    - navigation.top
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - tables
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Concepts: concepts.md
+  - API Reference: api.md
+  - Tools: tools.md
+  - Technical Report: report.md
+  - Blog: blog/index.md

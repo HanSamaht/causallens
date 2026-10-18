@@ -1,0 +1,171 @@
+# API Reference
+
+The main entry point is `MicSession`. Everything runs through it; the
+analysis modules underneath are importable for advanced use.
+
+```python
+from causallens.core import MicSession, ConceptPack
+```
+
+## MicSession
+
+```python
+MicSession(driver, pack=None)
+```
+
+- `driver`: from `detect_driver`, any model with predict
+- `pack`: optional `ConceptPack` for domain grounding
+
+### Session and model
+
+| Method | What it does |
+|---|---|
+| `describe_model()` | kind, features, semantics, capabilities |
+| `list_samples(n=5)` | preview background rows |
+| `set_target_class(i)` | for multiclass probability models |
+| `register_data(name, data)` | named dataset for tools like leak scans |
+| `list_datasets()` | what is registered |
+| `update_background(X)` | swap the reference distribution |
+
+### Level 1: attribution
+
+| Method | What it does |
+|---|---|
+| `get_attribution(i)` | SHAP attribution with concept grounding |
+| `fit_fastshap(n_samples=150, epochs=200)` | train the amortized explainer |
+| `fastshap_attribution(i)` | one-pass attribution after fitting |
+| `ts_attribution(i, granularity="auto")` | timeseries: channel, segment, full, gradient |
+| `simulate_score(i)` | simulate the model score on a sample |
+
+### Level 2: causal graph and discovery
+
+| Method | What it does |
+|---|---|
+| `get_causal_graph(i=None, discovery=None)` | intervention graph; `discovery="pc"`, `"ges"`, or `"lingam"` adds structure discovery |
+| `temporal_causal_graph(max_lag=4)` | pairwise Granger over channels with model reliance annotation |
+
+### Level 3: mediation and fairness
+
+| Method | What it does |
+|---|---|
+| `mediation_decomposition(i, ref_i, layer)` | NDE and NIE at an activation layer |
+| `counterfactual_fairness(i, feature, contrasts)` | Kusner style flip test on a protected attribute |
+| `fairness_path_decomposition(feature, lo, hi)` | direct versus mediated paths, with verdict |
+
+### Level 4: circuits and activations
+
+| Method | What it does |
+|---|---|
+| `get_activations(i)` | all hooked layer activations |
+| `patch_activation_test(i, ref_i, layer)` | single patch, recovery measured |
+| `activation_graph(i, ref_i)` | unit level intervention graph |
+| `neuron_ranking(i, layer=None)` | units by contribution |
+| `discover_circuit(tolerance=0.02)` | ACDC style greedy circuit search |
+| `circuit_with_confidence(n_bootstrap=20)` | circuit with 95 percent bootstrap intervals |
+
+### Level 5: parameters
+
+| Method | What it does |
+|---|---|
+| `param_ablation(groups, metric="pred_shift")` | reversible weight lesions |
+
+### Level 6: dictionaries
+
+| Method | What it does |
+|---|---|
+| `sae_features()` | single layer sparse dictionary, tagged and causally checked |
+| `crosscoder_features(layers=None)` | one dictionary across layers, shared versus specific |
+| `mechanism_diff(other_session, layer=None)` | Crosscoder diff of two models |
+
+### Counterfactuals
+
+| Method | What it does |
+|---|---|
+| `run_counterfactual(i)` | minimal flip search |
+| `diverse_counterfactuals(i, n_paths=3)` | DiCE style distinct flip paths |
+
+### Trust checks
+
+| Method | What it does |
+|---|---|
+| `run_faithfulness()` | comprehensiveness, sufficiency, random baseline |
+| `run_faithfulness_profile()` | the same across many samples, pass rate |
+| `check_drift(new_data)` | KS, PSI, prediction drift |
+| `check_contamination(...)` | train versus test overlap |
+| `leak_scan(y)` | single feature leakage scan |
+| `symbolic_distill()` | model to formula audit |
+
+### Repair
+
+| Method | What it does |
+|---|---|
+| `steering_repair(i, feature, layer=None)` | learn a steering direction, verify with follow-up |
+
+### Investigator loop
+
+| Method | What it does |
+|---|---|
+| `investigate(n_samples=10)` | offline investigator pass over findings |
+| `form_hypotheses(statements)` | open a tracked investigation |
+| `set_causal_prior(edges)` | record domain prior, bounded nudge |
+| `test_causal_prior()` | check each prior edge against interventions |
+| `get_hypotheses()` | snapshot with posteriors |
+| `update_hypotheses(updates)` | bounded likelihood ratio updates |
+| `conclude_investigation()` | verdict, threshold enforced |
+
+### Ledger
+
+| Method | What it does |
+|---|---|
+| `attach_ledger(ledger, model_version="v1")` | start chain hashed recording |
+| `case_briefing()` | chain integrity plus priors from history |
+
+### Reports
+
+| Method | What it does |
+|---|---|
+| `offline_report(i=0)` | deterministic full text report |
+| `audit(i=None)` | findings list with codes |
+| `visualize(i=0, output_path=...)` | Neuronpedia style HTML |
+
+### Backtest engines
+
+| Method | What it does |
+|---|---|
+| `slippage_stress()` | PF survival curve over execution costs |
+| `assumption_gap()` | ladder versus market fill inflation |
+| `live_faithfulness(backtest, live)` | did the backtest keep its promise |
+
+## Drivers
+
+```python
+from causallens.drivers import detect_driver
+```
+
+`detect_driver(model, feature_names, background, name="model")` returns
+the right driver for: sklearn estimators, tree ensembles, torch modules
+(`torch` extra), ONNX (`onnx` extra), pipelines, ensembles, time series
+(`TimeSeriesDriver`), backtest engines (`BacktestDriver`), decision
+logs, and text classifiers (`TextDriver`).
+
+## Analysis modules
+
+For advanced use the layers are importable directly:
+
+```python
+from causallens.analysis import build_causal_graph, discovery_edges, explain_sample
+from causallens.analysis.temporal_causal import granger_pairwise
+from causallens.analysis.crosscoder import train_crosscoder, crosscoder_model_diff
+```
+
+## Agents and server
+
+```python
+from causallens.agents import LLMClient
+from causallens.agents.interrogator import Interrogator
+
+interrogator = Interrogator(session, llm=LLMClient(), role="auditor")
+print(interrogator.ask("which feature dominates the decisions"))
+```
+
+MCP server: `python -m causallens serve --model model.pkl --background bg.csv`
