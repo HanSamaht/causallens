@@ -50,6 +50,8 @@ class CausalEdge:
       - "interaction": feature f -> feature g attribution interventioneffect( f set tonotpercentilevalue,
                           g attribution——thisisintervention experiment,notcorrelation)
       - "correlational": observational only,,notandcausalconclusion
+      - "discovered": structure from a causal-learn backend (pc, ges, lingam);
+                          hypothesis until it survives intervention experiments
     """
 
     source: str

@@ -25,10 +25,19 @@ def build_causal_graph(
     max_interaction_edges: int = 8,
     interaction_threshold: float | None = None,
     correlational: bool = True,
+    discovery: str | None = None,
+    discovery_alpha: float = 0.05,
 ) -> CausalGraph:
     """Build causal graph."""
     anchor = np.asarray(anchor, dtype=float).ravel()
     feats = driver.feature_names
+
+    # ---- 0) structure discovery backend (causal-learn) ----
+    discovered: list = []
+    if discovery is not None:
+        from .discovery import discovery_edges
+
+        discovered = discovery_edges(driver, method=discovery, alpha=discovery_alpha)
 
     # ---- 1) direct :backgroundsampleon |SHAP| ----
     bg = driver.background[: min(len(driver.background), 200)]
@@ -99,4 +108,8 @@ def build_causal_graph(
                     )
                 )
 
-    return CausalGraph(nodes=feats + ["prediction"], edges=edges)
+    edges.extend(discovered)
+    method = "shap_aggregation + quantile_intervention"
+    if discovery is not None:
+        method += f" + {discovery}_discovery"
+    return CausalGraph(nodes=feats + ["prediction"], edges=edges, method=method)

@@ -1,12 +1,14 @@
 from .attribution import explain_sample, shap_matrix
 from .causal_graph import build_causal_graph
 from .counterfactual import default_threshold, search_counterfactual, search_counterfactuals
+from .discovery import discovery_edges
 from .faithfulness import aggregate_faithfulness, evaluate_faithfulness, explain_simulate_score
 
 __all__ = [
     "explain_sample",
     "shap_matrix",
     "build_causal_graph",
+    "discovery_edges",
     "search_counterfactual",
     "search_counterfactuals",
     "default_threshold",

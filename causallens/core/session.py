@@ -303,16 +303,17 @@ class MicSession:
             },
         )
 
-    def get_causal_graph(self, sample_index: int | None = None) -> dict:
-        """Get causal graph."""
+    def get_causal_graph(self, sample_index: int | None = None,
+                         discovery: str | None = None) -> dict:
+        """Get causal graph, optionally with causal-learn structure discovery."""
         anchor = (
             self.driver.sample_at(sample_index)
             if sample_index is not None
             else np.median(self.driver.background, axis=0)
         )
-        g = build_causal_graph(self.driver, anchor)
+        g = build_causal_graph(self.driver, anchor, discovery=discovery)
         edges = [
-            e.to_dict() | {"concept": self.pack.concept_of(e.source) if e.kind != "correlational" else ""}
+            e.to_dict() | {"concept": self.pack.concept_of(e.source) if e.kind not in ("correlational", "discovered") else ""}
             for e in g.edges
         ]
         return self._log(
@@ -322,6 +323,7 @@ class MicSession:
                 "direct_edges": [e for e in edges if e["kind"] == "direct"],
                 "interaction_edges": [e for e in edges if e["kind"] == "interaction"],
                 "correlational_edges": [e for e in edges if e["kind"] == "correlational"],
+                "discovered_edges": [e for e in edges if e["kind"] == "discovered"],
                 "method": g.method,
             },
         )
