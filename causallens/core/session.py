@@ -536,6 +536,19 @@ class MicSession:
 
     # ================= leakageandcontamination =================
 
+    def mediation_decomposition(self, sample_index: int, reference_index: int,
+                                layer: str) -> dict:
+        """Decompose prediction change into natural direct and indirect effects.
+
+        TE = NDE + NIE + interaction (Pearl 2001).
+        NDE: effect from changing input, holding mediator at reference.
+        NIE: effect from changing mediator, holding input at reference.
+        """
+        from ..analysis.mediation import mediation_decomposition
+        assert self.has_torch_internals(), "Mediation decomposition requires torch driver"
+        result = mediation_decomposition(self.driver, sample_index, reference_index, layer)
+        return self._log("mediation_decomposition", result)
+
     def counterfactual_fairness(self, sample_index: int, protected_feature: str,
                                 contrast_values: list[float],
                                 n_samples: int = 20) -> dict:
