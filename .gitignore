@@ -13,3 +13,8 @@ dist/
 site/
 *.zip
 *.db
+examples/nfl/*.csv
+examples/nfl/*.log
+examples/nfl/enrichment/
+examples/nfl/dl_*.log
+*.kaggle-partial
