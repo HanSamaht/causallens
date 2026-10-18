@@ -228,3 +228,163 @@ def crosscoder_features(drv, layers: list[str] | None = None, n: int = 300,
             "all layers simultaneously"
         ),
     }
+
+
+def crosscoder_model_diff(drv_a, drv_b, layer: str | None = None, n: int = 200,
+                          expand: int = 4, top_k: int = 8,
+                          l1: float = 0.01, epochs: int = 300,
+                          causal_threshold: float = 0.005) -> dict:
+    """Mechanistic diff of two models through a shared dictionary.
+
+    The behavioral diff (flip rate, attribution share shifts) says that
+    the models differ. This says how they differ internally: one
+    Crosscoder trains over both models' activations on the same inputs,
+    and each feature carries a per-model decoder norm plus a per-model
+    causal effect from ablating that feature in that model alone.
+
+    A feature both decoders use is a shared concept; a feature only one
+    decoder uses is unique to that model. A shared feature whose causal
+    effect collapsed from one model to the next is a concept both models
+    represent but only one still acts on.
+    """
+    if layer is None:
+        common = [l for l in drv_a.list_layers() if l in drv_b.list_layers()]
+        parametrized = [
+            name for name, mod in drv_a.model.named_modules()
+            if name in common and any(p.numel() > 1 for p in mod.parameters(recurse=False))
+        ]
+        if not parametrized:
+            raise ValueError("no common parametrized layer between the two models")
+        layer = parametrized[0]
+    if layer not in drv_a.list_layers() or layer not in drv_b.list_layers():
+        raise ValueError(f"layer {layer!r} missing in one of the models")
+
+    n_use = min(n, len(drv_a.background), len(drv_b.background))
+    X = drv_a.background[:n_use]
+
+    def _acts(drv):
+        rows = []
+        for i in range(n_use):
+            a = drv.get_activations(drv.sample_at(i))[layer]
+            if a.ndim == 4:
+                a = a[0, 0, -1, :]
+            elif a.ndim == 3:
+                a = a[0, -1, :]
+            elif a.ndim == 2:
+                a = a[0]
+            rows.append(np.asarray(a, dtype=float).ravel())
+        return np.stack(rows)
+
+    hidden = {"model_a": _acts(drv_a), "model_b": _acts(drv_b)}
+    cc = train_crosscoder(hidden, expand=expand, l1=l1, epochs=epochs)
+    Z = cc["Z"]
+
+    base_names = getattr(drv_a, "base_feature_names", drv_a.feature_names)
+    if drv_a.kind == "timeseries":
+        input_view = X.reshape(len(X), drv_a.seq_len, drv_a.n_features_raw).mean(axis=1)
+    else:
+        input_view = X
+
+    def _causal_effect(drv, k, cc_entry):
+        """Ablate feature k in this model alone and measure the shift.
+
+        z is inferred from this model's activation alone by solving the
+        least-norm preimage under its decoder (x = z @ W), then feature
+        k is zeroed and the reconstruction is patched into the model.
+        """
+        t = drv.torch
+        top_idx = int(np.argsort(-Z[:, k])[0])
+        x = drv.sample_at(top_idx)
+        a = drv.get_activations(x)[layer]
+        if a.ndim == 4:
+            flat = a[0, 0, -1, :]
+        elif a.ndim == 3:
+            flat = a[0, -1, :]
+        else:
+            flat = a[0]
+        zn = (t.tensor(np.asarray(flat, dtype=np.float32))
+              - cc_entry["mu"].squeeze()) / cc_entry["sd"].squeeze()
+        # least-norm z with z @ dec_w = zn: solve dec_w^T z^T = zn^T
+        zt = t.relu(t.linalg.lstsq(cc_entry["dec_w"].T, zn.unsqueeze(1)).solution.squeeze(1))
+        zt[k] = 0.0
+        patched = (zt @ cc_entry["dec_w"]).numpy() * cc_entry["sd"].squeeze().numpy() \
+            + cc_entry["mu"].squeeze().numpy()
+        tensor = a.copy()
+        if a.ndim == 4:
+            tensor[0, 0, -1, :] = patched
+        elif a.ndim == 3:
+            tensor[0, -1, :] = patched
+        else:
+            tensor[0, :] = patched
+        drv._patch_plan[layer] = tensor
+        try:
+            p_abl = drv.predict_one(x)
+        finally:
+            drv._patch_plan.pop(layer, None)
+        p_base = drv.predict_one(x)
+        return abs(float(p_abl - p_base))
+
+    rows = []
+    for k in range(cc["n_features"]):
+        zk = Z[:, k]
+        if (zk > 0.01).sum() < 5:
+            continue
+        profile = _feature_source_profile(cc["dec_norms"], k)
+        effect_a = _causal_effect(drv_a, k, {"dec_w": cc["dec_ws"]["model_a"],
+                                             "mu": cc["mu"]["model_a"],
+                                             "sd": cc["sd"]["model_a"]})
+        effect_b = _causal_effect(drv_b, k, {"dec_w": cc["dec_ws"]["model_b"],
+                                             "mu": cc["mu"]["model_b"],
+                                             "sd": cc["sd"]["model_b"]})
+        cors = {}
+        if input_view.shape[1] == len(base_names) and np.std(zk) > 1e-9:
+            for j, bname in enumerate(base_names):
+                r = float(np.corrcoef(zk, input_view[:, j])[0, 1])
+                if abs(r) > 0.3:
+                    cors[bname] = round(r, 2)
+        if profile["kind"] == "shared":
+            if effect_a > causal_threshold and effect_b <= causal_threshold:
+                kind = "shared, A acts on it"
+            elif effect_b > causal_threshold and effect_a <= causal_threshold:
+                kind = "shared, B acts on it"
+            else:
+                kind = "shared"
+        else:
+            owner = profile["strongest_source"]
+            kind = f"unique to {owner.replace('model_', 'model ')}"
+        rows.append({
+            "feature": k,
+            "active_frac": round(float((zk > 0.01).mean()), 3),
+            "kind": kind,
+            "decoder_shares": profile["decoder_shares"],
+            "causal_effect_a": round(effect_a, 5),
+            "causal_effect_b": round(effect_b, 5),
+            "correlates_with": dict(sorted(cors.items(), key=lambda kv: -abs(kv[1]))[:3]),
+        })
+
+    rows.sort(key=lambda r: -max(r["causal_effect_a"], r["causal_effect_b"]))
+    n_shared = sum(1 for r in rows if r["kind"].startswith("shared"))
+    n_unique_a = sum(1 for r in rows if r["kind"] == "unique to model a")
+    n_unique_b = sum(1 for r in rows if r["kind"] == "unique to model b")
+    return {
+        "layer": layer,
+        "n_inputs": n_use,
+        "n_features": cc["n_features"],
+        "recon_mse": {k2: round(v, 4) for k2, v in cc["recon_mse"].items()},
+        "n_tagged": len(rows),
+        "n_shared": n_shared,
+        "n_unique_a": n_unique_a,
+        "n_unique_b": n_unique_b,
+        "features": rows[:top_k],
+        "verdict": (
+            f"{len(rows)} features: {n_shared} shared, {n_unique_a} unique to "
+            f"model A, {n_unique_b} unique to model B"
+        ),
+        "method": "crosscoder_model_diff",
+        "reference": "Lindsey et al. (2025) Crosscoders, model diffing section",
+        "note": (
+            "unique is defined by decoder norm share below half of the "
+            "strongest model; shared features can still differ in causal "
+            "weight, see causal_effect_a versus causal_effect_b"
+        ),
+    }

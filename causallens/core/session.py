@@ -576,6 +576,23 @@ class MicSession:
                      epochs=epochs, n=n)
         return self._log("crosscoder_features", result)
 
+    def mechanism_diff(self, other: "LensSession", layer: str | None = None,
+                       top_k: int = 8, epochs: int = 300, n: int = 200) -> dict:
+        """Mechanistic diff of two models through a shared Crosscoder.
+
+        One dictionary trains over both models' activations on the same
+        inputs. Features come back shared or unique to one model, each
+        with per-model causal effects, so the diff explains internal
+        differences rather than only flip rates.
+        """
+        from ..analysis.crosscoder import crosscoder_model_diff
+
+        assert self.has_torch_internals() and other.has_torch_internals(), \
+            "mechanism diff requires torch drivers"
+        result = crosscoder_model_diff(self.driver, other.driver, layer=layer,
+                                       top_k=top_k, epochs=epochs, n=n)
+        return self._log("mechanism_diff", result)
+
     def steering_repair(self, sample_index: int | None, feature: str, layer: str | None = None) -> dict:
         """repair: steering vector suspiciousfeature, interrogationtoolfollow-up. """
         from ..analysis.steering import steering_repair as _repair
