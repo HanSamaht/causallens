@@ -395,6 +395,19 @@ class MicSession:
         result["sample_index"] = int(sample_index)
         return self._log("ts_attribution", result)
 
+    def attribution_confidence(self, n_bootstrap: int = 50, top_k: int = 5) -> dict:
+        """Bootstrap confidence intervals and rank stability for attribution.
+
+        A point SHAP share is one draw; this resamples the background
+        and reports percentile intervals plus the fraction of
+        replicates each feature keeps its top-k rank, so weak evidence
+        is named instead of presented as a ranking.
+        """
+        from ..analysis.attribution_ci import attribution_with_ci
+
+        result = attribution_with_ci(self.driver, n_bootstrap=n_bootstrap, top_k=top_k)
+        return self._log("attribution_confidence", result)
+
     def identify_real_effect(self, treatment: str, outcome: str = "prediction",
                               edges: list[tuple[str, str]] | None = None,
                               n_samples: int = 500) -> dict:

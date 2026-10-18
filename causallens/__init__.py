@@ -10,4 +10,4 @@ inmodel( / / / ……)""interrogationframework:
 Every LLM conclusion must come from intervention experiments it calls,not.
 """
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
