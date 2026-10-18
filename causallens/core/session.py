@@ -542,6 +542,21 @@ class MicSession:
         result = _sf(self.driver, top_k=top_k, expand=expand, epochs=epochs)
         return self._log("sae_features", result)
 
+    def crosscoder_features(self, layers: list[str] | None = None, top_k: int = 8,
+                            expand: int = 4, epochs: int = 300, n: int = 300) -> dict:
+        """Crosscoder: one dictionary across layers, shared vs layer specific.
+
+        Unlike the single-layer SAE, the Crosscoder says whether a
+        concept is carried across layers or born in one of them, and
+        its causal test ablates the feature in all layers at once.
+        """
+        from ..analysis.crosscoder import crosscoder_features as _cc
+
+        assert self.has_torch_internals(), "Crosscoder requires torch driver"
+        result = _cc(self.driver, layers=layers, top_k=top_k, expand=expand,
+                     epochs=epochs, n=n)
+        return self._log("crosscoder_features", result)
+
     def steering_repair(self, sample_index: int | None, feature: str, layer: str | None = None) -> dict:
         """repair: steering vector suspiciousfeature, interrogationtoolfollow-up. """
         from ..analysis.steering import steering_repair as _repair
