@@ -87,8 +87,13 @@ def sae_features(drv, layer: str | None = None, n: int = 300, expand: int = 4,
                 cors[bname] = round(r, 2)
         if not cors:
             continue
+        top_idx = np.argsort(-zk)[:5]
         rows.append({"feature": k, "active_frac": round(float((zk > 0.01).mean()), 3),
-                     "correlates_with": dict(sorted(cors.items(), key=lambda kv: -abs(kv[1]))[:3])})
+                     "correlates_with": dict(sorted(cors.items(), key=lambda kv: -abs(kv[1]))[:3]),
+                     "activation_examples": [
+                         {"sample_index": int(i), "activation": round(float(zk[i]), 4)}
+                         for i in top_idx if zk[i] > 0
+                     ]})
 
     # ---- causal:feature -> model -> prediction ----
     verified = []

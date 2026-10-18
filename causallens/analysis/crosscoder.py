@@ -17,6 +17,16 @@ from __future__ import annotations
 import numpy as np
 
 
+def activation_examples(Z: np.ndarray, k: int, n: int = 5) -> list[dict]:
+    """Top activating samples for dictionary feature k, panel data."""
+    col = Z[:, k]
+    idx = np.argsort(-col)[:n]
+    return [
+        {"sample_index": int(i), "activation": round(float(col[i]), 4)}
+        for i in idx if col[i] > 0
+    ]
+
+
 def flat_last_activation(a) -> np.ndarray:
     """Flatten one activation tensor to its unit vector.
 
@@ -171,6 +181,7 @@ def crosscoder_features(drv, layers: list[str] | None = None, n: int = 300,
             "active_frac": round(float((zk > 0.01).mean()), 3),
             **profile,
             "correlates_with": dict(sorted(cors.items(), key=lambda kv: -abs(kv[1]))[:3]),
+            "activation_examples": activation_examples(Z, k),
         })
 
     # causal verification: ablate the feature across every layer at once

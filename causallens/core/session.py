@@ -395,6 +395,20 @@ class MicSession:
         result["sample_index"] = int(sample_index)
         return self._log("ts_attribution", result)
 
+    def transcoder_features(self, block: tuple[str, str] | None = None,
+                             top_k: int = 8, epochs: int = 300, n: int = 200) -> dict:
+        """Dictionary over one MLP block, input side to output side.
+
+        A transcoder feature is a virtual neuron: an input pattern to
+        output pattern rule the block implements. Each feature carries
+        causal effects and activation examples for panel rendering.
+        """
+        from ..analysis.transcoder import transcoder_features as _tc
+
+        assert self.has_torch_internals(), "transcoder requires torch driver"
+        result = _tc(self.driver, block=block, top_k=top_k, epochs=epochs, n=n)
+        return self._log("transcoder_features", result)
+
     def attribution_confidence(self, n_bootstrap: int = 50, top_k: int = 5) -> dict:
         """Bootstrap confidence intervals and rank stability for attribution.
 
