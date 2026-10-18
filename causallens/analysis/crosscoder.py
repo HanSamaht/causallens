@@ -27,12 +27,35 @@ def activation_examples(Z: np.ndarray, k: int, n: int = 5) -> list[dict]:
     ]
 
 
-def flat_last_activation(a) -> np.ndarray:
+def layer_semantics(drv, layer: str) -> str:
+    """Unit semantics of a layer: rnn, conv, or dense.
+
+    RNN outputs (1, T, H) carry units on the last axis at the last
+    step. Conv1d maps (1, C, L) carry units on channels, pooled over
+    length. Everything else, including transformer token-wise layers,
+    carries units on the last axis, pooled over tokens.
+    """
+    try:
+        import torch
+
+        mod = drv.model.get_submodule(layer)
+        if isinstance(mod, torch.nn.RNNBase):
+            return "rnn"
+        if isinstance(mod, (torch.nn.Conv1d, torch.nn.Conv2d, torch.nn.Conv3d)):
+            return "conv"
+        return "dense"
+    except Exception:
+        return "dense"
+
+
+def flat_last_activation(a, semantics: str | None = None) -> np.ndarray:
     """Flatten one activation tensor to its unit vector.
 
-    RNN outputs (1, T, H) take the last step. Convolution maps
-    (1, C, H, W) are average pooled over space so units stay channels.
-    Anything else is flattened as is.
+    Semantics: rnn takes the last step of (1, T, H). conv pools (1, C,
+    L) over length and (1, C, H, W) over space, units stay channels.
+    dense pools token-wise maps (1, T, H) over tokens, units are the
+    last axis. Without an explicit semantics the 3D shape heuristic
+    picks rnn when the time axis is shorter, conv otherwise.
     """
     a = np.asarray(a, dtype=float)
     if a.ndim == 4:
@@ -40,7 +63,12 @@ def flat_last_activation(a) -> np.ndarray:
             return a[0, 0, -1, :]
         return a[0].mean(axis=(1, 2))
     if a.ndim == 3:
-        return a[0, -1, :]
+        sem = semantics or ("rnn" if a.shape[1] < a.shape[2] else "conv")
+        if sem == "rnn":
+            return a[0, -1, :]
+        if sem == "conv":
+            return a[0].mean(axis=1)
+        return a[0].mean(axis=0)  # dense: pool tokens, keep hidden units
     if a.ndim == 2:
         return a[0]
     return a.ravel()
@@ -52,7 +80,8 @@ def collect_multilayer_hidden(drv, layers: list[str], n: int = 300) -> dict[str,
     for i in range(min(n, len(drv.background))):
         acts = drv.get_activations(drv.sample_at(i))
         for layer in layers:
-            out.setdefault(layer, []).append(flat_last_activation(acts[layer]))
+            out.setdefault(layer, []).append(
+                flat_last_activation(acts[layer], semantics=layer_semantics(drv, layer)))
     return {layer: np.stack(rows) for layer, rows in out.items()}
 
 
@@ -193,7 +222,7 @@ def crosscoder_features(drv, layers: list[str] | None = None, n: int = 300,
         acts = drv.get_activations(x)
         z_parts = []
         for layer in layers:
-            flat = flat_last_activation(acts[layer])
+            flat = flat_last_activation(acts[layer], semantics=layer_semantics(drv, layer))
             z_parts.append((t.tensor(flat.astype(np.float32))
                             - cc["mu"][layer].squeeze()) / cc["sd"][layer].squeeze())
         zt = t.relu(t.cat(z_parts) @ cc["enc_w"])
@@ -281,10 +310,13 @@ def crosscoder_model_diff(drv_a, drv_b, layer: str | None = None, n: int = 200,
     n_use = min(n, len(drv_a.background), len(drv_b.background))
     X = drv_a.background[:n_use]
 
+    layer_sem = layer_semantics(drv_a, layer)
+
     def _acts(drv):
         rows = []
         for i in range(n_use):
-            rows.append(flat_last_activation(drv.get_activations(drv.sample_at(i))[layer]))
+            rows.append(flat_last_activation(drv.get_activations(drv.sample_at(i))[layer],
+                                            semantics=layer_sem))
         return np.stack(rows)
 
     hidden = {"model_a": _acts(drv_a), "model_b": _acts(drv_b)}

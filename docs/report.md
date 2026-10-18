@@ -1,6 +1,6 @@
 # CausalLens Technical Report
 
-Version 0.2.1, October 2026
+Version 0.9.0, October 2026
 
 ## Abstract
 
@@ -59,7 +59,49 @@ and a summary second.
 7. Mechanistic model diff: two models through one Crosscoder with
    per-model causal effects
 
-## 4. Case study: the age attribution that failed its intervention
+## 4. The research gap batch in 0.3.0 to 0.8.0
+
+Six gaps from the first report, closed and tested on real artifacts:
+
+1. Identifiability: identify_real_effect runs DoWhy backdoor and
+   front-door criteria over the framework graph. Reciprocal
+   interaction pairs collapse to correlational edges, correlation
+   becomes a latent common cause, and a latent U on both treatment
+   and outcome is refused rather than estimated naively, stricter
+   than the DoWhy default.
+2. Conditional temporal discovery: PCMCI from Tigramite conditions
+   each link test on the system's full past, behind
+   temporal_causal_graph(method="pcmci").
+3. Attribution intervals: attribution_confidence bootstraps the
+   background and reports 95 percent percentile intervals plus top-k
+   rank stability; weak evidence is named.
+4. The transcoder: a dictionary over an MLP block, encoder on the
+   input side, decoder on the output side, every feature a virtual
+   neuron. All three dictionaries now ship activation example panels.
+5. Active experiment design: plan_next_intervention ranks candidate
+   interventions by expected information gain over the standing
+   hypotheses, a simulated lookahead disclosed as such, exposed to
+   the LLM investigator as a tool.
+6. Phrase counterfactuals: typed edits, negation, intensity,
+   antonym, deletion, contrastive clauses, under a budget, every
+   flip verified.
+
+On the real artifacts: the credit Random Forest identifies the
+loan-to-income effect through a three variable backdoor set while age
+estimates land near zero; the LGBM twin gets age identified only
+through a loan intent and grade adjustment set; PCMCI on the gesture
+GRU confirms the single lagged edge at corrected p below 0.05 with
+model reliance still 0.1 percent; the protein CNN transcoder produces
+512 virtual neurons with 5 causally verified features.
+
+A real bug surfaced during artifact testing and is worth recording: 1D
+convolution outputs (1, C, L) were misread as RNN (1, T, H) maps, the
+last step rule silently took the last channel, and the transcoder
+trained on garbage columns with perfect reconstruction and zero causal
+effects. Layer semantics are now explicit per module type: rnn, conv,
+dense.
+
+## 5. Case study: the age attribution that failed its intervention
 
 A Kaggle lending dataset, 22 one-hot features, three models trained on
 identical data.
@@ -83,7 +125,7 @@ cause of its output.
 A conventional SHAP report would have delivered "age 40.8 percent" as
 the finding. The interrogation delivers the finding plus its refutation.
 
-## 5. Case study: the gesture model that ignores its best signal
+## 6. Case study: the gesture model that ignores its best signal
 
 A 3-layer bidirectional GRU over 17 IMU channels, 18 gesture classes.
 The temporal discovery tool found exactly one significant lagged edge
@@ -95,7 +137,7 @@ The data carries a structure the model does not use. The annotation
 layer separated data-side causality from model-side reliance, which is
 the question a practitioner actually asks.
 
-## 6. Case study: the honest null
+## 7. Case study: the honest null
 
 Two LSTM versions of an Android traffic classifier, rebuilt from state
 dicts. The Crosscoder diff: 512 features, all shared, zero unique, 100
@@ -104,7 +146,7 @@ percent behavioral agreement on identical inputs. The tool reported
 can say "nothing changed" is worth more than one that always finds
 something.
 
-## 7. Benchmarks
+## 8. Benchmarks
 
 - 125 tests, fast suite 95 in 69 seconds, slow suite 30 in 167 seconds
 - 24 real models across 15 domains interrogated during development,
@@ -116,17 +158,17 @@ something.
 - Granger validated on synthetic VAR data: true link found at p below
   1e-6 with correct lag, reverse direction null, noise channel silent
 
-## 8. Known limits
+## 9. Known limits
 
-- Pairwise Granger, not conditional (PCMCI is future work)
-- No identifiability calculus: backdoor or front-door adjustment is not
-  implemented; all interventions are model-input level
-- Attribution point estimates lack confidence intervals, except
-  circuits which have bootstrap intervals
-- The Crosscoder has no transcoder variant or activation visualizer
+- Pairwise Granger remains the default; PCMCI needs the tigramite
+  extra and conditions on the observed past only
+- Identification trusts the framework graph or user edges; graph
+  mis-specification is not detectable from data alone
 - Mediator mechanisms in fairness path decomposition are linear
+- Phrase counterfactual lexicons are English only and small
+- EIG planning relies on literal hypothesis to feature name matching
 
-## 9. Availability
+## 10. Availability
 
 AGPL-3.0, source at github.com/HanSamaht/causallens, package on PyPI as
 causallens, documentation hosted on GitHub Pages. Python 3.10 to 3.12,

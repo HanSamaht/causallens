@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .crosscoder import activation_examples, flat_last_activation
+from .crosscoder import activation_examples, flat_last_activation, layer_semantics
 
 
 def _parametrized_modules(drv):
@@ -61,7 +61,7 @@ def train_transcoder(hidden_in: np.ndarray, hidden_out: np.ndarray, expand: int 
             "mean_active_frac": float((Z > 0.01).mean())}
 
 
-def _patch_flat(tensor: np.ndarray, patched: np.ndarray) -> np.ndarray:
+def _patch_flat(tensor: np.ndarray, patched: np.ndarray, semantics: str | None = None) -> np.ndarray:
     """Write a flat per-unit vector back into an activation tensor."""
     out = tensor.copy()
     if out.ndim == 4 and not (out.shape[0] == 1 and out.shape[1] == 1):
@@ -69,7 +69,13 @@ def _patch_flat(tensor: np.ndarray, patched: np.ndarray) -> np.ndarray:
     elif out.ndim == 4:
         out[0, 0, -1, :] = patched
     elif out.ndim == 3:
-        out[0, -1, :] = patched
+        sem = semantics or ("rnn" if out.shape[1] < out.shape[2] else "conv")
+        if sem == "rnn":
+            out[0, -1, :] = patched
+        elif sem == "conv":  # conv1d: shift each channel over length
+            out[0] = out[0] + (patched - out[0].mean(axis=1))[:, None]
+        else:  # dense token-wise: shift each hidden unit over tokens
+            out[0] = out[0] + (patched - out[0].mean(axis=0))[None, :]
     else:
         out[0, :] = patched
     return out
@@ -100,10 +106,12 @@ def transcoder_features(drv, block: tuple[str, str] | None = None, n: int = 200,
 
     n_use = min(n, len(drv.background))
     rows_in, rows_out = [], []
+    sem_in = layer_semantics(drv, in_layer)
+    sem_out = layer_semantics(drv, out_layer)
     for i in range(n_use):
         acts = drv.get_activations(drv.sample_at(i))
-        rows_in.append(flat_last_activation(acts[in_layer]))
-        rows_out.append(flat_last_activation(acts[out_layer]))
+        rows_in.append(flat_last_activation(acts[in_layer], semantics=sem_in))
+        rows_out.append(flat_last_activation(acts[out_layer], semantics=sem_out))
     hidden_in, hidden_out = np.stack(rows_in), np.stack(rows_out)
 
     tc = train_transcoder(hidden_in, hidden_out, expand=expand, l1=l1, epochs=epochs)
@@ -141,13 +149,13 @@ def transcoder_features(drv, block: tuple[str, str] | None = None, n: int = 200,
         top_idx = int(np.argsort(-Z[:, k])[0])
         x = drv.sample_at(top_idx)
         acts = drv.get_activations(x)
-        a_in = flat_last_activation(acts[in_layer])
+        a_in = flat_last_activation(acts[in_layer], semantics=sem_in)
         zn = (t.tensor(a_in.astype(np.float32)) - tc["mu_i"].squeeze()) / tc["sd_i"].squeeze()
         zt = t.relu(zn @ tc["enc_w"])
         zt[k] = 0.0
         patched = (zt @ tc["dec_w"]).numpy() * tc["sd_o"].squeeze().numpy() \
             + tc["mu_o"].squeeze().numpy()
-        drv._patch_plan[out_layer] = _patch_flat(acts[out_layer], patched)
+        drv._patch_plan[out_layer] = _patch_flat(acts[out_layer], patched, semantics=sem_out)
         try:
             p_abl = drv.predict_one(x)
         finally:

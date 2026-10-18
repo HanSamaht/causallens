@@ -14,3 +14,11 @@ lending model whose headline number collapsed under do(age := 60).
 Diverse counterfactuals, structure discovery, fairness paths, temporal
 causality, the Crosscoder, priors with bounds, and mechanistic diffs,
 each run against real Kaggle artifacts.
+
+## 2026-10: Six research gaps closed, one real bug found on the way
+
+[Read the post](2026-10-six-research-gaps-closed.md)
+
+Identifiability, PCMCI, attribution intervals, the transcoder, EIG
+planning, and phrase counterfactuals, each tested against real Kaggle
+artifacts, plus the (1, C, L) activation bug they surfaced.

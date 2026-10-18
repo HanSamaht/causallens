@@ -8,6 +8,7 @@ mentally to the [API reference](api.md).
 | Tool | Kind | Gives you |
 |---|---|---|
 | `get_attribution` | observational plus interventional check | SHAP shares with concept grounding |
+| `attribution_confidence` | bootstrap | 95 percent intervals per feature plus top-k rank stability |
 | `fit_fastshap` + `fastshap_attribution` | amortized | full attribution in one forward pass |
 | `intervene` | interventional | the actual do() response |
 | `ts_attribution` | timeseries | channel, segment, full window, gradient granularity |
@@ -18,7 +19,8 @@ mentally to the [API reference](api.md).
 |---|---|---|
 | `get_causal_graph` | interventional | direct, interaction, correlational edges |
 | `get_causal_graph(discovery="pc")` | structure discovery | PC, GES, or LiNGAM edges over features plus prediction |
-| `temporal_causal_graph` | interventional plus discovery | lagged channel causes with model reliance per lag |
+| `identify_real_effect` | DoWhy identification | backdoor or front-door verdict on the real world effect, latent confounding refused |
+| `temporal_causal_graph` | interventional plus discovery | Granger or PCMCI lagged channel causes with model reliance per lag |
 
 ## Is it fair
 
@@ -42,6 +44,7 @@ mentally to the [API reference](api.md).
 | Tool | Kind | Gives you |
 |---|---|---|
 | `run_counterfactual` | interventional | minimal flip path |
+| `phrase_counterfactual` | interventional | typed phrase edits on text, verified flips |
 | `diverse_counterfactuals` | interventional | several distinct flip paths |
 
 ## What happens inside
@@ -57,7 +60,8 @@ mentally to the [API reference](api.md).
 | `circuit_with_confidence` | interventional | circuit with bootstrap intervals |
 | `param_ablation` | interventional | reversible weight lesions |
 | `sae_features` | interventional check | tagged dictionary with causal verdicts |
-| `crosscoder_features` | interventional check | shared versus layer specific concepts |
+| `crosscoder_features` | interventional check | shared versus layer specific concepts, activation examples |
+| `transcoder_features` | interventional check | virtual neurons over an MLP block, input to output rules |
 | `mechanism_diff` | interventional check | two models through one dictionary |
 | `steering_repair` | interventional | verified steering direction repair |
 
@@ -73,9 +77,11 @@ mentally to the [API reference](api.md).
 ## The investigator
 
 The LLM loop: `form_hypotheses`, `set_causal_prior`, `test_causal_prior`,
-`update_hypotheses`, `conclude_investigation`. The LLM proposes, the
-tracker owns the arithmetic, the threshold enforces honesty. Fully
-available offline through `investigate()` and `offline_report()`.
+`update_hypotheses`, `conclude_investigation`, plus the active designer
+`plan_next_intervention` which ranks candidate experiments by expected
+information gain. The LLM proposes, the tracker owns the arithmetic,
+the threshold enforces honesty. Fully available offline through
+`investigate()` and `offline_report()`.
 
 ## Evidence integrity
 

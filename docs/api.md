@@ -35,6 +35,7 @@ MicSession(driver, pack=None)
 | `fit_fastshap(n_samples=150, epochs=200)` | train the amortized explainer |
 | `fastshap_attribution(i)` | one-pass attribution after fitting |
 | `ts_attribution(i, granularity="auto")` | timeseries: channel, segment, full, gradient |
+| `attribution_confidence(n_bootstrap=50)` | bootstrap percentile intervals plus top-k rank stability |
 | `simulate_score(i)` | simulate the model score on a sample |
 
 ### Level 2: causal graph and discovery
@@ -42,7 +43,8 @@ MicSession(driver, pack=None)
 | Method | What it does |
 |---|---|
 | `get_causal_graph(i=None, discovery=None)` | intervention graph; `discovery="pc"`, `"ges"`, or `"lingam"` adds structure discovery |
-| `temporal_causal_graph(max_lag=4)` | pairwise Granger over channels with model reliance annotation |
+| `temporal_causal_graph(max_lag=4, method="granger")` | Granger or PCMCI lagged channel causes with model reliance annotation |
+| `identify_real_effect(treatment, outcome="prediction")` | DoWhy backdoor and front-door identification of the real world effect, latent confounding refused |
 
 ### Level 3: mediation and fairness
 
@@ -74,7 +76,8 @@ MicSession(driver, pack=None)
 | Method | What it does |
 |---|---|
 | `sae_features()` | single layer sparse dictionary, tagged and causally checked |
-| `crosscoder_features(layers=None)` | one dictionary across layers, shared versus specific |
+| `crosscoder_features(layers=None)` | one dictionary across layers, shared versus specific, activation examples per feature |
+| `transcoder_features(block=None)` | dictionary over one MLP block, input side to output side, virtual neurons |
 | `mechanism_diff(other_session, layer=None)` | Crosscoder diff of two models |
 
 ### Counterfactuals
@@ -82,6 +85,7 @@ MicSession(driver, pack=None)
 | Method | What it does |
 |---|---|
 | `run_counterfactual(i)` | minimal flip search |
+| `phrase_counterfactual(text, max_edits=2)` | typed phrase edits for text drivers, every flip verified |
 | `diverse_counterfactuals(i, n_paths=3)` | DiCE style distinct flip paths |
 
 ### Trust checks
@@ -106,6 +110,7 @@ MicSession(driver, pack=None)
 | Method | What it does |
 |---|---|
 | `investigate(n_samples=10)` | offline investigator pass over findings |
+| `plan_next_intervention(n_candidates=16)` | rank candidate interventions by expected information gain |
 | `form_hypotheses(statements)` | open a tracked investigation |
 | `set_causal_prior(edges)` | record domain prior, bounded nudge |
 | `test_causal_prior()` | check each prior edge against interventions |
