@@ -12,6 +12,15 @@ from .text import TextDriver
 from .tree import TreeDriver
 
 
+def _is_torch_module(model: Any) -> bool:
+    """True for any nn.Module, including subclasses defined in user code."""
+    try:
+        import torch
+    except ImportError:
+        return False
+    return isinstance(model, torch.nn.Module)
+
+
 def _looks_like_tree_model(model: Any) -> bool:
     """LightGBM / XGBoost / sklearn / all."""
     if hasattr(model, "booster_") and hasattr(model, "feature_importances_"):
@@ -44,9 +53,9 @@ def detect_driver(
         except ImportError as e:
             raise ImportError("loading ONNX require onnxruntime:pip install onnxruntime") from e
 
-    # torch.nn.Module
-    mod = type(model).__module__ or ""
-    if mod.startswith("torch"):
+    # torch.nn.Module, including user defined subclasses: the class
+    # module name is not always torch.*, so check the type hierarchy
+    if _is_torch_module(model):
         from .torch_model import TorchDriver
 
         return TorchDriver(model, feature_names, background, name=name)

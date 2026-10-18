@@ -17,20 +17,32 @@ from __future__ import annotations
 import numpy as np
 
 
+def flat_last_activation(a) -> np.ndarray:
+    """Flatten one activation tensor to its unit vector.
+
+    RNN outputs (1, T, H) take the last step. Convolution maps
+    (1, C, H, W) are average pooled over space so units stay channels.
+    Anything else is flattened as is.
+    """
+    a = np.asarray(a, dtype=float)
+    if a.ndim == 4:
+        if a.shape[0] == 1 and a.shape[1] == 1:
+            return a[0, 0, -1, :]
+        return a[0].mean(axis=(1, 2))
+    if a.ndim == 3:
+        return a[0, -1, :]
+    if a.ndim == 2:
+        return a[0]
+    return a.ravel()
+
+
 def collect_multilayer_hidden(drv, layers: list[str], n: int = 300) -> dict[str, np.ndarray]:
     """Per-layer activation matrices {layer: (n, H_l)} at the h_T step."""
     out: dict[str, np.ndarray] = {}
     for i in range(min(n, len(drv.background))):
         acts = drv.get_activations(drv.sample_at(i))
         for layer in layers:
-            a = acts[layer]
-            if a.ndim == 4:  # RNN: (1, 1, T, H) -> last step
-                a = a[0, -1, :]
-            elif a.ndim == 3:  # conv/linear: (1, T, H) -> last step
-                a = a[0, -1, :]
-            elif a.ndim == 2:  # linear: (1, H)
-                a = a[0]
-            out.setdefault(layer, []).append(np.asarray(a, dtype=float).ravel())
+            out.setdefault(layer, []).append(flat_last_activation(acts[layer]))
     return {layer: np.stack(rows) for layer, rows in out.items()}
 
 
@@ -170,14 +182,8 @@ def crosscoder_features(drv, layers: list[str] | None = None, n: int = 300,
         acts = drv.get_activations(x)
         z_parts = []
         for layer in layers:
-            a = acts[layer]
-            if a.ndim == 4:
-                a = a[0, -1, :]
-            elif a.ndim == 3:
-                a = a[0, -1, :]
-            elif a.ndim == 2:
-                a = a[0]
-            z_parts.append((t.tensor(np.asarray(a, dtype=np.float32).ravel())
+            flat = flat_last_activation(acts[layer])
+            z_parts.append((t.tensor(flat.astype(np.float32))
                             - cc["mu"][layer].squeeze()) / cc["sd"][layer].squeeze())
         zt = t.relu(t.cat(z_parts) @ cc["enc_w"])
         zt[k] = 0.0
@@ -187,7 +193,9 @@ def crosscoder_features(drv, layers: list[str] | None = None, n: int = 300,
                     + cc["mu"][layer].squeeze().numpy()
                 ref = acts[layer]
                 tensor = ref.copy()
-                if ref.ndim == 4:
+                if ref.ndim == 4 and not (ref.shape[0] == 1 and ref.shape[1] == 1):
+                    tensor[0] = tensor[0] + (patched - tensor[0].mean(axis=(1, 2)))[:, None, None]
+                elif ref.ndim == 4:
                     tensor[0, 0, -1, :] = patched
                 elif ref.ndim == 3:
                     tensor[0, -1, :] = patched
@@ -265,14 +273,7 @@ def crosscoder_model_diff(drv_a, drv_b, layer: str | None = None, n: int = 200,
     def _acts(drv):
         rows = []
         for i in range(n_use):
-            a = drv.get_activations(drv.sample_at(i))[layer]
-            if a.ndim == 4:
-                a = a[0, 0, -1, :]
-            elif a.ndim == 3:
-                a = a[0, -1, :]
-            elif a.ndim == 2:
-                a = a[0]
-            rows.append(np.asarray(a, dtype=float).ravel())
+            rows.append(flat_last_activation(drv.get_activations(drv.sample_at(i))[layer]))
         return np.stack(rows)
 
     hidden = {"model_a": _acts(drv_a), "model_b": _acts(drv_b)}
@@ -295,13 +296,8 @@ def crosscoder_model_diff(drv_a, drv_b, layer: str | None = None, n: int = 200,
         t = drv.torch
         top_idx = int(np.argsort(-Z[:, k])[0])
         x = drv.sample_at(top_idx)
-        a = drv.get_activations(x)[layer]
-        if a.ndim == 4:
-            flat = a[0, 0, -1, :]
-        elif a.ndim == 3:
-            flat = a[0, -1, :]
-        else:
-            flat = a[0]
+        raw = drv.get_activations(x)[layer]
+        flat = flat_last_activation(raw)
         zn = (t.tensor(np.asarray(flat, dtype=np.float32))
               - cc_entry["mu"].squeeze()) / cc_entry["sd"].squeeze()
         # least-norm z with z @ dec_w = zn: solve dec_w^T z^T = zn^T
@@ -309,10 +305,12 @@ def crosscoder_model_diff(drv_a, drv_b, layer: str | None = None, n: int = 200,
         zt[k] = 0.0
         patched = (zt @ cc_entry["dec_w"]).numpy() * cc_entry["sd"].squeeze().numpy() \
             + cc_entry["mu"].squeeze().numpy()
-        tensor = a.copy()
-        if a.ndim == 4:
+        tensor = raw.copy()
+        if raw.ndim == 4 and not (raw.shape[0] == 1 and raw.shape[1] == 1):
+            tensor[0] = tensor[0] + (patched - tensor[0].mean(axis=(1, 2)))[:, None, None]
+        elif raw.ndim == 4:
             tensor[0, 0, -1, :] = patched
-        elif a.ndim == 3:
+        elif raw.ndim == 3:
             tensor[0, -1, :] = patched
         else:
             tensor[0, :] = patched
