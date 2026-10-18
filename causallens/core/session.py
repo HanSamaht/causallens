@@ -593,6 +593,31 @@ class MicSession:
         )
         return self._log("counterfactual_fairness", result)
 
+    def fairness_path_decomposition(self, protected_feature: str,
+                                    contrast_low: float, contrast_high: float,
+                                    mediators: list[str] | None = None,
+                                    n_samples: int = 30) -> dict:
+        """Split the protected attribute effect into direct and indirect paths.
+
+        Direct discrimination means the protected attribute moves the
+        decision on its own. Indirect means the effect rides through a
+        mediator feature, which may be a legitimate decision factor that
+        deserves review rather than removal.
+        """
+        from ..analysis.fairness import fairness_path_decomposition
+
+        rng = np.random.default_rng(0)
+        indices = rng.choice(
+            len(self.driver.background),
+            size=min(n_samples, len(self.driver.background)),
+            replace=False,
+        ).tolist()
+        result = fairness_path_decomposition(
+            self.driver, indices, protected_feature,
+            contrast_low, contrast_high, mediators=mediators,
+        )
+        return self._log("fairness_path_decomposition", result)
+
     def check_contamination(self, new_data=None, data_ref: str | None = None,
                             y_bg=None, y_new=None) -> dict:
         """trainingbackground vs : + (training/testcontamination). """
