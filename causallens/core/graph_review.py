@@ -4,10 +4,11 @@
   1. export_graph:finding -> JSON()
   2. domain:confirm/,prior,
   3. apply_corrections: -> feature -> **intervention experiment**
-     (prior,——prior)-> output diff report
+     (the prior graph, corrected against evidence) produces a diff report
 
 :/confirmashighestbyrecord(its overridden evidence);
-notbydirect,mustpassed do validate——priorandits.
+Direct edits are not trusted; every change must survive a do() validation 
+before the prior graph and its corrections are accepted.
 """
 from __future__ import annotations
 
@@ -27,7 +28,7 @@ def export_graph(session, path: str, sample_index: int | None = None) -> dict:
     doc = {
         "_": (
             "interrogationcausal graph: status from auto as confirmed(confirm)or rejected();"
-            "add {source, target, status: 'added', note: ''}——"
+            "add {source, target, status: 'added', note: ''} to register an edge"
             "target as 'prediction'(feature->prediction)orfeature(featureeffect)."
             "byintervention experimentvalidate.run mic graph-apply."
         ),

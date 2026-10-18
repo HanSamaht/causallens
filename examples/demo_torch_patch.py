@@ -1,6 +1,7 @@
-"""Torch 模型机制可解释性示例：激活读取 + 激活修补（因果中介分析）。
+"""Torch mechanistic interpretability demo: activation readout plus
+activation patching, the core of causal mediation analysis.
 
-运行： python examples/demo_torch_patch.py  （需要 pip install torch）
+Run: python examples/demo_torch_patch.py (needs pip install torch)
 """
 import os
 import sys
@@ -11,28 +12,30 @@ from causallens.core import ConceptPack, MicSession
 from causallens.demos import FinanceMLP
 from causallens.drivers.torch_model import TorchDriver
 
-# 1) 训练一个小 MLP（与金融 demo 同任务）
+# 1) train a small MLP on the finance demo task
 net, feats, background, auc = FinanceMLP.train()
 print(f"MLP auc = {auc:.4f}")
 
-# 2) Torch 驱动器自带激活武器库
+# 2) the torch driver ships the activation toolkit
 drv = TorchDriver(net, feats, background, name="quant_mlp")
-mic = MicSession(drv, ConceptPack.load(os.path.join("concepts", "finance.json")))
+session = MicSession(drv, ConceptPack.load(os.path.join("concepts", "finance.json")))
 
-print("层列表:", drv.list_layers())
+print("layers:", drv.list_layers())
 
-# 3) 激活修补：样本#1 的预测是 0.99，把样本#0 的第2层激活植入后会发生什么？
+# 3) activation patching: sample 1 predicts 0.99; implant the layer 2
+#    activations of sample 0 and watch what happens
 p_clean = drv.predict_one(drv.sample_at(0))
 p_other = drv.predict_one(drv.sample_at(1))
-print(f"\n样本#0 预测={p_clean:.4f} | 样本#1 预测={p_other:.4f}")
+print(f"sample 0 prediction = {p_clean:.4f} | sample 1 prediction = {p_other:.4f}")
 
-with drv.patch_activation("2", drv.sample_at(0)):   # 植入"干净"激活
+with drv.patch_activation("2", drv.sample_at(0)):  # implant the clean activations
     p_patched = drv.predict_one(drv.sample_at(1))
-print(f"修补样本#1 的第2层激活后 → 预测={p_patched:.4f}")
-print("恢复率 =", (p_patched - p_other) / (p_clean - p_other))
-print("解读：该层几乎完全中介了这个决策——模型的关键判断发生在这里之前")
+print(f"after patching layer 2 of sample 1 -> prediction = {p_patched:.4f}")
+print("recovery =", (p_patched - p_other) / (p_clean - p_other))
+print("reading: this layer almost fully mediates the decision, the key"
+      " computation happens before it")
 
-# 4) 梯度×输入归因（TorchDriver 免 SHAP 的快速路径）
+# 4) gradient times input attribution, the SHAP-free fast path
 attr = drv.input_attribution(drv.sample_at(0))
 ranked = sorted(zip(feats, attr), key=lambda t: -abs(t[1]))[:3]
-print("\n梯度×输入 Top3:", [(f, round(v, 3)) for f, v in ranked])
+print("gradient times input top 3:", [(f, round(v, 3)) for f, v in ranked])

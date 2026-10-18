@@ -1,12 +1,15 @@
-"""evidence ledger + case archive(SQLite,).
+"""Evidence ledger and case archive (SQLite, chain hashed).
 
-:
-  1. —— everyevidence/hypothesis/,alsoin
-  2. —— evidence(every), verify
-  3. —— hypothesis valid_from/valid_to:"findingXinv3,v4"
+Design:
+  1. Tamper evidence: every record links to the previous one, so any
+     silent edit breaks the chain and verify reports where
+  2. Chain verification: recompute the chain over all records
+  3. Bitemporal hypotheses with valid_from and valid_to, so "finding X
+     held in v3 and died in v4" stays queryable
 
-:MLflow run-> schema,EU AI Act IV,W3C PROV,
-Graphiti model;"historyhypothesisasinvestigationprior"asprojecthas.
+Design references: MLflow run lineage, EU AI Act article IV logging,
+W3C PROV, the Graphiti memory model; carrying history hypotheses as
+investigation priors is a project original.
 """
 from __future__ import annotations
 
@@ -140,7 +143,7 @@ class Ledger:
         self.conn.commit()
 
     def hypothesis_priors(self, model_name: str) -> list[dict]:
-        """modelhistoryhypothesis——belowinvestigationprior."""
+        """Confirmed hypotheses from this model history, to seed the next investigation as priors."""
         rows = self.conn.execute(
             """SELECT h.*, c.model_version, c.model_name FROM hypotheses h
                JOIN cases c ON c.id = h.case_id

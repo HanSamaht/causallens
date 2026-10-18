@@ -1,7 +1,8 @@
-"""SAE-lite:domainmodel + featuretagged + causal.
+"""SAE-lite: a domain dictionary with tagged features and causal checks.
 
-:Olshausen & Field 1996 (V1) -> Anthropic Scaling Monosemanticity(2024)
--> ( H=16~256 layerdomainmodel,CPU ).
+Lineage: Olshausen and Field 1996 (V1 sparse coding) through Anthropic
+Scaling Monosemanticity (2024), sized to train on CPU for layers of
+roughly 16 to 256 units.
 
 :
   1. traininglayer h_T activation(expand H->4H,L1 )
@@ -57,8 +58,8 @@ def train_sae(hidden: np.ndarray, expand: int = 4, l1: float = 0.01, epochs: int
 def sae_features(drv, layer: str | None = None, n: int = 300, expand: int = 4,
                  top_k: int = 8, causal_threshold: float = 0.005,
                  l1: float = 0.01, epochs: int = 300) -> dict:
-    """expand: (4=default,8/16=moremorefeature——moremore,moreconcept)"""
-    """training + tagged + causal,to."""
+    """expand sets the dictionary size multiple of the layer width,
+    4 by default, 8 or 16 for finer concepts at higher cost."""
     target = layer or (drv.list_layers()[-2] if len(drv.list_layers()) >= 2 else drv.list_layers()[0])
     hidden = collect_hidden(drv, target, n)
     sae = train_sae(hidden, expand=expand, l1=l1, epochs=epochs)

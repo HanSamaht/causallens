@@ -1,16 +1,18 @@
-"""leakageandcontamination:modelhasno"lookahead",trainingandtesthasno.
+"""Leakage and contamination checks: no lookahead in the model, no test
+rows hiding in training.
 
-tool,:
-  1. duplicate_overlap training/test +
-     —— testsampleintraining = contamination
-  2. single_feature_leak_scan featureleakagescan
-     —— featurehas AUC≈model = leakage
-     :feature;leakagefeature
-  3. label_distribution_check training/testdistributiondrift
+Three tools:
+  1. duplicate_overlap between training and test sets:
+     test samples present in training means contamination
+  2. single_feature_leak_scan:
+     a single feature with AUC close to the model AUC means leakage,
+     though a strong legitimate feature can look the same, so verify
+     before deleting
+  3. label_distribution_check for training versus test drift
 
-leakage:driverbackground,
-do(feature := 1bar) effectrequire —— GAP-002,
-driver window support,background.
+Known gap, GAP-002 in the bug registry: leakage flags on a driver
+background cannot be confirmed by do(feature := one bar) effects yet;
+the window level driver support is still missing.
 """
 from __future__ import annotations
 
@@ -81,9 +83,9 @@ def single_feature_leak_scan(y, X, feature_names, model_auc: float | None = None
         "borderline": borderline,
         "model_auc_reference": model_auc,
         "verdict": (
-            f"finding {len(flagged)} leakagefeaturesolo AUC≥0.75——verifyitsis"
+            f"{len(flagged)} features with solo AUC at or above 0.75, verify each before removal"
             if flagged
-            else f"{len(borderline)} 0.65-0.75,as"
+            else f"{len(borderline)} features between 0.65 and 0.75, treat as borderline"
         ),
         "note": "solo AUC 0.6-0.7 normal;>0.75 on'notthethis'featureleakageverify",
     }

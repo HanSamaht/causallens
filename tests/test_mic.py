@@ -2,6 +2,7 @@
 
 :,attribution,causal,counterfactual,,concept pack,report,Torch activation patching.
 """
+
 from __future__ import annotations
 
 import os
@@ -21,6 +22,9 @@ from causallens.analysis import (
 from causallens.core import ConceptPack, MicSession
 from causallens.demos import FINANCE_FEATURES, make_finance_data, train_finance_demo
 from causallens.drivers import detect_driver
+
+
+pytestmark = [pytest.mark.slow]
 
 _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

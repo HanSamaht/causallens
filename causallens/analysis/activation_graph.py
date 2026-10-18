@@ -2,7 +2,7 @@
 
 "featurelayercausal graph"layer:"modellayer,unitinthis".
 
-method(allintervention experiment,notcorrelation)——causalin:
+Method, all intervention experiments, no correlation:
   clean = p(sample) sampleprediction
   corrupt = p(reference) sampleprediction
   patched = p(reference | Llayeractivation ← sampleactivation) prediction

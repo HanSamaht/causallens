@@ -1,12 +1,15 @@
-"""drift(:KS + PSI + predictiondistributiondrift).
+"""Drift checks: KS, PSI, and prediction distribution drift.
 
-distributiondrift SHAP ——"backgrounddistributionalso".
-not evidently/alibi-detect (optionalgenerate HTML report),
-KS/PSI ,andtest.
+Distribution drift also bends SHAP values, so "the background moved
+and the attributions moved with it" is a drift finding, not a model
+finding. This deliberately avoids evidently and alibi-detect (both
+want to generate HTML reports) and implements the tests directly:
 
-  - KS:sample Kolmogorov-Smirnov ,α=0.05 value 1.36*sqrt((n+m)/(nm))
-  - PSI:Population Stability Index,>0.25 significantdrift()
-  - predictiondrift:modeloutputdistributionin/on KS
+  - KS: two sample Kolmogorov-Smirnov, alpha 0.05 with the classical
+    1.36*sqrt((n+m)/(nm)) threshold
+  - PSI: Population Stability Index, above 0.25 means significant drift
+  - prediction drift: KS on the model output distribution, offline
+    background versus new data
 """
 from __future__ import annotations
 

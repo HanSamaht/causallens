@@ -1,8 +1,8 @@
 """modeldriver: Booster IC LightGBM/XGBoost .
 
 (v3d_prod:3 × 3 × 9 Booster).
-predictionand SHAP all:output = Σ wᵢ·fᵢ(x), SHAP = Σ wᵢ·SHAPᵢ(x),
-value——,.
+Prediction and SHAP stay consistent by construction:
+output = sum of w_i times f_i(x) and SHAP = sum of w_i times SHAP_i(x),
 """
 from __future__ import annotations
 
@@ -46,7 +46,8 @@ class EnsembleTreeDriver(TreeDriver):
     kind = "ensemble-tree"
 
     def __init__(self, members: list, feature_names, background, name="ensemble"):
-        """members: [(model, weight, ...), ...] or [model, ...](etc)——v3d_prod and book_models all."""
+        """members: [(model, weight, ...), ...] or a plain model list;
+        both the production v3d_prod and the book models bundles load."""
         self.members = [m if isinstance(m, (tuple, list)) else (m, 1.0) for m in members]
         w = np.array([float(m[1]) for m in self.members], dtype=float)
         self.weights = w / w.sum()

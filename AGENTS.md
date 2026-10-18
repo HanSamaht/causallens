@@ -25,6 +25,19 @@ ALL files must contain ZERO Chinese characters. This includes code, comments, do
 3. Any finding must be tagged: framework tool output / manual analysis / third-party source
 4. Never skip test regression
 
+## Version discipline
+
+1. Every pushed change bumps the version: patch for fixes and cleanup, minor for features
+2. Bump in both pyproject.toml and causallens/__init__.py `__version__`
+3. The commit message states the new version
+
+## Test layering
+
+1. End-to-end tests that train demo models carry `pytest.mark.slow`
+2. Push CI runs `-m "not slow"` (fast suite, under 2 minutes)
+3. The nightly workflow runs the full suite and the Kaggle artifact smoke
+4. A new slow test needs a fast unit companion or a justification in the commit
+
 ## Other
 
 - API keys only in .env

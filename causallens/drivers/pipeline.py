@@ -1,7 +1,8 @@
 """Pipeline driver:loading sklearn Pipeline object( + model).
 
 projectinmodelbyin Pipeline (StandardScaler + PCA + RandomForest etc),
-Pipeline onlyhas predict/predict_proba——and GenericSklearnDriver .
+A sklearn Pipeline only exposes predict and predict_proba, so it rides
+the GenericSklearnDriver path with a pipeline aware wrapper.
 problem:Pipeline no n_features_in_(thatis estimator ).
 
 :from Pipeline.steps inferinputwidth;ifno,

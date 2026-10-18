@@ -1,9 +1,10 @@
-"""versioncontrastinterrogation(model diff):modelversionbehaviordifference.
+"""Version diff interrogation: behavioral differences between model versions.
 
-mostproblem:"/retrain,modelbehaviorto?"
-  - predictionlayer:(threshold),predictiondistribution
-  - attributionlayer:attributionfeature(weight/)
-  - layer:mostsample(predictiontypical,attributioncontrast)
+The main question: "after the retrain, what did the model change its
+mind about?"
+  - prediction layer: threshold crossings and prediction distribution
+  - attribution layer: which features gained or lost share
+  - case layer: the samples that moved most, with both sides quoted
 """
 from __future__ import annotations
 
@@ -84,6 +85,6 @@ def diff_sessions(
         "verdict": (
             "behaviorstable"
             if flip_rate < 0.05 and all(abs(d["delta"]) < 0.1 for d in feature_diffs[:3])
-            else "behaviorhas—— attribution_diff and disagreement_cases"
+            else "behavior changed, see attribution_diff and disagreement_cases"
         ),
     }

@@ -1,4 +1,4 @@
-"""`mic ask` —— causal reasoningengine.
+"""`causallens ask`: causal reasoning over a what-if question.
 
     python -m mic ask --demo geo --concepts concepts/geo.json \
         "ifincreases50%,mostsample?"
@@ -76,7 +76,7 @@ class AskEngine:
         for base, a in involved.items():
             lines.append(
                 f"[Causal Role]{a['concept']}({base}) intheattribution {a['share']:.0%}"
-                + (" ⚠️suspicious feature" if a["role"] == "spurious" else "")
+                + (" [suspicious feature]" if a["role"] == "spurious" else "")
             )
         boundary = "This is in-model reasoning, not real-world prediction."
 
@@ -89,7 +89,8 @@ class AskEngine:
         return "\n".join(lines)
 
     def _filter_mentioned(self, assignments: list[dict], question: str) -> list[dict]:
-        """:LLM onlyinterventiontofeature——range."""
+        """Constraint: the LLM only proposes features and ranges, the
+        intervention engine executes them locally."""
         pack = self.session.pack
         kept = []
         for a in assignments:

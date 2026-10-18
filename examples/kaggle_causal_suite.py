@@ -26,13 +26,23 @@ from causallens.drivers import detect_driver
 from causallens.drivers.timeseries import TimeSeriesDriver
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KAG = os.path.join(HERE, "kaggle_models")
+KAG = os.environ.get("KAGGLE_MODELS_DIR", os.path.join(HERE, "kaggle_models"))
 
 
 def line(title):
     print("\n" + "=" * 72)
     print(title)
     print("=" * 72)
+
+
+def require_artifacts():
+    """Exit cleanly when the Kaggle artifacts are not on this machine."""
+    if not os.path.isdir(os.path.join(KAG, "credit_rf_dir")):
+        print(f"[kaggle-smoke] artifacts not found under {KAG}")
+        print("[kaggle-smoke] set KAGGLE_MODELS_DIR to the directory holding")
+        print("[kaggle-smoke] credit_rf_dir, credit_ensemble_dir, gesture_gru_dir,")
+        print("[kaggle-smoke] andro_lstm_dir; skipping")
+        sys.exit(0)
 
 
 # ================================================================
@@ -248,6 +258,7 @@ def section_andro():
 
 
 if __name__ == "__main__":
+    require_artifacts()
     section_credit()
     section_gesture()
     section_andro()

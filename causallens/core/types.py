@@ -1,6 +1,7 @@
 """in(Evidence IR):analysisallisevidenceobject.
 
-LLM layeronlyallowthisevidence——thisis.
+The LLM layer may only rely on this evidence model, which is what keeps
+conclusions auditable.
 """
 from __future__ import annotations
 
@@ -48,8 +49,9 @@ class CausalEdge:
     kind:
       - "direct": feature -> prediction effect( SHAP )
       - "interaction": feature f -> feature g attribution interventioneffect( f set tonotpercentilevalue,
-                          g attribution——thisisintervention experiment,notcorrelation)
-      - "correlational": observational only,,notandcausalconclusion
+                          g attribution drift, an intervention experiment,
+                          not a correlation)
+      - "correlational": observational only, never a causal conclusion
       - "discovered": structure from a causal-learn backend (pc, ges, lingam);
                           hypothesis until it survives intervention experiments
     """

@@ -1,10 +1,11 @@
 """PyTorch driver:modelinterrogation.
 
-inintervention,:
-  - activation: get_activations(x) —— everylayeroutputactivation
-  - activation patching: patch_activation() —— causalinanalysis / activation patching ,
-                layeractivationreplaceas"sample"activation,outputrecovery
-  - ×input: input_attribution() —— SHAP inputattribution
+Interventions at every level:
+  - activations: get_activations(x) captures every hooked layer
+  - activation patching: the causal inference workhorse behind
+    mediation analysis and circuit tracing, replace a layer activation
+    with the reference sample and watch the output recover
+  - input attribution: gradient times input, plus SHAP support
 """
 from __future__ import annotations
 
@@ -75,7 +76,8 @@ class TorchDriver(MicDriver):
                 """Create hook factory for layer."""
                 def hook(_m, _inp, out):
                     """Capture, cache, and optionally patch layer output."""
-                    # RNN outputas (output, hidden) ——onlyinterrogation/
+                    # RNN modules return (output, hidden); only the output
+                    # tensor is what interrogation cares about
                     is_seq = isinstance(out, (tuple, list))
                     core = out[0] if is_seq else out
                     if hasattr(core, "batch_sizes"): # PackedSequence:/
@@ -114,7 +116,7 @@ class TorchDriver(MicDriver):
     def ablate_units(self, layer_name: str, units: set[int]):
         """unit(reversible):with thelayerunitoutput.
 
-        "mode"——sample,;recovery.
+        "mode" pins the mask for a whole investigation and restores on exit.
         ACDC-lite circuitand SAE feature.
         """
         if layer_name not in dict(self.model.named_modules()):

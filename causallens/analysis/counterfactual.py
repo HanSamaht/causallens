@@ -1,11 +1,13 @@
-"""counterfactual search:topredictionmostfeature.
+"""Counterfactual search: which features flip the prediction.
 
-engine:
-  - feature(F<=15):percentilescan(, Top feature)
-  - feature(F>15) : |SHAP| search + output(DiCE
-    :,(, )ranking,feature)
+Engines:
+  - Few features (F at most 15): full percentile scan over every
+    feature, exhaustive for the top features
+  - Many features (F above 15): rank by |SHAP| then search, a DiCE
+    style budgeted search over the ranked features
 
-everyisintervention experiment——andframework"LLM only"consistent.
+Every reported path is an intervention experiment, consistent with the
+framework rule that the LLM only proposes and tools decide.
 """
 from __future__ import annotations
 

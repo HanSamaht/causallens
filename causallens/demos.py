@@ -1,9 +1,10 @@
-"""model:domain.
+"""Demo models across domains.
 
-1) finance_demo: A + GradientBoosting model.
-    'month_index'(feature,role=spurious)——auditorwhen.
-2) medicine_demo: sklearn + RandomForest diagnosismodel.
-3) torch_demo: and finance distribution MLP,activation//attribution.
+1) finance_demo: a GradientBoosting classifier with a planted
+   spurious feature month_index the auditor is expected to flag.
+2) medicine_demo: a RandomForest diagnosis classifier.
+3) torch_demo: an MLP with the finance feature set for activation
+   patching and attribution work.
 """
 from __future__ import annotations
 
@@ -21,7 +22,7 @@ FINANCE_FEATURES = [
     "reversal", #
     "size", # value
     "earnings_yield",
-    "month_index", # ⚠️ feature(demo )
+    "month_index", # planted spurious feature for the demo
 ]
 
 MEDICINE_CONCEPT_KEYS = None # fromfeature
@@ -159,7 +160,7 @@ def train_timeseries_demo(seq_len: int = 16, epochs: int = 60, seed: int = 11):
 
 GEO_FEATURES = [
     "elevation", "slope", "ndvi", "lst", "precipitation", "pop_density", "dist_river",
-    "region_id", # ⚠️ feature(demo )
+    "region_id",  # planted spurious feature for the demo
 ]
 
 
@@ -194,11 +195,12 @@ def train_geo_demo():
 # ---------------- :German Credit(feature + ) ----------------
 
 def train_credit_demo(missing_rate: float = 0.08, seed: int = 0):
-    """(1000sample×20feature,/value)——validate"".
+    """Credit demo with missing values to validate missing data handling.
 
-    not:feature(),not(30% bad),
-     MCAR (8%,invalue)——feature was_missing_*
-    modelinput,modeisbymodelinattributionin.
+    Features arrive with values missing completely at random at 8
+    percent, encoded as was_missing_* indicator columns that enter the
+    model input; the auditor should find the imputation markers in
+    attribution.
     """
     from sklearn.datasets import fetch_openml
     from sklearn.metrics import roc_auc_score
@@ -249,7 +251,7 @@ IRIS_FEATURES = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
 
 
 def train_iris_demo():
-    """(sklearn )——interrogationmost."""
+    """Iris demo: the smallest end-to-end interrogation target."""
     from sklearn.datasets import load_iris
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.metrics import accuracy_score
@@ -266,15 +268,16 @@ def train_iris_demo():
 
 AGENT_LOG_FEATURES = [
     "credit_score", "debt_ratio", "income_k", "loan_amount_k",
-    "employment_years", "region_code", # ⚠️
+    "employment_years", "region_code",  # region_code is a planted bias column
 ]
 
 
 def make_agent_logs(n: int = 4000, seed: int = 5):
-    """no predict ""behaviorlog.
+    """Decision log demo: behavior records without a predict function.
 
-    (its):/,in
-    region_code ∈ {3, 7} 1.2 reject——.
+    The generating rule discriminates: applicants from region_code 3
+    or 7 are rejected at 1.2 times the base rate, and the log analysis
+    is expected to surface it.
     """
     rng = np.random.default_rng(seed)
     X = np.column_stack(

@@ -1,11 +1,13 @@
-"""Steering vector repair:diagnosis -> treatment -> follow-up.
+"""Steering vector repair: diagnose, treat, follow up.
 
-(RepE / activation steering,Zou et al. 2023):
-  from"suspiciousfeaturevalue vs value"activationindirection,
-  inthelayeron/(notweight),modelsuspiciousfeature.
+In the RepE and activation steering line (Zou et al. 2023): from paired
+samples, high versus low value on a suspicious feature, learn the
+activation direction of that feature, then add or subtract it at the
+layer (weights untouched) and watch the model behavior on that feature.
 
-MIC in——follow-up:interrogationtool(attribution,,predictiondrift)
-repair,notreportas"recommendretrain".
+The framework contribution is the follow-up loop: interrogation tools
+(attribution, interventions, prediction drift) verify the repair
+instead of writing "recommend retraining" and stopping.
 """
 from __future__ import annotations
 

@@ -1,14 +1,15 @@
-"""Investigator :auditorfrom" audit then"upgradeas
-"generatehypothesis -> -> update -> significantwinnerbelowconclusion".
+"""Investigator: upgrades the auditor from report-once to a full loop of
+generate hypotheses, update on evidence, and conclude only past a
+significance threshold.
 
-( LLM-as-an-Investigator + ):
+Design, in the spirit of LLM-as-an-Investigator:
 
-1. hypothesis(HypothesisTracker in session on)——LLM nothistory,
-   everyupdate evidence_log,audit.
-2. update(LR ∈ [0.2, 5]):LLM only(support//in),
-   in,evidence.
-3. evidencethreshold:posterior > ODDS_THRESHOLD allowconclusion;
-   evidencenotsignificant -> mustreport inconclusive(not).
+1. Hypotheses live in the HypothesisTracker, not in LLM context, so
+   every update lands in the evidence log where it can be audited.
+2. Updates are likelihood-ratio bounded: the LLM only proposes
+   direction and narrative, the tracker owns the arithmetic.
+3. Conclusions require posterior odds above ODDS_THRESHOLD,
+   otherwise the verdict is honestly inconclusive.
 """
 from __future__ import annotations
 
@@ -166,6 +167,8 @@ class HypothesisTracker:
             "leader_statement": leader.statement,
             "leader_posterior": round(p1, 4),
             "odds_vs_runner_up": round(odds, 2) if odds != float("inf") else None,
-            "note": f"insufficient evidence to distinguish hypotheses( {odds:.1f} < {ODDS_THRESHOLD})——reportnot,ordecreasesconclusion",
+            "note": (f"insufficient evidence to distinguish hypotheses, odds {odds:.1f} "
+                     f"below {ODDS_THRESHOLD}; report as inconclusive, gather more evidence, "
+                     "or weaken the conclusions"),
             "budget_exhausted": self.n_updates >= MAX_EVIDENCE_UPDATES,
         }

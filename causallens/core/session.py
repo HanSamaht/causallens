@@ -1,9 +1,8 @@
-"""MicSession: interrogation API.
+"""MicSession: the interrogation API surface.
 
-CLI(`mic report / audit / chat`), LLM (tool), MCP Server( LLM )
-method——"model"from, evidenceconsistent.
-
- LLM also: offline_report / audit outputChinesereport.
+Consumed by the CLI (report, audit, chat), the LLM tools, and the MCP
+server. Methods never trust the model at face value; every claim is
+backed by evidence recorded in the log.
 """
 from __future__ import annotations
 
@@ -106,15 +105,16 @@ class MicSession:
         return self._log("conclude_investigation", v)
 
     def investigate(self, n_samples: int = 10) -> dict:
-        """investigator( LLM): fromfindinghypothesis, .
+        """Investigator loop: turn findings into hypotheses.
 
-        upgrade: notis"audit "——everyfindingbecomeshypothesis,
-        evidenceupdate, insufficientreport inconclusive.
+        This is not a passive audit: every finding becomes a hypothesis,
+        evidence updates posteriors, and insufficient evidence is
+        reported as inconclusive rather than decided.
         """
         audit = self.audit(None)
         codes = {f["code"]: f for f in audit["findings"]}
 
-        # priorininvestigation(conclusion——historyinvestigation, )
+        # carry priors from earlier investigations of the same model
         case_priors = None
         if self.ledger is not None:
             try:
@@ -411,7 +411,7 @@ class MicSession:
         return self._log("temporal_causal_graph", result)
 
     def fit_fastshap(self, n_samples: int = 150, epochs: int = 200) -> dict:
-        """training FastSHAP —— full attributionfrom. """
+        """Train FastSHAP: amortized full attribution in one forward pass."""
         from ..analysis.fastshap import AmortizedExplainer
         from ..analysis.attribution import shap_matrix
 
@@ -460,7 +460,8 @@ class MicSession:
     # ================= tool: drift / backgroundupdate =================
 
     def register_data(self, name: str, data) -> dict:
-        """(background/). not——LLM . """
+        """Register a named dataset (background or reference) so the LLM
+        can pass references by name instead of inline blobs."""
         import numpy as np
 
         self.datasets[name] = np.asarray(data, dtype=float)
@@ -519,7 +520,7 @@ class MicSession:
         return self._log("activation_graph", result)
 
     def neuron_ranking(self, sample_index: int, layer: str | None = None, top_k: int = 10) -> dict:
-        """ranking(Captum optional, fallback)——unitinthis. """
+        """Rank units by contribution, Captum when available, gradient fallback."""
         from ..analysis.neuron_rank import neuron_ranking as _rank
 
         result = _rank(self.driver, sample_index, layer=layer, top_k=top_k)
@@ -723,14 +724,14 @@ class MicSession:
         return self._log("slippage_stress", _stress(self.driver))
 
     def assumption_gap(self) -> dict:
-        """: ladder price accounting vs market fill——backtesthypothesis. """
+        """Backtest assumption gap: ladder price accounting versus market fill."""
         assert self.has_backtest_internals(), "hypothesisrequire BacktestDriver"
         from ..backtest.stress import assumption_gap as _gap
 
         return self._log("assumption_gap", _gap(self.driver))
 
     def live_faithfulness(self, backtest: dict, live: dict) -> dict:
-        """backtest vs ——evaluate(). """
+        """Compare backtest promises against live results to score fidelity."""
         from ..backtest.stress import live_faithfulness as _lf
 
         return self._log("live_faithfulness", _lf(backtest, live))
@@ -801,7 +802,7 @@ class MicSession:
         lines.append("")
         lines.append("── attribution( |SHAP| descending, top 8)──")
         for a in attr["attributions"][:8]:
-            flag = " ⚠️suspiciousfeature" if a["role"] == "spurious" else ""
+            flag = " [suspicious]" if a["role"] == "spurious" else ""
             lines.append(
                 f" {a['concept']:<12} value={a['value']:+.2f} contribution={a['shap']:+.3f} ( {a['share']:.0%}){flag}"
             )
@@ -937,8 +938,8 @@ class MicSession:
                     "severity": "warning",
                     "code": "faithfulness_profile",
                     "message": (
-                        f"cross-sample faithfulness pass rate only {prof['pass_rate']:.0%}(threshold 80%)——"
-                        f"themodelattribution explanations lack overall credibility; use with caution"
+                        f"cross-sample faithfulness pass rate only {prof['pass_rate']:.0%} versus the 80% threshold; "
+                        f"the attribution explanations lack overall credibility, use with caution"
                     ),
                 }
             )

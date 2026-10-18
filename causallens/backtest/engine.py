@@ -1,13 +1,15 @@
-"""backtestengine(most): + fill semantics.
+"""Backtest engine replay with explicit fill semantics.
 
-——,,onlyhypothesis:
-  fill_market = 0(/):hypothesis(backtest)
-  fill_market = 1(/):,when K
+The engine itself is the model under interrogation, and fill semantics
+is its main hypothesis:
+  fill_market = 0, ladder accounting: the backtest assumption
+  fill_market = 1, market fill: orders fill at market when price gaps
+  across the trigger
 
-(bias):
-  - []bars valuecompute,,updatevalue
-  - bar andand()
-  - in entry_every bar ;and,directionnot
+Known biases this engine exposes:
+  - unrealized position value is computed per closed bar only
+  - intrabar sequence of high and low is unknowable from OHLC
+  - entry_every bars ignores signal strength and direction persistence
 """
 from __future__ import annotations
 
@@ -89,10 +91,10 @@ def run_backtest(ohlc: np.ndarray, params: BTParams) -> dict:
 
 
 def make_synthetic_4h(n_bars: int = 6000, seed: int = 7) -> np.ndarray:
-    """ 4H OHLC: + bar().
+    """Synthetic 4H OHLC bars with planted intrabar gaps.
 
-    :andvalue;——
-    hypothesisthis"value-",.
+    The point is the gap between ladder and market accounting: the fill
+    semantics hypothesis lives exactly in that value difference.
     """
     rng = np.random.default_rng(seed)
     # AR(1) :correlation;

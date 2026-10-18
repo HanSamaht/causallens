@@ -1,6 +1,7 @@
 """ sklearn driver: predict / predict_proba model(SVM,KNN,MLP……).
 
-model——attribution/Kernel ,intervention.
+Any sklearn style predict or predict_proba model; attribution falls back
+to Kernel SHAP, interventions work through the generic path.
 """
 from __future__ import annotations
 

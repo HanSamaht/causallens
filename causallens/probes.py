@@ -1,15 +1,16 @@
-"""(Synthetic Probes):MIC ground-truth test.
+"""Synthetic probes: ground-truth self-validation of the framework.
 
-modelno,****model——if MIC
-attribution/counterfactual/inonall,thatisframework bug,notmodelproblem.
-( MAIA synthetic vision neurons .)
+The probe models are built with the answer printed on the box. If the
+framework gets attribution, counterfactuals, or interventions wrong
+here, the bug is in the framework, not the model. This follows the
+synthetic vision neuron idea from MAIA.
 
-:
-  1. linear : logit -> attributionand || consistent
-  2. leak :leakagefeature(role=spurious)-> auditormustto
-  3. interact : y=x1·x2 -> causal graphevidence
+Probes:
+  1. linear probe: a known logit, attribution must match the coefficients
+  2. leak probe: a planted leakage feature, the auditor must flag it
+  3. interaction probe: y = x1 times x2, the causal graph must find it
 
-:python -m mic probe
+Run: python -m causallens probe
 """
 from __future__ import annotations
 

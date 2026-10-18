@@ -1,61 +1,67 @@
-"""`python -m mic hero` —— 30 :hypothesisbacktest 8 .
+"""`python -m causallens hero`: a self-contained end-to-end demo.
 
-:,GPU,API Key,,
-outputhascausalaudit(, GIF).
+Runs a backtest engine interrogation in one pass: baseline replay, a
+fill semantics intervention, a slippage stress test, and a
+counterfactual repair path. Works offline on CPU with no API key. Every
+printed line carries a causal verdict rather than a plain number.
 """
 from __future__ import annotations
 
-import json
-
 
 def run_hero() -> None:
-    """Run hero."""
+    """Run the hero demo."""
     from causallens.backtest import make_synthetic_4h
-    mic_line = "=" * 64
-    print(mic_line)
-    print(" MIC causal reasoningengine · 30 :interrogationbacktestengine")
-    print(" :Correlation tells you what happens together; causality tells you what happens when you intervene")
-    print(mic_line)
-
     from causallens.core import ConceptPack, MicSession
     from causallens.drivers.backtest import BacktestDriver
+
+    line = "=" * 64
+    print(line)
+    print(" CausalLens causal reasoning engine, backtest engine interrogation")
+    print(" Correlation tells you what happens together;")
+    print(" causality tells you what happens when you intervene")
+    print(line)
 
     drv = BacktestDriver(make_synthetic_4h(8000, seed=7), name="bt_engine")
     session = MicSession(drv, ConceptPack.load("concepts/backtest.json"))
 
-    print("\n[1] :thisbacktest PF≈5, 56% —— is\n")
+    print("\n[1] Baseline: this backtest reports PF around 5 with a 56% win rate. Is it real?\n")
     ladder = drv.run(fill_market=0.0)
-    print(f" backtestreport: {ladder['win_rate']:.0%} | PF {ladder['pf']:.2f} | {ladder['avg_pnl_pct']:+.2%}")
+    print(f" backtest report: win rate {ladder['win_rate']:.0%} | PF {ladder['pf']:.2f} "
+          f"| avg pnl {ladder['avg_pnl_pct']:+.2%}")
 
-    print("\n[2] interrogation:'fill semantics'thishypothesis(do(:=))\n")
-    r = session.intervene(2, {"fill_market": 0.0}) # sample2=
+    print("\n[2] Intervention: test the fill semantics hypothesis, do(fill_market := 1.0)\n")
+    session.intervene(2, {"fill_market": 0.0})  # pin sample 2 as the anchor
     market = drv.run(fill_market=1.0)
-    print(f" interventionresult: {market['win_rate']:.0%} | PF {market['pf']:.2f} | {market['avg_pnl_pct']:+.2%}")
+    print(f" intervention result: win rate {market['win_rate']:.0%} | PF {market['pf']:.2f} "
+          f"| avg pnl {market['avg_pnl_pct']:+.2%}")
     ratio = ladder["pf"] / max(market["pf"], 1e-3)
-    print(f"\n ⚡ -> PF {ratio:.1f} ")
-    print(f" ⚡ :(depth {market['avg_gap_through']:.1%}),")
-    print(f" backtesthypothesis")
+    print(f"\n profit factor inflated {ratio:.1f} times by the fill assumption")
+    print(f" mechanism: stop orders fill through gaps with depth "
+          f"{market['avg_gap_through']:.1%} of the time")
+    print(" the backtest hypothesis does not survive the intervention")
 
-    print("\n[3] test:edge \n")
+    print("\n[3] Stress test: how far does the edge survive slippage?\n")
     s = session.slippage_stress()
     for c in s["curve"][:4]:
-        bar = "█" * int(c["pf"] * 10)
+        bar = "#" * int(c["pf"] * 10)
         print(f" {c['slippage_bps']:>4.0f} bps: PF={c['pf']:.2f} {bar}")
-    print(f"\n ⚠ {s['verdict']}")
+    print(f"\n verdict: {s['verdict']}")
 
-    print("\n[4] counterfactual:most?\n")
+    print("\n[4] Counterfactual: what changes would repair this backtest?\n")
     cf = session.run_counterfactual(2)
     for i, p in enumerate(cf["paths"][:2], 1):
-        changes = ";".join(f"{v['concept']} {v['from']:+.2f}->{v['to']:+.2f}" for v in p["changed_features"].values())
+        changes = ";".join(f"{v['concept']} {v['from']:+.2f}->{v['to']:+.2f}"
+                           for v in p["changed_features"].values())
         print(f" {i}: {changes} -> PF {p['prediction_after']:.2f}")
 
-    print(f"\n{mic_line}")
-    print(" thisnot,isinterventionreasoning:(model/backtest/log),")
-    print(" MIC causal graph,—— X,Y .")
-    print(" : python -m mic report --demo finance --concepts concepts/finance.json")
-    print(mic_line)
+    print(f"\n{line}")
+    print(" This was not attribution, it was intervention reasoning over an engine")
+    print(" with inputs, outputs, and explicit assumptions. The same loop applies")
+    print(" to any model, backtest engine, or decision log.")
+    print(" Next: python -m causallens report --demo finance --concepts concepts/finance.json")
+    print(line)
 
 
 def cmd_hero(args):
-    """Cmd hero."""
+    """CLI entry for the hero subcommand."""
     run_hero()

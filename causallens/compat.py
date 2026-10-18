@@ -57,7 +57,7 @@ def load_model_anyhow(path: str):
         except Exception as e:
             errors.append(("torch", type(e).__name__, str(e)[:80]))
 
-    # all——reportevery
+    # all environments must import, so report every failure together
     lines = [f" {method}: {err_type}: {msg}" for method, err_type, msg in errors]
     raise RuntimeError(
         f"modelloadingall ({len(errors)} ):\n" + "\n".join(lines)

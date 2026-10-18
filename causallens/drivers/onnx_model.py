@@ -1,7 +1,8 @@
 """ONNX driver:safeloading.
 
 pickle loadingmodeletcexecute(not .pkl isexecute);
-ONNX iscompute,loadingnotexecute——model:
+ONNX is a compute graph, so loading cannot execute code, which makes it
+the safe model format:
 
     : skl2onnx.convert_sklearn(model) -> model.onnx
     interrogation: python -m mic report --model model.onnx --background bg.csv

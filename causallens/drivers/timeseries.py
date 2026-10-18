@@ -2,15 +2,16 @@
 
 :"".background (n, T, F) byas (n, T*F),
 featureas `{feature}@lag{k}`(lag0 = most).thisattribution,intervention,
-counterfactual,causal graph,——analysis; (B, T, F).
+counterfactuals, causal graphs, and the rest of the analysis stack;
+background stays (B, T, F).
 
  TorchDriver:activation,activation patching(unit),
-steering,attribution——onlyinput.
+Steering and attribution are input level only.
 
 intervention:
-  - intervene({"momentum": v}) —— intervention: momentum allset to v
-  - intervene({"momentum@lag0": v}) —— intervention:onlymost
-  - intervene_window(lag_slice, ...) —— onlyinterventionhistory
+  - intervene({"momentum": v}) intervenes on momentum at every lag
+  - intervene({"momentum@lag0": v}) intervenes only on the newest step
+  - intervene_window(lag_slice, ...) intervenes on a chosen lag range
 """
 from __future__ import annotations
 

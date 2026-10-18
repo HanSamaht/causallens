@@ -1,11 +1,14 @@
-"""symbolic distillation:model""——behavioraudit.
+"""Symbolic distillation: turn the model into a formula for behavior audit.
 
-engine:
-  - PySR(,pip install pysr):search,most
-  - ():Top-k feature Lasso ( + x² + |x| + Top ),
-    outputandmodeloutput R²——"modelonin"
+Engines:
+  - PySR (optional, pip install pysr): full symbolic regression search,
+    the most faithful but slowest
+  - Built in fallback: Lasso over the top-k features expanded with
+    squares, absolute values, and top feature products, scored by R2
+    against the model output, so "the model is really doing this"
+    becomes checkable arithmetic
 
-//model,more,moreaudit.
+A distilled formula is smaller than the model and easier to audit.
 """
 from __future__ import annotations
 

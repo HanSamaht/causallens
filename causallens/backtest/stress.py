@@ -1,10 +1,11 @@
-"""evaluate:test / hypothesis / backtest-.
+"""Backtest stress audits: fragility, assumption gap, live fidelity.
 
-thistoolproblem():
-  1. slippage_stress:PF .PF in bps to 1
-     = "edge hypothesis"feature——can.
-  2. assumption_gap:hypothesis vs ( PF / PF).
-  3. live_faithfulness:backtest vs ——evaluate.
+Three tools that answer three production questions:
+  1. slippage_stress: at what cost in bps does PF drop to 1, which
+     measures how much of the edge is really an execution assumption
+  2. assumption_gap: ladder accounting versus market fill, the PF
+     inflation ratio between the two
+  3. live_faithfulness: backtest promises versus live results
 """
 from __future__ import annotations
 
@@ -35,17 +36,17 @@ def slippage_stress(
     break_bps = next((c["slippage_bps"] for c in curve if not c["profitable"]), None)
     if pf0 <= 1.0:
         verdict = (
-            f" PF={pf0:.2f} also——fill semanticsbelow edge as,"
-            "all''hypothesis"
+            f"PF={pf0:.2f} even before costs, there is no edge under any "
+            "fill hypothesis"
         )
         fragility = ""
     else:
         fragility = "" if (break_bps is not None and break_bps <= 25) else \
                     ("" if break_bps is not None else "")
         verdict = (
-            f"edge {fragility}:"
-            + (f" {break_bps:.0f} bps PF 1" if break_bps is not None else " PF>1")
-            + ("——thisis'edge hypothesis'feature,backtestnotdirect" if fragility == "" else "")
+            "edge verdict:"
+            + (f" breaks at {break_bps:.0f} bps" if break_bps is not None else " PF stays above 1")
+            + (", the edge is mostly an execution assumption, not a market signal" if fragility == "" else "")
         )
     return {
         "curve": curve,
@@ -57,7 +58,7 @@ def slippage_stress(
 
 
 def assumption_gap(driver: BacktestDriver) -> dict:
-    """:ladder price accounting vs market fill——'backtest-'."""
+    """Assumption gap: ladder price accounting versus market fill, the heart of any backtest."""
     ladder = driver.run(fill_market=0.0)
     market = driver.run(fill_market=1.0)
     inflation = ladder["pf"] / max(market["pf"], 1e-3)
@@ -69,18 +70,18 @@ def assumption_gap(driver: BacktestDriver) -> dict:
         "win_rate_gap": round(float(ladder["win_rate"] - market["win_rate"]), 4),
         "avg_gap_through": round(ladder["avg_gap_through"], 4),
         "verdict": (
-            f"hypothesis PF {inflation:.1f} "
-            + ("——backtestinhypothesis,allhistorybacktestnot" if severe else "")
+            f"fill hypothesis inflates PF {inflation:.1f} times "
+            + (", every historical backtest on this hypothesis is unusable" if severe else "")
         ),
-        "note": ",parameter,difference do(fill semantics);depth=" + f"{ladder['avg_gap_through']:.2%}"
-        + "(depth)",
+        "note": ("the only parameter that differs is fill semantics, an intervention; "
+                 f"gap through depth {ladder['avg_gap_through']:.2%}"),
     }
 
 
 def live_faithfulness(backtest: dict, live: dict) -> dict:
-    """backtest vs ——evaluate.
+    """Backtest versus live: measure whether the backtest kept its promise.
 
-    :in,
+    Example call:
     live_faithfulness({"pf": 1.09, "win_rate": 0.48, "avg_pnl_pct": 0.0076},
                       {"pf": 0.94, "win_rate": 0.45})
     """
@@ -98,7 +99,7 @@ def live_faithfulness(backtest: dict, live: dict) -> dict:
         "metrics": gaps,
         "verdict": verdict,
         "note": (
-            ":1m PF 1.09 vs 0.94( -14%,'');"
-            "backtest PF 10-27 vs 0.94( >90%)——ishypothesis"
+            "at 1m granularity PF 1.09 versus live 0.94, a 14 percent miss, borderline;"
+            " backtest PF 10 to 27 versus live 0.94 is over 90 percent inflation, the backtest hypothesis itself is broken"
         ),
     }

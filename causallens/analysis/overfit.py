@@ -1,7 +1,10 @@
-"""deflated(Deflated Sharpe Ratio, Bailey & López de Prado 2014)——.
+"""Deflated Sharpe Ratio (Bailey and Lopez de Prado 2014).
 
-problem:"thisbacktest,' N most',also?"
-PBO/CSCV requireretrain(its,not);DSR is——isauditthehas.
+The question it answers: "this backtest is the best of N trials, is it
+still an edge once the selection bias is priced in?" PBO and CSCV need
+retraining trials, which this framework deliberately does not run;
+DSR is computable from the realized track alone, which makes it the
+right audit for a backtest that already exists.
 """
 from __future__ import annotations
 
@@ -84,8 +87,8 @@ def deflated_sharpe(returns, n_trials: int) -> dict:
         "verdict": (
             f"deflated(DSR={dsr:.2f}): {N} SR>0 probabilityhas {dsr:.0%}"
             if dsr >= 0.95
-            else f"deflated(DSR={dsr:.2f}): SR onis {e_max:.3f},"
-                 f" {sr:.3f}——bias edge"
+            else f"deflated, DSR={dsr:.2f}: the SR demanded is {e_max:.3f},"
+                 f" realized {sr:.3f}, the edge does not survive selection bias"
         ),
-        "note": "Bailey & López de Prado (2014).:PBO/CSCV(retrain,frameworkonlynot)",
+        "note": "Bailey and Lopez de Prado (2014); PBO and CSCV need retrains, out of scope here",
     }

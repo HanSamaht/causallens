@@ -1,9 +1,11 @@
-"""FastSHAP : SHAP .
+"""FastSHAP: amortized SHAP estimation.
 
-:FastSHAP (Jethani et al., ICLR 2022, 337 )——training
-prediction SHAP value,result,count.
+Reference: FastSHAP (Jethani et al., ICLR 2022, paper 337), train a
+network once to predict SHAP values, then amortize: any prediction
+gets full attribution in one forward pass at any count.
 
- MIC model:`full` (T×F feature)from.
+In this framework the payoff is the timeseries `full` granularity,
+all T by F features in one pass instead of one explainer call each.
 """
 from __future__ import annotations
 

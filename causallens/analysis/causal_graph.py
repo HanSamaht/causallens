@@ -1,13 +1,17 @@
-"""interventioncausal graph(lite).
+"""Intervention grounded causal graph (feature level).
 
-:evidence——
-  - direct (feature->prediction):SHAP effect(interventioneffect,modelbelow)
-  - interaction (feature f-> feature g):intervention experiment—— f do() tonotpercentilevalue,
-     g attribution.thisnotcorrelation,isintervention.
-  - correlational :backgroundoncorrelation,auditor"onlyiscorrelation".
+Evidence tiers:
+  - direct (feature to prediction): SHAP effect, a lower bound on the
+    intervention effect
+  - interaction (feature f to feature g): intervention experiment, set f
+    to extreme percentiles and watch g attribution drift, which is an
+    experiment, not a correlation
+  - correlational: background correlation only, the auditor must
+    label it "correlation only"
 
-MVP is"featurelayer -> prediction"layercausal graph;activationlayercausal graph(circuit tracing)
-TorchDriver + patch_activation .
+This module builds the feature layer graph. The activation layer graph
+(circuit tracing) lives in activation_graph.py and needs TorchDriver
+patch_activation.
 """
 from __future__ import annotations
 

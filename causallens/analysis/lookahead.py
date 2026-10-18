@@ -1,13 +1,15 @@
-"""lookahead(look-ahead):featurein"alsonotin".
+"""Lookahead detection: does a feature know the label before the bar
+where it legitimately becomes available.
 
-method(,intervention, lookahead-bias :
-,,value):
+Method, an intervention flavored information test on shifted values:
 
-  IC —— everyfeaturecomparebelow:
-    IC_now = corr( f_t, y_t ) feature"in"has
-    IC_prev = corr( f_{t-k}, y_t ) feature k to
-  feature:IC (that,not)
-  lookaheadfeature:IC_now ,IC_prev -> onlyin" bar"in,
+  For every feature compare rank IC on two alignments:
+    IC_now = corr( f_t, y_t ), the feature aligned at its release bar
+    IC_prev = corr( f_{t-k}, y_t ), the same feature shifted k bars back
+  A healthy feature loses IC when shifted (its information arrives on
+  time and is consumed).
+  A lookahead feature keeps IC_now only when aligned inside the leak
+  window,
   featureto(or bar )
 
   value:leakagefeature = |IC_now| ( Sharpe ).
@@ -56,9 +58,9 @@ def lookahead_scan(y, X_now, X_prev, feature_names, collapse_ratio: float = 0.35
         "top_features": rows[:8],
         "leak_suspects": suspects,
         "verdict": (
-            f"finding {len(suspects)} lookaheadfeature(IC in)——verifyitsis"
+            f"{len(suspects)} features keep IC only inside the suspect window, verify their release schedule"
             if suspects
-            else "lookaheadfeature:allfeature IC (normal)"
+            else "no lookahead signal, all features lose IC when shifted, normal"
         ),
         "note": ":onlyfeatureand,notmodel; leak_scan(featuresolo AUC)more",
     }

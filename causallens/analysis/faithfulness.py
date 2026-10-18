@@ -3,7 +3,8 @@
  ERASER + random baseline:
   - comprehensiveness comprehensiveness: Top-k(asbackgroundin)prediction
   - sufficiency sufficiency:only Top-k,itspredictionunchanged
-  - random baseline: k feature——SHAP notsignificant,not
+  - random baseline: k random features must do less than the top k from
+    SHAP, otherwise the ranking carries no signal
 """
 from __future__ import annotations
 
@@ -59,9 +60,9 @@ def evaluate_faithfulness(
 
     notes = []
     if comprehensiveness <= random_baseline * 1.2:
-        notes.append("warning:SHAP Top-k effectnotrandom baseline,attributionnot")
+        notes.append("warning: the SHAP top-k effect does not beat a random baseline, the attribution carries no signal")
     if sufficiency > comprehensiveness:
-        notes.append("warning:sufficiencycomprehensiveness——Top-k featureinsufficientbythe")
+        notes.append("warning: sufficiency beats comprehensiveness, the top-k features alone carry more than they should")
     passed = len(notes) == 0
 
     return FaithfulnessReport(
@@ -112,7 +113,7 @@ def aggregate_faithfulness(
     profile["notes"] = (
         []
         if profile["verdict"] == ""
-        else [f"passed {profile['pass_rate']:.0%}, 80% threshold——themodelattribution"]
+        else [f"passed {profile['pass_rate']:.0%} against the 80% threshold, attribution is broadly trustworthy"]
     )
     return profile
 

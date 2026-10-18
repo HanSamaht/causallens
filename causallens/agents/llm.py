@@ -1,12 +1,14 @@
-"""OpenAI LLM (requests ,,).
+"""OpenAI compatible LLM client over plain requests.
 
-support providers.py(GLM/OpenAI/DeepSeek/Qwen/Moonshot//Ollama/).
+Provider defaults live in providers.py (GLM, OpenAI, DeepSeek, Qwen,
+Moonshot, Ollama).
 
-():
-  - content as None(tool)-> as ""
-  - tool_calls.function.arguments is JSON or dict -> as dict
-  - 429/5xx ()
-  - GLM :partial /api/paas/v4 cause 404 —— direct URL,noteffect
+Normalization handled here:
+  - content None on tool-call turns becomes an empty string
+  - tool_calls.function.arguments arrives as JSON text or dict, becomes dict
+  - 429 and 5xx responses are retried with backoff
+  - GLM partial paths such as /api/paas/v4 can 404, so the full base URL
+    is used directly
 """
 from __future__ import annotations
 

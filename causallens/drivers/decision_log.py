@@ -3,7 +3,8 @@
 layer():
   - (in agent/)-> directintervention = causal(,)
   - not(/historylog/)-> :behaviormodel
-    + .attribution/intervention/counterfactual/causal graphallrun——allconclusion
+    Plus the full analysis stack, attribution, intervention, counterfactual,
+    causal graph, all run on the log, so conclusions carry evidence
     "modelconsistent XX%".
 
 causalevidenceisaboutmodel;isandbehavior,

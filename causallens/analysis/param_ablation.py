@@ -1,8 +1,9 @@
-"""parameter(reversible ablation):parameter.
+"""Parameter level reversible ablation: lesion studies on weights.
 
-:(lesion study)——,.
-MIC upgrade:reversible + (->->->recovery->confirm),
-recoverynot"finding".
+Classic lesioning removes a unit and checks the damage. The upgrade
+here is reversibility plus a full chain (ablate, measure, restore,
+recovery, confirm), so every reported finding survives a recovery
+check and nothing is called a finding on a damaged model.
 
  = behaviortest:
   - "pred_shift":N samplepredictiondistribution
@@ -73,7 +74,7 @@ def param_ablation(drv, param_groups: list[str], metric: str = "pred_center",
                 "verdict": (
                     f"{'validfinding' if abs(effect) > 1e-4 else 'unchanged'}: {prefix} {metric} "
                     f"{base:.4g}->{ablated:.4g}(delta={effect:+.4g})"
-                    + ("" if reversible else " ⚠recovery,result")
+                    + ("" if reversible else " [recovery failed, treat as suspect]")
                 ),
             }
         )
@@ -96,7 +97,7 @@ def discover_circuit(drv, capability_samples: int = 20, tolerance: float = 0.02,
     layer(defaultfinallylayer)everyunitpersistent ablation:
     behavior < tolerance -> theunitnotcircuit();
     significant -> circuit(recovery).
-    model(≤256 unit)also——notrequire EAP.
+    Small models up to 256 units are enumerable, no EAP pruning needed.
     """
     assert drv.kind in ("torch", "timeseries"), "circuit discoveryrequire torch "
     layers = drv.list_layers()
@@ -185,10 +186,10 @@ def discover_circuit(drv, capability_samples: int = 20, tolerance: float = 0.02,
         "improvements_from_refinement": improvements if mode == "exhaustive" else 0,
         "residual_after_restore": round(residual, 6),
         "verdict": (
-            f"[{mode_desc}] mostcircuit = {len(circuit)}/{width} unit"
-            f"({len(pruned)} , {len(pruned)/width:.0%});"
-            f"allcircuitunitbehavior {residual:.4f}"
-            + ("(≈0,circuit)" if residual < tolerance else " ⚠,circuitnot")
+            f"[{mode_desc}] minimal circuit = {len(circuit)}/{width} units "
+            f"({len(pruned)} pruned, {len(pruned)/width:.0%}); "
+            f"residual after restore {residual:.4f}"
+            + (", circuit confirmed" if residual < tolerance else ", circuit incomplete, keep looking")
         ),
-        "note": "(ACDC ,model);everyaspersistent ablationintervention",
+        "note": "ACDC style greedy search, model level; every claim is backed by a persistent ablation intervention",
     }

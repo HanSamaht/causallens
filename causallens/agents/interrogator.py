@@ -106,8 +106,8 @@ class Interrogator:
                     "name": "audit",
                     "description": (
                         "run(range:suspicious/proxyfeature,concentrated,sampleandsample,"
-                        "explain-simulate-score).notdistribution(OOD)testanddrift——"
-                        "checknotpassed"
+                        "explain-simulate-score). Not a distribution or OOD test, run "
+                        "check_drift for that"
                     ),
                     "parameters": {
                         "type": "object",
@@ -186,7 +186,7 @@ class Interrogator:
                 "type": "function",
                 "function": {
                     "name": "form_hypotheses",
-                    "description": "2-4,hypothesis(,)——investigation",
+                    "description": "form 2 to 4 competing hypotheses to open the investigation",
                     "parameters": {
                         "type": "object",
                         "properties": {"statements": {"type": "array", "items": {"type": "string"}}},
@@ -298,7 +298,7 @@ class Interrogator:
                 "type": "function",
                 "function": {
                     "name": "leak_scan",
-                    "description": "featureleakagescan(, datasets['y'])——AUCleakagefeature",
+                    "description": "single feature leakage scan, needs datasets['y']; flags features whose solo AUC rivals the model",
                     "parameters": {"type": "object", "properties": {}},
                 },
             },

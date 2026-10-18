@@ -1,13 +1,15 @@
-"""BacktestDriver:interrogationobjectisbacktestengine(evaluate),not ML model.
+"""BacktestDriver: the interrogation target is the backtest engine, not an ML model.
 
-"feature" = executeparameterandhypothesis(fill semantics/////)
-"prediction" = PF(score , 1.0 iscounterfactualthreshold)
+"feature" means execution parameters and hypotheses (fill semantics,
+slippage, position sizing and friends) and "prediction" means the
+profit factor, with 1.0 as the natural counterfactual threshold.
 
-isinterrogation:
-  - attribution: executehypothesisinbacktest(SHAP over executeparameter)
-  - intervention: do(fill semantics := ) —— C'->C asetc
-  - counterfactual: mostparameter PF
-  - causal graph: executeparameter( × fill semantics)
+Interrogation still applies:
+  - attribution: SHAP over execution parameters of the replay
+  - intervention: do(fill semantics := market) changes commission to
+    spread to slippage in one switch
+  - counterfactual: which parameters push PF back above 1
+  - causal graph: execution parameters times fill semantics
   - : attribution vs intervention(notonenginebehavior)
 """
 from __future__ import annotations

@@ -1,9 +1,10 @@
 """:model"interrogationinterface".
 
 driveronly:
-  1. predict(X) —— (value,score/probability)
-  2. background —— modeltrainingdistributionsample(intervention/counterfactualvalue)
-  3. intervention —— featureset tovalue(causal graph)
+  1. predict(X), returns values, scores, or probabilities
+  2. background, samples of the model training distribution, the value
+     source for interventions and counterfactuals
+  3. intervene, set features to chosen values, the causal graph engine
 
 TorchDriver layeractivationand(activation patching).
 """
