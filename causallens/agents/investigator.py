@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 ODDS_THRESHOLD = 5.0 # conclusionrequireposterior
 LR_BOUNDS = (0.2, 5.0) # evidence
 MAX_EVIDENCE_UPDATES = 12 # evidence
+MAX_PRIOR_NUDGE = math.log(1.5) # prior may orient, never outweigh evidence
 
 
 @dataclass
@@ -45,6 +46,44 @@ class HypothesisTracker:
         """Init."""
         self.hypotheses: dict[str, Hypothesis] = {}
         self.n_updates = 0
+        self.causal_prior: list[dict] = []
+
+    # ---- prior injection ----
+    def set_prior(self, edges: list[dict]) -> None:
+        """Store a causal graph prior proposed by the investigator or user."""
+        self.causal_prior = list(edges)
+
+    def inject_prior(self) -> dict:
+        """Nudge hypothesis log-odds by consistency with the stored prior.
+
+        The nudge is bounded by ln(1.5) per hypothesis so a prior can
+        orient an investigation but never outweigh tool evidence. Every
+        nudge is recorded as an evidence entry with tool prior_injection.
+        """
+        if not self.causal_prior:
+            return {"n_nudged": 0, "note": "no prior stored"}
+        endpoints = set()
+        for e in self.causal_prior:
+            endpoints.update((e.get("source", ""), e.get("target", "")))
+        strength_map = {"weak": 0.34, "medium": 0.67, "strong": 1.0}
+        nudged = 0
+        for hyp in self.hypotheses.values():
+            mentioned = sum(1 for f in endpoints if f and f in hyp.statement)
+            if mentioned == 0:
+                continue
+            nudge = MAX_PRIOR_NUDGE * min(1.0, mentioned / max(1, len(endpoints)))
+            hyp.log_odds += nudge
+            hyp.evidence.append({
+                "tool": "prior_injection",
+                "summary": (
+                    f"hypothesis mentions {mentioned} endpoints of the causal prior; "
+                    f"bounded nudge {nudge:.3f} in log-odds"
+                ),
+                "direction": "supports",
+                "lr_step": round(nudge, 3),
+            })
+            nudged += 1
+        return {"n_nudged": nudged, "max_nudge": round(MAX_PRIOR_NUDGE, 4)}
 
     # ---- ----
     def form(self, statements: list[str]) -> dict:
@@ -55,6 +94,8 @@ class HypothesisTracker:
             f"H{i+1}": Hypothesis(hid=f"H{i+1}", statement=s.strip())
             for i, s in enumerate(statements)
         }
+        if self.causal_prior:
+            self.inject_prior()
         return self.snapshot()
 
     # ---- update(,LLM only) ----

@@ -240,11 +240,57 @@ class Interrogator:
             {
                 "type": "function",
                 "function": {
-                    "name": "check_contamination",
-                    "description": "training/testcontamination:+(data_ref test; register_data y_bg/y_new or)",
+                    "name": "conclude_investigation",
+                    "description": "investigationconclusion:if odds ratio met, announce winner; otherwise honestly report inconclusive",
                     "parameters": {
                         "type": "object",
-                        "properties": {"data_ref": {"type": "string"}},
+                        "properties": {},
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "set_causal_prior",
+                    "description": (
+                        "record your domain prior as explicit causal edges "
+                        "(source feature, target feature or prediction, strength, "
+                        "expected true or false); the prior nudges hypothesis "
+                        "log-odds by at most ln(1.5) and every nudge is logged"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "edges": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "source": {"type": "string"},
+                                        "target": {"type": "string"},
+                                        "strength": {"type": "string", "enum": ["weak", "medium", "strong"]},
+                                        "expected": {"type": "boolean"},
+                                    },
+                                    "required": ["source", "target"],
+                                },
+                            }
+                        },
+                        "required": ["edges"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "test_causal_prior",
+                    "description": (
+                        "check every stored prior edge against the intervention "
+                        "causal graph: supported, refuted, reversed, violated, "
+                        "or untested"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
                     },
                 },
             },
@@ -453,6 +499,8 @@ class Interrogator:
             "get_hypotheses": lambda: s.get_hypotheses(),
             "update_hypotheses": lambda: s.update_hypotheses(args["updates"]),
             "conclude_investigation": lambda: s.conclude_investigation(),
+            "set_causal_prior": lambda: s.set_causal_prior(args["edges"]),
+            "test_causal_prior": lambda: s.test_causal_prior(),
             "slippage_stress": lambda: s.slippage_stress(),
             "assumption_gap": lambda: s.assumption_gap(),
             "live_faithfulness": lambda: s.live_faithfulness(args["backtest"], args["live"]),

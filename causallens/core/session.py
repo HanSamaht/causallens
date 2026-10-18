@@ -63,6 +63,25 @@ class MicSession:
         """Form hypotheses."""
         return self._log("form_hypotheses", self.investigation.form(statements))
 
+    def set_causal_prior(self, edges: list[dict]) -> dict:
+        """Record a causal graph prior from the investigator or user.
+
+        The prior nudges hypothesis log-odds by at most ln(1.5) per
+        hypothesis, with every nudge logged as evidence, so domain
+        knowledge can orient the investigation but never decide it.
+        """
+        from ..agents.causal_prior import set_causal_prior
+
+        result = set_causal_prior(self, edges)
+        return self._log("set_causal_prior", result)
+
+    def test_causal_prior(self, sample_index: int | None = None) -> dict:
+        """Check each prior edge against the intervention causal graph."""
+        from ..agents.causal_prior import test_causal_prior
+
+        result = test_causal_prior(self, sample_index)
+        return self._log("test_causal_prior", result)
+
     def get_hypotheses(self) -> dict:
         """Get hypotheses."""
         return self._log("get_hypotheses", self.investigation.snapshot())
