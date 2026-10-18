@@ -536,6 +536,14 @@ class MicSession:
 
     # ================= leakageandcontamination =================
 
+    def circuit_with_confidence(self, n_bootstrap: int = 20, tolerance: float = 0.02,
+                                 layer: str | None = None) -> dict:
+        """Circuit discovery with bootstrap confidence intervals on unit membership."""
+        from ..analysis.circuit_bootstrap import circuit_with_confidence as _boot
+        assert self.has_torch_internals(), "Circuit discovery requires torch driver"
+        result = _boot(self.driver, n_bootstrap=n_bootstrap, tolerance=tolerance, layer=layer)
+        return self._log("circuit_with_confidence", result)
+
     def mediation_decomposition(self, sample_index: int, reference_index: int,
                                 layer: str) -> dict:
         """Decompose prediction change into natural direct and indirect effects.
