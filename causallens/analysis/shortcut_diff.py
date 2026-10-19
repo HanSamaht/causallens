@@ -99,6 +99,7 @@ def shortcut_diff(
     max_samples: int = 400,
     edges: list[tuple[str, str]] | None = None,
     min_reliance: float = 0.03,
+    n_perm: int = 20,
     quantiles: tuple[float, float] = (0.10, 0.90),
     n_anchor: int = 64,
     seed: int = 0,
@@ -118,6 +119,10 @@ def shortcut_diff(
             world graph as directed; they override an undirected pair.
         min_reliance: features below this interventional share are
             reported but not classified.
+        n_perm: permutation replicates for the chance baseline of each
+            reliance share (refit on shuffled outcome); 0 disables.
+            Skipped automatically when the model family cannot be
+            refit.
         quantiles: contrast pair defining each intervention.
         n_anchor: rows over which reliance is averaged.
         seed: reproducibility.
@@ -190,18 +195,42 @@ def shortcut_diff(
     rng = np.random.default_rng(seed)
     anchor_idx = rng.choice(len(bg), size=min(n_anchor, len(bg)),
                             replace=False)
-    lo_q, hi_q = quantiles
-    reliance = np.zeros(len(feats))
-    for j in range(len(feats)):
-        lo, hi = np.percentile(bg[:, j], lo_q * 100), np.percentile(bg[:, j], hi_q * 100)
-        if hi - lo < 1e-12:
-            continue
-        A = bg[anchor_idx].copy()
-        B = bg[anchor_idx].copy()
-        A[:, j] = hi
-        B[:, j] = lo
-        reliance[j] = float(np.mean(np.abs(driver.predict(A) - driver.predict(B))))
-    shares = reliance / (reliance.sum() + 1e-12)
+
+    def _contrast_shares(predict_fn) -> np.ndarray:
+        lo_q, hi_q = quantiles
+        rel = np.zeros(len(feats))
+        for j in range(len(feats)):
+            lo, hi = (np.percentile(bg[:, j], lo_q * 100),
+                      np.percentile(bg[:, j], hi_q * 100))
+            if hi - lo < 1e-12:
+                continue
+            A = bg[anchor_idx].copy()
+            B = bg[anchor_idx].copy()
+            A[:, j] = hi
+            B[:, j] = lo
+            rel[j] = float(np.mean(np.abs(predict_fn(A) - predict_fn(B))))
+        return rel / (rel.sum() + 1e-12)
+
+    shares = _contrast_shares(driver.predict)
+
+    # ---- permutation null: refit on shuffled y, reliance becomes chance
+    perm = None
+    if n_perm and n_perm > 0:
+        try:
+            from sklearn.base import clone
+
+            base = clone(driver.model)
+            null = np.zeros((n_perm, len(feats)))
+            for k in range(n_perm):
+                mk = clone(base).fit(bg, rng.permutation(y))
+                null[k] = _contrast_shares(mk.predict)
+            perm = {
+                "n_perm": n_perm,
+                "null_share_median": np.median(null, axis=0),
+                "p_value": (1.0 + (null >= shares).sum(axis=0)) / (n_perm + 1),
+            }
+        except Exception:  # noqa: BLE001 - permutation is optional evidence
+            perm = None
 
     # ---- classify each relied upon feature against the world graph
     rows = []
@@ -224,14 +253,20 @@ def shortcut_diff(
             "feature": feats[j],
             "reliance_share": round(share, 4),
             "classification": cls if share >= min_reliance else "BELOW THRESHOLD",
+            **({"null_share_median": round(float(perm["null_share_median"][j]), 4),
+                "perm_p": round(float(perm["p_value"][j]), 3)}
+               if perm else {}),
         })
         if share >= min_reliance and cls != "CAUSAL PATH":
             at_risk += share
 
     risky = [r for r in rows if r["classification"] not in ("CAUSAL PATH", "BELOW THRESHOLD")]
     if risky:
-        detail = ", ".join(f"{r['feature']} ({r['classification'].lower()}, "
-                           f"{r['reliance_share']:.0%})" for r in risky)
+        detail = ", ".join(
+            f"{r['feature']} ({r['classification'].lower()}, "
+            f"{r['reliance_share']:.0%}"
+            + (f", perm p={r['perm_p']:.2f}" if "perm_p" in r else "")
+            + ")" for r in risky)
         verdict = (
             f"SHORTCUT RISK: {at_risk:.0%} of interventional reliance sits on "
             f"features without a directed causal path to the outcome: {detail}"
@@ -256,6 +291,7 @@ def shortcut_diff(
         "dropped_columns": dropped,
         "reliance": rows,
         "reliance_at_risk": round(at_risk, 4),
+        "permutation": ({"n_perm": perm["n_perm"]} if perm else None),
         "verdict": verdict,
         "method": "world_graph_vs_interventional_reliance",
         "reference": (

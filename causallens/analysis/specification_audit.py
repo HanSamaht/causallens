@@ -116,6 +116,7 @@ def specification_audit(
     max_flip_depth: int = 3,
     materiality: float | None = None,
     sample_weight=None,
+    groups=None,
     seed: int = 0,
 ) -> dict:
     """Sign stability of the do-contrast for one treatment across specifications.
@@ -148,12 +149,19 @@ def specification_audit(
             contrast scale).
         sample_weight: per-row weights matching the production fit
             protocol; refits and the closed form both honor them.
+        groups: labels per row (for example draft year). When given, the
+            lean and full specifications are refit inside each group
+            (effect heterogeneity: groups with at least 20 rows) and
+            the per group effects are compared to the pooled signs, so
+            a finding that only exists in the pooled sample is named
+            by the cohort that reverses it.
         seed: reproducibility.
 
     Returns:
         Dict with the specification curve, flip counts, minimal flip
-        sets, attribution share of the frozen model, and one of three
-        verdicts: STABLE SIGN, FRAGILE SIGN, or NEGLIGIBLE.
+        sets, attribution share of the frozen model, optional fold
+        stability block, and one of three verdicts: STABLE SIGN,
+        FRAGILE SIGN, or NEGLIGIBLE.
     """
     feats = list(driver.feature_names)
     if treatment not in feats:
@@ -318,6 +326,70 @@ def specification_audit(
             f"intervention {what}: importance is bookkeeping, not behavior"
         )
 
+    # ---- leave-one-group-out stability of the lean and full effects
+    fold_stability = None
+    if groups is not None:
+        from sklearn.base import clone as _clone
+
+        groups = np.asarray(groups)
+        if len(groups) != len(bg):
+            raise ValueError(
+                f"groups has {len(groups)} rows but the background has "
+                f"{len(bg)}"
+            )
+        sw = (None if sample_weight is None
+              else np.asarray(sample_weight, dtype=float))
+        folds = []
+        for g in np.unique(groups):
+            rows = groups == g
+            if rows.sum() < 20:
+                continue
+            entry = {"group": str(g), "n_rows": int(rows.sum())}
+            for name, cols in (("lean", ()), ("full", tuple(others))):
+                spec_cols = [t_idx] + sorted(cols)
+                m = _fit_with_weights(_clone(driver.model),
+                                      bg[np.ix_(rows, spec_cols)], y[rows],
+                                      None if sw is None else sw[rows])
+                xg = bg[np.ix_(rows, spec_cols)]
+                a_hi = xg.copy()
+                a_hi[:, 0] = hi
+                a_lo = xg.copy()
+                a_lo[:, 0] = lo
+                entry[f"effect_{name}"] = round(
+                    float(np.mean(m.predict(a_hi) - m.predict(a_lo))), 6)
+            folds.append(entry)
+        ref_lean, ref_full = sign_of(lean), sign_of(full)
+        # pooled signs can cancel when groups disagree, so the flip
+        # reference is the dominant material fold sign, not the pool
+        def _fold_flips(key):
+            material = [f for f in folds if sign_of(f[key]) != 0]
+            if not material:
+                return [], 1.0
+            pos = [f for f in material if sign_of(f[key]) == 1]
+            neg = [f for f in material if sign_of(f[key]) == -1]
+            if len(pos) != len(neg):
+                # majority rules; ties fall through to magnitude
+                dom_sign = 1 if len(pos) > len(neg) else -1
+            else:
+                dom_sign = sign_of(max(material, key=lambda f: abs(f[key]))[key])
+            flips = [f["group"] for f in material
+                     if sign_of(f[key]) == -dom_sign]
+            kept = len(material) - len(flips)
+            return flips, round(kept / max(len(material), 1), 3)
+
+        lean_flips, lean_agree = _fold_flips("effect_lean")
+        full_flips, full_agree = _fold_flips("effect_full")
+        fold_stability = {
+            "n_folds": len(folds),
+            "folds": folds,
+            "pooled_sign_lean": ref_lean,
+            "pooled_sign_full": ref_full,
+            "lean_sign_agreement": lean_agree,
+            "full_sign_agreement": full_agree,
+            "lean_flip_folds": lean_flips,
+            "full_flip_folds": full_flips,
+        }
+
     # ---- verdict
     if ref == 0 or n_neg >= 0.9 * len(specs):
         verdict = (
@@ -345,6 +417,16 @@ def specification_audit(
                 "; the effect survives only in sparse specifications and "
                 "collapses into the chance band as controls enter"
             )
+    if fold_stability and fold_stability["n_folds"] >= 2:
+        flipped = (fold_stability["lean_flip_folds"]
+                   or fold_stability["full_flip_folds"])
+        if flipped:
+            verdict += (f"; FOLD FRAGILE: the sign reverses inside "
+                        f"group(s) {', '.join(map(str, flipped))} while "
+                        "the pool averages over it")
+        else:
+            verdict += (f"; fold stable across {fold_stability['n_folds']} "
+                        "groups")
 
     flip_specs = [
         {"controls": sorted(names[i] for i in s), "effect": round(effects[s], 6)}
@@ -393,4 +475,6 @@ def specification_audit(
     if lattice_mode == "sampled":
         ci = _wilson_interval(n_flip, len(specs))
         result["flip_ci95"] = [round(ci[0], 4), round(ci[1], 4)]
+    if fold_stability is not None:
+        result["fold_stability"] = fold_stability
     return result

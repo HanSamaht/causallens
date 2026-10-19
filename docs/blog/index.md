@@ -1,5 +1,14 @@
 # Blog
 
+## 2026-10: Audit hardening: cohort folds, permutation nulls, automated forensics
+
+[Read the post](2026-10-audit-hardening.md)
+
+Cohort fold stability names the cohort that reverses a pooled effect,
+permutation nulls give reliance shares p values, and data forensics
+runs the afternoon of manual plumbing checks in one call, validated on
+the real NFL cohort.
+
 ## 2026-10: The shortcut diff: right answers riding the wrong features
 
 [Read the post](2026-10-the-shortcut-diff.md)

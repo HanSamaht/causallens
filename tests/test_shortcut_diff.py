@@ -128,6 +128,33 @@ def test_lingam_backend_runs():
     assert out["verdict"].startswith(("SUPPORTED", "SHORTCUT RISK"))
 
 
+def test_permutation_null_separates_signal_from_chance():
+    """The proxy share must exceed the refit-on-shuffled-y baseline."""
+    X, y, feats = make_proxy()
+    gbm = GradientBoostingRegressor(n_estimators=60, max_depth=3,
+                                    random_state=0).fit(X, y)
+    drv = detect_driver(gbm, feats, X, name="perm")
+    out = shortcut_diff(drv, y, edges=[("x", "outcome"), ("outcome", "p")],
+                        n_perm=20)
+    by_name = {r["feature"]: r for r in out["reliance"]}
+    assert "perm_p" in by_name["p"]
+    # 20 replicates: the smallest reachable p is 1/21 (rounded to 0.048)
+    assert by_name["p"]["perm_p"] < 0.05
+    assert by_name["p"]["reliance_share"] > by_name["p"]["null_share_median"]
+    assert out["permutation"] == {"n_perm": 20}
+    assert "perm p=" in out["verdict"]
+
+
+def test_permutation_disabled():
+    X, y, feats = make_spurious()
+    gbm = GradientBoostingRegressor(n_estimators=60, max_depth=3,
+                                    random_state=0).fit(X, y)
+    drv = detect_driver(gbm, feats, X, name="noperm")
+    out = shortcut_diff(drv, y, edges=[("x", "outcome")], n_perm=0)
+    assert out["permutation"] is None
+    assert all("perm_p" not in r for r in out["reliance"])
+
+
 def test_session_and_agent_wiring():
     X, y, feats = make_proxy()
     gbm = GradientBoostingRegressor(n_estimators=60, max_depth=3,

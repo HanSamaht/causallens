@@ -266,6 +266,53 @@ class Interrogator:
             {
                 "type": "function",
                 "function": {
+                    "name": "data_forensics",
+                    "description": (
+                        "audit a registered dataset before modeling: "
+                        "constant and duplicate columns, missingness "
+                        "inventory, MCAR versus MAR hints, drift across "
+                        "cohort labels, and an optional two directional "
+                        "join audit against a second registered dataset; "
+                        "call this first on any new data, the manual "
+                        "checks careful analysts run, as one verdict"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "data_ref": {
+                                "type": "string",
+                                "description": (
+                                    "registered dataset name to audit"
+                                ),
+                            },
+                            "groups": {
+                                "type": "string",
+                                "description": (
+                                    "column name holding cohort labels "
+                                    "for the drift scan, optional"
+                                ),
+                            },
+                            "other_ref": {
+                                "type": "string",
+                                "description": (
+                                    "second registered dataset for the "
+                                    "join audit, optional"
+                                ),
+                            },
+                            "key": {
+                                "type": "string",
+                                "description": (
+                                    "join key column for the join audit"
+                                ),
+                            },
+                        },
+                        "required": ["data_ref"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
                     "name": "specification_audit",
                     "description": (
                         "refit the model family on every control subset and "
@@ -590,6 +637,12 @@ class Interrogator:
             "shortcut_diff": lambda: s.shortcut_diff(
                 s.datasets.get(args.get("y_ref", "y")),
                 method=args.get("method", "pc"),
+            ),
+            "data_forensics": lambda: s.data_forensics(
+                args["data_ref"],
+                groups=args.get("groups"),
+                other_df=args.get("other_ref"),
+                key=args.get("key"),
             ),
             "set_causal_prior": lambda: s.set_causal_prior(args["edges"]),
             "test_causal_prior": lambda: s.test_causal_prior(),

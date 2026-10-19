@@ -156,6 +156,52 @@ def test_errors(suppressor_linear):
         specification_audit(drv, "x", y[:-1])
 
 
+def test_fold_stability_detects_heterogeneity():
+    """Effect positive in two cohorts, reversed in a third: the pool
+    cancels toward zero and the fold block names cohort c."""
+    rng = np.random.default_rng(9)
+    n = 600
+    x = rng.normal(size=n)
+    z = 0.5 * x + rng.normal(scale=0.5, size=n)
+    groups = np.array(["a"] * 200 + ["b"] * 200 + ["c"] * 200)
+    y = np.where(groups == "c", -2.0 * x, x) + 0.2 * rng.normal(size=n)
+    X = np.column_stack([x, z])
+    model = LinearRegression().fit(X, y)
+    drv = detect_driver(model, ["x", "z"], X, name="hetero")
+
+    out = specification_audit(drv, "x", y, groups=groups)
+    assert "fold_stability" in out
+    assert out["fold_stability"]["lean_flip_folds"] == ["c"]
+    assert "FOLD FRAGILE" in out["verdict"]
+    assert "c" in out["verdict"]
+    by_group = {f["group"]: f["effect_lean"] for f in out["fold_stability"]["folds"]}
+    assert by_group["a"] > 0 > by_group["c"]
+
+
+def test_fold_stability_agrees_when_homogeneous():
+    rng = np.random.default_rng(10)
+    n = 600
+    x = rng.normal(size=n)
+    z = 0.5 * x + rng.normal(scale=0.5, size=n)
+    groups = np.array(["a"] * 300 + ["b"] * 300)
+    y = x + 0.2 * rng.normal(size=n)
+    X = np.column_stack([x, z])
+    model = LinearRegression().fit(X, y)
+    drv = detect_driver(model, ["x", "z"], X, name="homo")
+
+    out = specification_audit(drv, "x", y, groups=groups)
+    assert out["fold_stability"]["lean_flip_folds"] == []
+    assert "fold stable" in out["verdict"]
+
+
+def test_fold_groups_misaligned_raises():
+    X, y, feats = make_suppressor(n=400, seed=12)
+    model = LinearRegression().fit(X, y)
+    drv = detect_driver(model, feats, X, name="mis")
+    with pytest.raises(ValueError, match="groups"):
+        specification_audit(drv, "x", y, groups=np.array(["a"] * 10))
+
+
 def test_session_and_agent_wiring():
     X, y, feats = make_suppressor(n=400, seed=6)
     model = LinearRegression().fit(X, y)

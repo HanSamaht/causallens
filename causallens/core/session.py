@@ -470,6 +470,7 @@ class MicSession:
                             max_flip_depth: int = 3,
                             materiality: float | None = None,
                             sample_weight=None,
+                            groups=None,
                             seed: int = 0) -> dict:
         """Sign stability of the intervention effect across specifications.
 
@@ -479,7 +480,9 @@ class MicSession:
         which specifications flip it, and the minimal control sets
         responsible. A feature whose importance share stays healthy
         while its intervention sign flips is named here, not hidden in
-        the ranking.
+        the ranking. Pass groups (for example draft year) to add
+        leave-one-group-out fold stability of the lean and full
+        effects.
         """
         from ..analysis.specification_audit import (
             specification_audit as _spec,
@@ -488,7 +491,7 @@ class MicSession:
         result = _spec(self.driver, treatment, y, max_specs=max_specs,
                        contrast=contrast, max_flip_depth=max_flip_depth,
                        materiality=materiality, sample_weight=sample_weight,
-                       seed=seed)
+                       groups=groups, seed=seed)
         return self._log("specification_audit", result)
 
     def shortcut_diff(self, y, method: str = "pc", alpha: float = 0.05,
@@ -508,6 +511,28 @@ class MicSession:
         result = _sd(self.driver, y, method=method, alpha=alpha,
                      edges=edges, min_reliance=min_reliance, seed=seed)
         return self._log("shortcut_diff", result)
+
+    def data_forensics(self, df, groups=None, other_df=None,
+                       key=None, alpha: float = 0.05) -> dict:
+        """One call audit of a dataframe before modeling begins.
+
+        Constant and duplicate columns, missingness inventory with the
+        dominant pattern, MCAR versus MAR hints via rank tests, drift
+        across cohort labels, and a two directional join audit between
+        two frames. The checks careful analysts run by hand, returned
+        as a severity ordered verdict.
+        """
+        from ..analysis.data_forensics import data_forensics as _dfx
+
+        if isinstance(df, str):
+            df = self.datasets.get(df)
+        if isinstance(other_df, str):
+            other_df = self.datasets.get(other_df)
+        if df is None:
+            raise ValueError("df must be a DataFrame or a registered dataset name")
+        result = _dfx(df, groups=groups, other_df=other_df, key=key,
+                      alpha=alpha)
+        return self._log("data_forensics", result)
 
     def temporal_causal_graph(self, max_lag: int = 4, alpha: float = 0.05,
                               n_windows: int = 256, annotate_model: bool = True,
@@ -579,11 +604,19 @@ class MicSession:
 
     def register_data(self, name: str, data) -> dict:
         """Register a named dataset (background or reference) so the LLM
-        can pass references by name instead of inline blobs."""
+        can pass references by name instead of inline blobs. pandas
+        DataFrames keep their columns; everything else is coerced to
+        a float array."""
         import numpy as np
+        import pandas as pd
 
-        self.datasets[name] = np.asarray(data, dtype=float)
-        return self._log("register_data", {"name": name, "shape": list(self.datasets[name].shape)})
+        if isinstance(data, pd.DataFrame):
+            self.datasets[name] = data
+            shape = [len(data), len(data.columns)]
+        else:
+            self.datasets[name] = np.asarray(data, dtype=float)
+            shape = list(self.datasets[name].shape)
+        return self._log("register_data", {"name": name, "shape": shape})
 
     def list_datasets(self) -> dict:
         """List datasets."""

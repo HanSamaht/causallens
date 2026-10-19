@@ -1,6 +1,6 @@
 # CausalLens Technical Report
 
-Version 0.13.0, October 2026
+Version 0.14.0, October 2026
 
 ## Abstract
 
@@ -212,7 +212,40 @@ disclosure: CPDAG orientations are assumptions, and PROXY verdicts
 state explicitly that deployment timing knowledge is required to
 separate leakage from legitimate measurement.
 
-## 10. Benchmarks
+## 10. Audit hardening in 0.14.0
+
+Three upgrades prompted by benchmarking against the strongest public
+Big Data Bowl entries, which showed out of sample discipline the audits
+lacked and manual data forensics the framework did not cover.
+
+Cohort fold stability: specification_audit accepts group labels and
+refits the lean and full specifications inside each cohort (groups with
+at least 20 rows). Per group effects are compared against the dominant
+material fold sign, so a finding that exists only in the pool is named
+by the cohort that reverses it. On a planted scenario where the effect
+is positive in two cohorts and negative in a third, the pooled estimate
+cancels toward zero and the fold block returns FOLD FRAGILE with the
+reversing cohort named.
+
+Permutation nulls: shortcut_diff refits the driver's family on shuffled
+outcomes and recomputes reliance shares per replicate, giving each
+observed share a p value against the chance baseline. A label echo at
+80 percent reliance tests at p = 1/21 against a null median of 34
+percent, while the true cause at 18 percent sits below the null median:
+the baseline absorbs both overfitting and share normalization.
+
+Data forensics: one call over a dataframe returns constant and
+duplicate columns, the missingness inventory with its dominant pattern,
+MCAR versus MAR hints (Mann Whitney between missing and observed rows,
+Bonferroni per target), Kruskal Wallis drift across cohort labels, and
+a two directional join audit between frames. On the real NFL cohort it
+reproduces in seconds what the manual analysis found by hand: draft
+pick missingness associates with career snaps (undrafted players get
+fewer opportunities, medians 14 versus 315), three drill features drift
+across draft years, traditional drills are over 50 percent missing, and
+join coverage is 97 percent one direction.
+
+## 11. Benchmarks
 
 - 125 tests, fast suite 95 in 69 seconds, slow suite 30 in 167 seconds
 - 24 real models across 15 domains interrogated during development,
@@ -224,7 +257,7 @@ separate leakage from legitimate measurement.
 - Granger validated on synthetic VAR data: true link found at p below
   1e-6 with correct lag, reverse direction null, noise channel silent
 
-## 11. Known limits
+## 12. Known limits
 
 - Pairwise Granger remains the default; PCMCI needs the tigramite
   extra and conditions on the observed past only
@@ -239,7 +272,7 @@ separate leakage from legitimate measurement.
 - Phrase counterfactual lexicons are English only and small
 - EIG planning relies on literal hypothesis to feature name matching
 
-## 12. Availability
+## 13. Availability
 
 AGPL-3.0, source at github.com/HanSamaht/causallens, package on PyPI as
 causallens, documentation hosted on GitHub Pages. Python 3.10 to 3.12,
