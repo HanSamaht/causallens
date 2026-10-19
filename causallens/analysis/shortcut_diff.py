@@ -177,10 +177,18 @@ def shortcut_diff(
         by_pair: dict[tuple[int, int], tuple[int, int, bool]] = {}
         for i, j, d in world:
             by_pair[(min(i, j), max(i, j))] = (i, j, d)
+        unknown = sorted({n for src, dst in edges for n in (src, dst)
+                          if n not in names_kept})
+        if unknown:
+            raise ValueError(
+                f"unknown feature(s) in edges: {', '.join(map(str, unknown))}; "
+                "pass only observed feature names and the literal "
+                f"'{_OUTCOME}'; latent variables cannot orient a "
+                "discovered edge"
+            )
         for src, dst in edges:
-            if src in names_kept and dst in names_kept:
-                i, j = names_kept.index(src), names_kept.index(dst)
-                by_pair[(min(i, j), max(i, j))] = (i, j, True)
+            i, j = names_kept.index(src), names_kept.index(dst)
+            by_pair[(min(i, j), max(i, j))] = (i, j, True)
         world = list(by_pair.values())
 
     directed: dict[int, list[int]] = {}

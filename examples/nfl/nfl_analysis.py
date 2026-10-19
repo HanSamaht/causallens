@@ -132,13 +132,22 @@ def step4_analysis():
     from causallens.drivers import detect_driver
 
     m = pd.read_csv("full_cohort.csv")
+    # five of ten tracking features drift across 2023-2025 (protocol
+    # changes confirmed by the host); models standardize them within
+    # draft year so cohort shifts cannot masquerade as player skill
+    years = pd.read_csv("combine_results.csv")[["nfl_id", "draft_year"]]
+    m = m.merge(years, on="nfl_id", how="left")
+    for c in TRACK:
+        m[c] = m.groupby("draft_year")[c].transform(
+            lambda s: (s - s.mean()) / s.std() if s.std() > 1e-12 else s * 0.0)
     core = m[m.n_opportunities >= 50].copy()
     core["edge"] = core.nfl_position.isin(["DE", "OLB"]).astype(float)
     core = core.dropna(subset=["pressure_rate"])
     y = core.pressure_rate.values
     cols = ["edge", "draft_overall_pick"] + TRAD + TRACK[:6]
     X = core[cols]
-    print(f"[4] cohort with >=50 opportunities: {len(core)}")
+    print(f"[4] cohort with >=50 opportunities: {len(core)} "
+          f"(tracking features standardized within draft year)")
 
     # partial correlation of drill top speed, controlling edge and pick
     def partial(x, ycol, controls):
@@ -155,6 +164,49 @@ def step4_analysis():
     r, n = partial("max_speed", "pressure_rate", ["edge", "draft_overall_pick"])
     print(f"    partial corr max_speed -> pressure (ctrl edge, pick): {r:+.3f} n={n}")
 
+    # mediation chain: drill accel -> in-game get_off -> pressure
+    med = core[["accel_first_1s", "mean_get_off", "pressure_rate",
+                "edge", "draft_overall_pick"]].dropna()
+
+    def _z(v):
+        return (v - v.mean()) / (v.std() + 1e-12)
+
+    z_acc, z_go, z_pr = _z(med.accel_first_1s), _z(med.mean_get_off), _z(med.pressure_rate)
+    rho_am = spearmanr(med.accel_first_1s, med.mean_get_off).statistic
+    rho_mb = spearmanr(med.mean_get_off, med.pressure_rate).statistic
+
+    def indirect_share(acc, go, pr):
+        a = np.polyfit(acc, go, 1)[0]
+        M = np.column_stack([acc, go, np.ones(len(acc))])
+        b = np.linalg.lstsq(M, pr, rcond=None)[0][1]
+        total = np.polyfit(acc, pr, 1)[0]
+        return a * b / total if abs(total) > 1e-12 else np.nan
+
+    rng_med = np.random.default_rng(0)
+    shares = []
+    for _ in range(1000):
+        idx = rng_med.integers(0, len(med), len(med))
+        s = indirect_share(z_acc.values[idx], z_go.values[idx], z_pr.values[idx])
+        if np.isfinite(s):
+            shares.append(s)
+    point = indirect_share(z_acc.values, z_go.values, z_pr.values)
+    lo_ci, hi_ci = np.percentile(shares, [2.5, 97.5])
+    total_std = np.polyfit(z_acc.values, z_pr.values, 1)[0]
+    indirect_std = np.polyfit(z_acc.values, z_go.values, 1)[0] * \
+        np.linalg.lstsq(np.column_stack([z_acc.values, z_go.values,
+                                         np.ones(len(med))]), z_pr.values,
+                        rcond=None)[0][1]
+    if abs(point) > 1.0 or lo_ci < -1.0 or hi_ci > 2.0:
+        verdict = ("total effect near zero, the share ratio is unstable "
+                   "(suppression regime), no mediated share claimed")
+    else:
+        verdict = ("suggestive, CI excludes zero" if lo_ci > 0 or hi_ci < 0
+                   else "not established, CI crosses zero")
+    print(f"    mediation accel -> get_off -> pressure: a rho {rho_am:+.3f}, "
+          f"b rho {rho_mb:+.3f}; standardized indirect {indirect_std:+.3f} "
+          f"vs total {total_std:+.3f} (share {point:.0%}, bootstrap 95% CI "
+          f"{lo_ci:.0%} to {hi_ci:.0%}, n={len(med)}): {verdict}")
+
     # lean vs full model intervention effect
     def do_effect(feature_cols):
         pipe = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),
@@ -167,7 +219,7 @@ def step4_analysis():
         return float((pipe.predict(A) - pipe.predict(B)).mean())
 
     print(f"    do(max_speed p10->p90) lean model: {do_effect(['edge','draft_overall_pick','max_speed']):+.5f}")
-    print(f"    do(max_speed p10->p90) full model: {do_effect(cols):+.5f}  <- collinearity flips the sign")
+    print(f"    do(max_speed p10->p90) full model: {do_effect(cols):+.5f}  <- collinearity collapses the effect")
 
     # CausalLens: attribution stability on the lean model
     lean_cols = ["edge", "draft_overall_pick", "max_speed", "accel_first_1s",

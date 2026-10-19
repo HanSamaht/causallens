@@ -52,15 +52,17 @@ of the 2023 to 2025 cohorts.
    tracking features are 0 to 4 percent missing. A traditional-only analysis
    is conditioned on a sample selected on draft capital.
 3. PASS_RUSH_DRILL top speed predicts NFL pressure rate: Spearman 0.528 raw,
-   +0.237 partial controlling position group and draft pick. The backdoor
-   adjusted intervention estimate on the lean model is +0.024 pressure rate
-   for moving a prospect from the 10th to the 90th percentile.
+   +0.240 partial controlling position group and draft pick (within-year
+   standardized tracking features). The backdoor adjusted intervention
+   estimate on the lean model is +0.026 pressure rate for moving a
+   prospect from the 10th to the 90th within-cohort percentile.
 4. A 16-feature ridge regression collapses the drill-speed intervention
-   effect from +0.024 to -0.004, inside the chance band for this sample,
-   while its importance ranking shows nothing unusual. A specification
-   audit over 200 refitted control subsets confirms the effect is never
-   materially negative: the honest description is collapse, not flip.
-   Importance is bookkeeping, not behavior.
+   effect from +0.026 to essentially zero (-0.0002), inside the chance
+   band for this sample, while its importance ranking puts drill speed
+   dead last. A specification audit over 200 refitted control subsets
+   confirms the effect is never materially negative: the honest
+   description is collapse, not flip. Importance is bookkeeping, not
+   behavior.
 
 The causal machinery (interventions, backdoor identification, bootstrap
 attribution intervals) comes from
@@ -192,10 +194,12 @@ Four checks run in sequence:
    but the residue stays positive.
 2. do(max_speed p10 to p90) on the lean three-feature model vs the full
    sixteen-feature model: collinearity collapses the full model's effect
-   from +0.024 into the chance band at -0.004.
-3. Bootstrap attribution intervals on the lean model: which features carry
+   from +0.026 into the chance band at essentially zero.
+3. Mediation chain accel to get_off to pressure: two strong links, but
+   the total effect is too small for a stable mediated share.
+4. Bootstrap attribution intervals on the lean model: which features carry
    stable weight across resamples.
-4. Backdoor identification of the drill-speed effect with the adjustment set
+5. Backdoor identification of the drill-speed effect with the adjustment set
    {position, draft pick}: the estimate a team can act on.""")
 
 code("""na.step4_analysis()""")
@@ -221,6 +225,12 @@ m = pd.read_csv("full_cohort.csv")
 core = m[m.n_opportunities >= 50].copy()
 core["edge"] = core.nfl_position.isin(["DE", "OLB"]).astype(float)
 core = core.dropna(subset=["pressure_rate"])
+# tracking features are standardized within draft year, matching step 4
+years = pd.read_csv("combine_results.csv")[["nfl_id", "draft_year"]]
+core = core.merge(years, on="nfl_id", how="left")
+for c in na.TRACK:
+    core[c] = core.groupby("draft_year")[c].transform(
+        lambda s: (s - s.mean()) / s.std() if s.std() > 1e-12 else s * 0.0)
 y = core.pressure_rate.values
 cols = ["edge", "draft_overall_pick"] + na.TRAD + na.TRACK[:6]
 

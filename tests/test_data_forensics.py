@@ -85,6 +85,15 @@ def test_misaligned_groups_refused(planted):
         data_forensics(df, groups=np.array(["x"] * 3))
 
 
+def test_join_null_keys_disclosed():
+    df = pd.DataFrame({"k": [1.0, 2.0, np.nan, 4.0], "v": [1, 2, 3, 4]})
+    other = pd.DataFrame({"k": [1.0, 2.0, 3.0, np.nan]})
+    out = data_forensics(df, other_df=other, key="k")
+    j = out["join_audit"]
+    assert j["left_null_keys"] == 1 and j["right_null_keys"] == 1
+    assert "null join keys" in out["verdict"]
+
+
 def test_session_and_agent_wiring():
     model, feats, bg, _ = train_finance_demo()
     session = MicSession(detect_driver(model, feats, bg, name="forensics"))

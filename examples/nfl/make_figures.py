@@ -113,6 +113,18 @@ plt.close(fig)
 
 # ---- Fig 5: the specification audit of the drill speed effect ----
 core["edge_f"] = core.nfl_position.isin(["DE", "OLB"]).astype(float)
+# models standardize tracking features within draft year, matching
+# nfl_analysis step4; the drift figures above intentionally show raw
+years_f = pd.read_csv("combine_results.csv")[["nfl_id", "draft_year"]]
+if "draft_year" not in core.columns or core.draft_year.isna().all():
+    core = core.merge(years_f, on="nfl_id", how="left")
+TRACK10 = ["total_time", "max_speed", "first_step_yds_0p5s", "accel_first_1s",
+           "peak_accel", "path_efficiency", "bend_rate_deg_per_s", "arc_speed",
+           "speed_at_4yd", "speed_at_5yd"]
+for c in TRACK10:
+    if c in core.columns:
+        core[c] = core.groupby("draft_year")[c].transform(
+            lambda s: (s - s.mean()) / s.std() if s.std() > 1e-12 else s * 0.0)
 y = core.pressure_rate.values
 TRACK6 = ["total_time", "max_speed", "accel_first_1s", "speed_at_4yd", "path_efficiency", "bend_rate_deg_per_s"]
 TRAD8 = ["forty", "ten_yd_split", "vertical", "bench_reps", "combine_weight",

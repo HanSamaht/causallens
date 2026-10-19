@@ -59,6 +59,48 @@ def _linear_family(model) -> tuple[str, float] | None:
     return None
 
 
+def _cert_context(model, bg: np.ndarray):
+    """Closed form input (X, penalty) or None when not certifiable.
+
+    The certificate must reproduce the family the driver actually
+    fits. A pipeline regularizes in its transformed space, so the
+    closed form runs on the transformed columns; only affine steps
+    (imputers and scalers) qualify, anything else falls back to
+    refits. Percentiles commute with column wise affine transforms,
+    so quantile contrasts in the transformed space equal the transform
+    of the raw contrasts. The frozen pipeline's preprocessing
+    statistics are held fixed across subset refits, which isolates the
+    specification effect from preprocessing re-estimation.
+    """
+    fam = _linear_family(model)
+    if fam is None:
+        return None
+    _kind, penalty = fam
+    X = bg
+    try:
+        from sklearn.impute import SimpleImputer
+        from sklearn.pipeline import Pipeline
+        from sklearn.preprocessing import (MaxAbsScaler, MinMaxScaler,
+                                           RobustScaler, StandardScaler)
+
+        affine = (SimpleImputer, StandardScaler, MinMaxScaler,
+                  MaxAbsScaler, RobustScaler)
+        if isinstance(model, Pipeline):
+            for _name, step in model.steps[:-1]:
+                if not isinstance(step, affine):
+                    return None
+            X = np.asarray(model[:-1].transform(bg), dtype=float)
+            # an imputer with default settings can drop all-NaN columns,
+            # which would silently shift every column index
+            if X.shape[1] != bg.shape[1]:
+                return None
+    except ImportError:  # pragma: no cover - sklearn always present
+        return None
+    if np.isnan(X).any():
+        return None
+    return X, penalty
+
+
 def _subset_effect_linear(X, y, cols: tuple[int, ...], penalty: float,
                           sample_weight=None) -> float:
     """Coefficient of the treatment in the closed-form subset fit.
@@ -199,13 +241,19 @@ def specification_audit(
     rng = np.random.default_rng(seed)
     names = {i: feats[i] for i in range(len(feats))}
 
-    # ---- effect engine: closed form for linear families, refit otherwise
-    linear = _linear_family(driver.model)
-    sub_X = bg[:, [t_idx] + others]
+    # ---- effect engine: closed form for affine-preprocessed linear
+    # families (exact, including the pipeline's penalty geometry),
+    # refit otherwise
+    cert = _cert_context(driver.model, bg)
     effects: dict[frozenset, float] = {}
 
-    if linear is not None and not np.isnan(sub_X).any():
-        kind, penalty = linear
+    if cert is not None:
+        Xc, penalty = cert
+        sub_X = Xc[:, [t_idx] + others]
+        # quantiles commute with the column wise affine transform, so
+        # these are the transforms of the raw contrast values
+        lo_c = float(np.percentile(sub_X[:, 0], lo_q * 100))
+        hi_c = float(np.percentile(sub_X[:, 0], hi_q * 100))
         # position of each original index inside sub_X = [t_idx] + others
         pos_of = {t_idx: 0}
         for j, i in enumerate(others):
@@ -219,7 +267,7 @@ def specification_audit(
                 cols = (0,) + tuple(sorted(pos_of[i] for i in orig_set))
                 effects[orig_set] = _subset_effect_linear(
                     sub_X, y, cols, penalty, sample_weight
-                ) * (hi - lo)
+                ) * (hi_c - lo_c)
             return effects[orig_set]
     else:
         try:
@@ -447,8 +495,7 @@ def specification_audit(
         "frac_flip": round(frac_flip, 4),
         "n_negligible": n_neg,
         "reference_sign": ref,
-        "engine": "closed_form_linear" if (linear is not None
-                                           and not np.isnan(sub_X).any()) else "refit_clone",
+        "engine": "closed_form_linear" if cert is not None else "refit_clone",
         "sample_weighted": sample_weight is not None,
         "minimal_flip_sets": minimal_flips,
         "flip_specifications": flip_specs,
@@ -466,8 +513,12 @@ def specification_audit(
         "note": (
             "each specification refits the driver's model family on y "
             "(caller supplied training outcome) and averages the p10 to p90 "
-            "treatment contrast; linear families use the closed form so the "
-            "curve is exact; refit specifications carry no sample weights; "
+            "treatment contrast; affine-preprocessed linear and ridge "
+            "families use a closed form in the pipeline's transformed "
+            "space so the curve is exact, including penalty geometry, with "
+            "preprocessing statistics held at the frozen model's fitted "
+            "values (isolating the specification effect); "
+            "refit specifications carry no sample weights; "
             "the negligible band is max(0.02 sd of y, 2.5 times the chance "
             "contrast sd_y/sd_t * width / sqrt(n))"
         ),

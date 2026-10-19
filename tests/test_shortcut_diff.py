@@ -155,6 +155,18 @@ def test_permutation_disabled():
     assert all("perm_p" not in r for r in out["reliance"])
 
 
+def test_unknown_edge_name_raises():
+    """A typo in a user edge must refuse, not silently skip."""
+    X, y, feats = make_spurious()
+    gbm = GradientBoostingRegressor(n_estimators=40, max_depth=3,
+                                    random_state=0).fit(X, y)
+    drv = detect_driver(gbm, feats, X, name="typo")
+    with pytest.raises(ValueError, match="unknown feature"):
+        shortcut_diff(drv, y, edges=[("x_typo", "outcome")])
+    with pytest.raises(ValueError, match="latent variables"):
+        shortcut_diff(drv, y, edges=[("unobserved_cause", "x")])
+
+
 def test_session_and_agent_wiring():
     X, y, feats = make_proxy()
     gbm = GradientBoostingRegressor(n_estimators=60, max_depth=3,

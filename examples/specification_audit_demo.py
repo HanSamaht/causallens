@@ -86,6 +86,13 @@ def part2_nfl():
     print("Part 2: NFL replay, drill top speed under specification search")
     print("=" * 64)
     m = pd.read_csv(cohort_path)
+    # match the production protocol: tracking features standardized
+    # within draft year (protocol drift 2023-2025)
+    years = pd.read_csv(os.path.join(data_dir, "combine_results.csv"))[["nfl_id", "draft_year"]]
+    m = m.merge(years, on="nfl_id", how="left")
+    for c in TRACK:
+        m[c] = m.groupby("draft_year")[c].transform(
+            lambda s: (s - s.mean()) / s.std() if s.std() > 1e-12 else s * 0.0)
     core = m[m.n_opportunities >= 50].copy()
     core["edge"] = core.nfl_position.isin(["DE", "OLB"]).astype(float)
     core = core.dropna(subset=["pressure_rate"])

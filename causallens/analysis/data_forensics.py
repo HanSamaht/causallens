@@ -200,6 +200,8 @@ def data_forensics(
             "key": keys,
             "left_rows": n_rows,
             "right_rows": int(len(other_df)),
+            "left_null_keys": int(len(df) - len(left)),
+            "right_null_keys": int(len(other_df) - len(right)),
             "left_duplicate_keys": int(len(left) - len(lk)),
             "right_duplicate_keys": int(len(right) - len(rk)),
             "left_keys_matched": round(len(lk & rk) / max(len(lk), 1), 4),
@@ -207,6 +209,13 @@ def data_forensics(
             "unmatched_left_examples": fmt(sorted(lk - rk)[:5]),
             "unmatched_right_examples": fmt(sorted(rk - lk)[:5]),
         }
+        null_keys = join_audit["left_null_keys"] + join_audit["right_null_keys"]
+        if null_keys:
+            findings.append({
+                "severity": "WARN",
+                "text": (f"{null_keys} rows have null join keys and are "
+                         "excluded from the coverage numbers"),
+            })
         if join_audit["left_keys_matched"] < 0.9:
             findings.append({
                 "severity": "HIGH",

@@ -202,6 +202,31 @@ def test_fold_groups_misaligned_raises():
         specification_audit(drv, "x", y, groups=np.array(["a"] * 10))
 
 
+def test_certificate_matches_pipeline_penalty_geometry():
+    """The closed form must run in the pipeline's transformed space:
+    a StandardScaler plus Ridge pipeline regularizes standardized
+    columns, and the certificate has to reproduce that fit, not a
+    raw space ridge."""
+    from sklearn.base import clone
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import Ridge
+
+    X, y, feats = make_suppressor(n=400, seed=13)
+    pipe = make_pipeline(StandardScaler(), Ridge(alpha=1.0)).fit(X, y)
+    drv = detect_driver(pipe, feats, X, name="pipe_cert")
+    out = specification_audit(drv, "x", y)
+    assert out["engine"] == "closed_form_linear"
+
+    m = clone(pipe).fit(X, y)
+    lo, hi = np.percentile(X[:, 0], 10), np.percentile(X[:, 0], 90)
+    A, B = X.copy(), X.copy()
+    A[:, 0] = hi
+    B[:, 0] = lo
+    manual = float(np.mean(m.predict(A) - m.predict(B)))
+    assert abs(out["effect_full"] - manual) < 1e-5
+
+
 def test_session_and_agent_wiring():
     X, y, feats = make_suppressor(n=400, seed=6)
     model = LinearRegression().fit(X, y)
