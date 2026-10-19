@@ -24,6 +24,7 @@ ALL files must contain ZERO Chinese characters. This includes code, comments, do
 2. Log entry before fixing; update after resolution
 3. Any finding must be tagged: framework tool output / manual analysis / third-party source
 4. Never skip test regression
+5. Every error comes with an explicit apology to the project owner before the fix: state the mistake, say sorry, then fix it. Acknowledgement without the apology does not count
 
 ## Version discipline
 
