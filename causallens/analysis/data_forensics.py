@@ -39,13 +39,19 @@ from scipy.stats import chi2_contingency, kruskal, mannwhitneyu
 
 def _numeric_view(df: pd.DataFrame) -> dict[str, np.ndarray]:
     """Numeric columns plus datetimes as epoch seconds (drift and
-    association scans read both; the note discloses the conversion)."""
+    association scans read both; the note discloses the conversion).
+    Missing timestamps become NaN: the raw int64 cast would turn NaT
+    into the sentinel year 1677 and silently poison every statistic.
+    """
     out: dict[str, np.ndarray] = {}
     for c in df.columns:
         if pd.api.types.is_numeric_dtype(df[c]):
             out[c] = df[c].to_numpy(dtype=float)
         elif pd.api.types.is_datetime64_any_dtype(df[c]):
-            out[c] = df[c].astype("int64").to_numpy(dtype=float) / 1e9
+            s = df[c]
+            vals = s.astype("int64").to_numpy(dtype=float) / 1e9
+            vals[s.isna().to_numpy()] = np.nan
+            out[c] = vals
     return out
 
 

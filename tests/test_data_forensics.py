@@ -179,3 +179,19 @@ def test_session_and_agent_wiring():
         "data_forensics", {"data_ref": "cohort_frame"}
     )
     assert "verdict" in result
+
+
+def test_nat_datetime_becomes_nan_not_sentinel():
+    """A missing timestamp must surface as NaN, not the int64 sentinel
+    year 1677 that silently poisons drift, MAR tests, and tipping."""
+    from causallens.analysis.data_forensics import _numeric_view
+
+    rng = np.random.default_rng(0)
+    n = 200
+    ts = pd.Series(pd.to_datetime("2023-01-01")
+                   + pd.to_timedelta(rng.integers(0, 100, n), unit="D"))
+    ts.iloc[::10] = pd.NaT
+    df = pd.DataFrame({"event_time": ts, "x": rng.normal(size=n)})
+    et = _numeric_view(df)["event_time"]
+    assert np.isnan(et).sum() == 20
+    assert np.nanmin(et) > 1e9  # no sentinel epoch
