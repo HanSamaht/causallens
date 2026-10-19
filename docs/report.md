@@ -1,6 +1,6 @@
 # CausalLens Technical Report
 
-Version 0.12.0, October 2026
+Version 0.13.0, October 2026
 
 ## Abstract
 
@@ -179,7 +179,40 @@ to do-contrasts of refitted black-box models, the chance band
 discipline, and minimal flip sets as an audit product with refusal
 grade verdicts (STABLE SIGN, FRAGILE SIGN, NEGLIGIBLE).
 
-## 9. Benchmarks
+## 9. The shortcut diff in 0.13.0
+
+A model can be right for the wrong reasons. The shortcut diff builds two
+graphs in one call: the world graph, from structure discovery (PC, GES,
+or DirectLiNGAM) over the background plus the caller supplied real
+outcome, with domain edges able to pin CPDAG orientations; and the
+model-implied reliance, from intervention contrasts on the frozen
+model. Every relied upon feature is then classified: CAUSAL PATH (a
+directed path to the outcome exists, the reliance is structurally
+supported), PROXY (the outcome has a directed path into the feature,
+which is label leakage or a legitimate pre-outcome measurement
+depending on timing the graph cannot see), UNRESOLVED PATH
+(connectivity only through undirected edges), or INDEPENDENT (no
+connection at all). The verdict reports the interventional reliance
+share at risk: the part of the model that breaks when the correlation
+carrying it breaks.
+
+On planted scenarios the audit separates the three failure flavors: a
+spurious sibling riding a latent cause lands UNRESOLVED PATH with a
+double digit reliance share, an overfit noise feature lands INDEPENDENT,
+and a label echo lands PROXY at 84 percent reliance while the true
+cause carries 12 percent. A clean two-cause model returns SUPPORTED at
+100 percent.
+
+Provenance: shortcut features in DAG terms were characterized by
+Bellamy et al. (2022), shortcut discovery in black box classifiers by
+Sahidullah et al. (2025), the failure mode itself by Geirhos et al.
+(2020). The contribution here is the two graph diff as one audit call
+with reliance share accounting and refusal grade classification
+disclosure: CPDAG orientations are assumptions, and PROXY verdicts
+state explicitly that deployment timing knowledge is required to
+separate leakage from legitimate measurement.
+
+## 10. Benchmarks
 
 - 125 tests, fast suite 95 in 69 seconds, slow suite 30 in 167 seconds
 - 24 real models across 15 domains interrogated during development,
@@ -191,7 +224,7 @@ grade verdicts (STABLE SIGN, FRAGILE SIGN, NEGLIGIBLE).
 - Granger validated on synthetic VAR data: true link found at p below
   1e-6 with correct lag, reverse direction null, noise channel silent
 
-## 10. Known limits
+## 11. Known limits
 
 - Pairwise Granger remains the default; PCMCI needs the tigramite
   extra and conditions on the observed past only
@@ -200,10 +233,13 @@ grade verdicts (STABLE SIGN, FRAGILE SIGN, NEGLIGIBLE).
 - Mediator mechanisms in fairness path decomposition are linear
 - The specification audit refits sklearn families only in v1; the
   closed form covers linear and ridge, other families go through refits
+- The shortcut diff inherits CPDAG orientation limits; undirected edges
+  are assumptions until domain edges pin them, and PROXY classification
+  cannot separate leakage from legitimate measurement without timing
 - Phrase counterfactual lexicons are English only and small
 - EIG planning relies on literal hypothesis to feature name matching
 
-## 11. Availability
+## 12. Availability
 
 AGPL-3.0, source at github.com/HanSamaht/causallens, package on PyPI as
 causallens, documentation hosted on GitHub Pages. Python 3.10 to 3.12,

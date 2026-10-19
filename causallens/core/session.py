@@ -491,6 +491,24 @@ class MicSession:
                        seed=seed)
         return self._log("specification_audit", result)
 
+    def shortcut_diff(self, y, method: str = "pc", alpha: float = 0.05,
+                      edges: list[tuple[str, str]] | None = None,
+                      min_reliance: float = 0.03, seed: int = 0) -> dict:
+        """Diff the model's interventional reliance against the world graph.
+
+        The world graph comes from structure discovery over the
+        background plus the real outcome (caller supplied); the model's
+        reliance comes from intervention contrasts. Each relied upon
+        feature is classified CAUSAL PATH, PROXY, UNRESOLVED PATH, or
+        INDEPENDENT, and the verdict names the reliance share that
+        breaks when its carrying correlation breaks.
+        """
+        from ..analysis.shortcut_diff import shortcut_diff as _sd
+
+        result = _sd(self.driver, y, method=method, alpha=alpha,
+                     edges=edges, min_reliance=min_reliance, seed=seed)
+        return self._log("shortcut_diff", result)
+
     def temporal_causal_graph(self, max_lag: int = 4, alpha: float = 0.05,
                               n_windows: int = 256, annotate_model: bool = True,
                               method: str = "granger") -> dict:

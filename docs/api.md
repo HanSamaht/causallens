@@ -46,6 +46,7 @@ MicSession(driver, pack=None)
 | `temporal_causal_graph(max_lag=4, method="granger")` | Granger or PCMCI lagged channel causes with model reliance annotation |
 | `identify_real_effect(treatment, outcome="prediction")` | DoWhy backdoor and front-door identification of the real world effect, latent confounding refused |
 | `specification_audit(treatment, y, max_specs=200, sample_weight=None)` | refit the model family across control subsets; sign stability, minimal flip sets, chance band verdict |
+| `shortcut_diff(y, method="pc", edges=None)` | classify every relied upon feature against the world graph; reliance share at risk, SUPPORTED or SHORTCUT RISK |
 
 ### Level 3: mediation and fairness
 

@@ -1,5 +1,13 @@
 # Blog
 
+## 2026-10: The shortcut diff: right answers riding the wrong features
+
+[Read the post](2026-10-the-shortcut-diff.md)
+
+Model-implied reliance classified against the discovered world graph:
+CAUSAL PATH, PROXY, UNRESOLVED PATH, or INDEPENDENT, with the reliance
+share at risk. A label echo lands PROXY at 84 percent.
+
 ## 2026-10: The specification audit: when the control set decides your sign
 
 [Read the post](2026-10-the-specification-audit.md)

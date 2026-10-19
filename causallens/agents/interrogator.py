@@ -300,6 +300,41 @@ class Interrogator:
             {
                 "type": "function",
                 "function": {
+                    "name": "shortcut_diff",
+                    "description": (
+                        "diff the model's interventional reliance against "
+                        "the world graph discovered from the data plus the "
+                        "real outcome; classifies each relied upon feature "
+                        "as CAUSAL PATH, PROXY, UNRESOLVED PATH, or "
+                        "INDEPENDENT and reports the reliance share at "
+                        "risk; call this before trusting a model whose "
+                        "training correlations may not survive deployment; "
+                        "the training outcome must be registered as "
+                        "dataset 'y' or named via y_ref"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "y_ref": {
+                                "type": "string",
+                                "description": (
+                                    "registered dataset name holding the "
+                                    "training outcome, default y"
+                                ),
+                            },
+                            "method": {
+                                "type": "string",
+                                "enum": ["pc", "ges", "lingam"],
+                                "description": "structure discovery backend, default pc",
+                            },
+                        },
+                        "required": [],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
                     "name": "set_causal_prior",
                     "description": (
                         "record your domain prior as explicit causal edges "
@@ -551,6 +586,10 @@ class Interrogator:
             "plan_next_intervention": lambda: s.plan_next_intervention(),
             "specification_audit": lambda: s.specification_audit(
                 args["treatment"], s.datasets.get(args.get("y_ref", "y"))
+            ),
+            "shortcut_diff": lambda: s.shortcut_diff(
+                s.datasets.get(args.get("y_ref", "y")),
+                method=args.get("method", "pc"),
             ),
             "set_causal_prior": lambda: s.set_causal_prior(args["edges"]),
             "test_causal_prior": lambda: s.test_causal_prior(),
