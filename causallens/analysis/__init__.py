@@ -4,6 +4,7 @@ from .counterfactual import default_threshold, search_counterfactual, search_cou
 from .discovery import discovery_edges
 from .faithfulness import aggregate_faithfulness, evaluate_faithfulness, explain_simulate_score
 from .identifiability import identify_real_effect
+from .specification_audit import specification_audit
 
 __all__ = [
     "explain_sample",
@@ -17,4 +18,5 @@ __all__ = [
     "aggregate_faithfulness",
     "explain_simulate_score",
     "identify_real_effect",
+    "specification_audit",
 ]

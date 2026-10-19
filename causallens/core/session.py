@@ -464,6 +464,33 @@ class MicSession:
                       n_samples=n_samples)
         return self._log("identify_real_effect", result)
 
+    def specification_audit(self, treatment: str, y,
+                            max_specs: int = 200,
+                            contrast: tuple[float, float] = (0.10, 0.90),
+                            max_flip_depth: int = 3,
+                            materiality: float | None = None,
+                            sample_weight=None,
+                            seed: int = 0) -> dict:
+        """Sign stability of the intervention effect across specifications.
+
+        Refits the driver's model family on every control subset (the
+        caller supplies the training outcome y aligned with the
+        background) and reports whether the do-contrast keeps its sign,
+        which specifications flip it, and the minimal control sets
+        responsible. A feature whose importance share stays healthy
+        while its intervention sign flips is named here, not hidden in
+        the ranking.
+        """
+        from ..analysis.specification_audit import (
+            specification_audit as _spec,
+        )
+
+        result = _spec(self.driver, treatment, y, max_specs=max_specs,
+                       contrast=contrast, max_flip_depth=max_flip_depth,
+                       materiality=materiality, sample_weight=sample_weight,
+                       seed=seed)
+        return self._log("specification_audit", result)
+
     def temporal_causal_graph(self, max_lag: int = 4, alpha: float = 0.05,
                               n_windows: int = 256, annotate_model: bool = True,
                               method: str = "granger") -> dict:

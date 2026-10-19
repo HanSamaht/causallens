@@ -266,6 +266,40 @@ class Interrogator:
             {
                 "type": "function",
                 "function": {
+                    "name": "specification_audit",
+                    "description": (
+                        "refit the model family on every control subset and "
+                        "report whether the treatment's intervention effect "
+                        "keeps its sign, which specifications flip it, and "
+                        "the minimal control sets responsible; call this "
+                        "before quoting any feature effect from a "
+                        "multivariate model, collinearity can flip signs "
+                        "that importance rankings hide; the training "
+                        "outcome must be registered as dataset 'y' or "
+                        "named via y_ref"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "treatment": {
+                                "type": "string",
+                                "description": "feature whose effect is audited",
+                            },
+                            "y_ref": {
+                                "type": "string",
+                                "description": (
+                                    "registered dataset name holding the "
+                                    "training outcome, default y"
+                                ),
+                            },
+                        },
+                        "required": ["treatment"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
                     "name": "set_causal_prior",
                     "description": (
                         "record your domain prior as explicit causal edges "
@@ -515,6 +549,9 @@ class Interrogator:
             "update_hypotheses": lambda: s.update_hypotheses(args["updates"]),
             "conclude_investigation": lambda: s.conclude_investigation(),
             "plan_next_intervention": lambda: s.plan_next_intervention(),
+            "specification_audit": lambda: s.specification_audit(
+                args["treatment"], s.datasets.get(args.get("y_ref", "y"))
+            ),
             "set_causal_prior": lambda: s.set_causal_prior(args["edges"]),
             "test_causal_prior": lambda: s.test_causal_prior(),
             "slippage_stress": lambda: s.slippage_stress(),

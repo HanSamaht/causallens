@@ -20,6 +20,7 @@ mentally to the [API reference](api.md).
 | `get_causal_graph` | interventional | direct, interaction, correlational edges |
 | `get_causal_graph(discovery="pc")` | structure discovery | PC, GES, or LiNGAM edges over features plus prediction |
 | `identify_real_effect` | DoWhy identification | backdoor or front-door verdict on the real world effect, latent confounding refused |
+| `specification_audit` | specification curve | sign stability of the intervention effect across control subsets, minimal flip sets named |
 | `temporal_causal_graph` | interventional plus discovery | Granger or PCMCI lagged channel causes with model reliance per lag |
 
 ## Is it fair

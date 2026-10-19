@@ -4,7 +4,7 @@ Embeds the pipeline scripts verbatim as appendix cells (%%writefile),
 so the notebook runs on Kaggle from the competition attachment alone
 plus causallens installed from the repository tag.
 
-Usage: python build_notebook.py [tag]   (default v0.11.0)
+Usage: python build_notebook.py [tag]   (default v0.12.0)
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import sys
 
 import nbformat as nbf
 
-TAG = sys.argv[1] if len(sys.argv) > 1 else "v0.11.0"
+TAG = sys.argv[1] if len(sys.argv) > 1 else "v0.12.0"
 
 SRC = {
     "extract": "extract_pass_rush_features.py",
@@ -55,10 +55,12 @@ of the 2023 to 2025 cohorts.
    +0.237 partial controlling position group and draft pick. The backdoor
    adjusted intervention estimate on the lean model is +0.024 pressure rate
    for moving a prospect from the 10th to the 90th percentile.
-4. A 16-feature ridge regression flips the drill-speed coefficient negative
-   through collinearity while its importance ranking still shows a healthy
-   share. Importance is bookkeeping, not behavior. We verified every headline
-   claim with an explicit intervention and a stated adjustment set.
+4. A 16-feature ridge regression collapses the drill-speed intervention
+   effect from +0.024 to -0.004, inside the chance band for this sample,
+   while its importance ranking shows nothing unusual. A specification
+   audit over 200 refitted control subsets confirms the effect is never
+   materially negative: the honest description is collapse, not flip.
+   Importance is bookkeeping, not behavior.
 
 The causal machinery (interventions, backdoor identification, bootstrap
 attribution intervals) comes from
@@ -189,14 +191,49 @@ Four checks run in sequence:
    position group and draft pick: the confounders absorb most of the raw 0.528
    but the residue stays positive.
 2. do(max_speed p10 to p90) on the lean three-feature model vs the full
-   sixteen-feature model: collinearity pushes the full model's effect through
-   zero into the wrong sign.
+   sixteen-feature model: collinearity collapses the full model's effect
+   from +0.024 into the chance band at -0.004.
 3. Bootstrap attribution intervals on the lean model: which features carry
    stable weight across resamples.
 4. Backdoor identification of the drill-speed effect with the adjustment set
    {position, draft pick}: the estimate a team can act on.""")
 
 code("""na.step4_analysis()""")
+
+md("""## Step 5: specification audit of the drill speed effect
+
+The lean vs full contrast above is two points. The specification audit
+refits the same ridge family on 200 sampled control subsets (weighted by
+opportunity count, matching the production protocol) and draws the full
+curve: in which specifications the effect rises above the chance band,
+and whether any specification turns it materially negative. This is the
+CausalLens method the writeup leads with.""")
+
+code("""import pandas as pd
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import RidgeCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from causallens.analysis.specification_audit import specification_audit
+from causallens.drivers import detect_driver
+
+m = pd.read_csv("full_cohort.csv")
+core = m[m.n_opportunities >= 50].copy()
+core["edge"] = core.nfl_position.isin(["DE", "OLB"]).astype(float)
+core = core.dropna(subset=["pressure_rate"])
+y = core.pressure_rate.values
+cols = ["edge", "draft_overall_pick"] + na.TRAD + na.TRACK[:6]
+
+pipe = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),
+                     RidgeCV(alphas=[0.1, 1, 10, 100]))
+pipe.fit(core[cols], y, ridgecv__sample_weight=core.n_opportunities.values)
+drv = detect_driver(pipe, cols, core[cols].to_numpy(), name="nfl_spec_audit")
+
+out = specification_audit(drv, "max_speed", y, max_specs=200,
+                          sample_weight=core.n_opportunities.values, seed=0)
+print(out["verdict"])
+print("lean (speed only):", out["effect_lean"], " full (16 features):", out["effect_full"])
+print("minimal flip sets:", out["minimal_flip_sets"])""")
 
 md("""## Figures
 
@@ -225,8 +262,8 @@ md("""## Conclusions
    speed carries incremental validity over pick and stopwatch for pressure
    production.
 3. Never stack the collinear drill family into one regression and read its
-   importances: the sixteen-feature model flips the drill-speed sign while
-   looking healthy on importance.
+   importances: the sixteen-feature model collapses the drill-speed effect
+   into the chance band and its importance ranking does not flag it.
 4. Movement predicts pressure conversion, production scores predict snap
    volume; they answer different questions and belong in separate reports.
 

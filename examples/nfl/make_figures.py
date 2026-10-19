@@ -111,7 +111,7 @@ fig.tight_layout()
 fig.savefig("figures/fig4_speed_to_pressure.png", bbox_inches="tight")
 plt.close(fig)
 
-# ---- Fig 5: the sign flip ----
+# ---- Fig 5: the specification audit of the drill speed effect ----
 core["edge_f"] = core.nfl_position.isin(["DE", "OLB"]).astype(float)
 y = core.pressure_rate.values
 TRACK6 = ["total_time", "max_speed", "accel_first_1s", "speed_at_4yd", "path_efficiency", "bend_rate_deg_per_s"]
@@ -132,15 +132,47 @@ def do_effect(cols):
 
 lean = do_effect(["edge_f", "draft_overall_pick", "max_speed"])
 full = do_effect(full_cols)
-fig, ax = plt.subplots(figsize=(5.5, 3.6))
-ax.bar([0, 1], [lean, full], color=[C, C2], width=0.55)
-ax.axhline(0, color="black", lw=1)
-ax.set_xticks([0, 1])
-ax.set_xticklabels(["lean model\n(position, pick, drill speed)", "full model\n(16 features)"])
-ax.set_ylabel("do(drill speed: p10 -> p90) effect")
+
+# specification audit: refit the same family on 200 sampled control subsets
+import sys as _sys
+
+_sys.path.insert(0, "../..")
+from causallens.analysis.specification_audit import specification_audit as _sa
+from causallens.drivers import detect_driver as _dd
+
+_full_pipe = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),
+                           RidgeCV(alphas=[0.1, 1, 10, 100]))
+_full_pipe.fit(core[full_cols], y, ridgecv__sample_weight=core.n_opportunities.values)
+audit = _sa(_dd(_full_pipe, full_cols, core[full_cols].to_numpy(), name="nfl_spec"),
+            "max_speed", y, max_specs=200,
+            sample_weight=core.n_opportunities.values, seed=0)
+cut = audit["materiality"]
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.8))
+axes[0].bar([0, 1], [lean, full], color=[C, C2], width=0.55)
+axes[0].axhspan(-cut, cut, color="gray", alpha=0.25, label="chance band")
+axes[0].axhline(0, color="black", lw=1)
+axes[0].set_xticks([0, 1])
+axes[0].set_xticklabels(["lean model\n(position, pick, drill speed)",
+                         "full model\n(16 features)"], fontsize=9)
+axes[0].set_ylabel("do(drill speed: p10 -> p90) effect")
 for i, v in enumerate([lean, full]):
-    ax.text(i, v + (0.001 if v > 0 else -0.002), f"{v:+.4f}", ha="center", fontsize=10)
-ax.set_title("Collinearity flips the drill speed effect in the crowded model")
+    axes[0].text(i, v + (0.001 if v > 0 else -0.0025), f"{v:+.4f}",
+                 ha="center", fontsize=9)
+axes[0].legend(fontsize=8, loc="upper right")
+axes[0].set_title("(a) two models, one feature", fontsize=10)
+
+curve = np.array(audit["spec_curve"])
+axes[1].axhspan(-cut, cut, color="gray", alpha=0.25)
+axes[1].axhline(0, color="black", lw=1)
+axes[1].plot(np.arange(1, len(curve) + 1), curve, color=C, lw=1.2)
+axes[1].set_xlabel("specification rank (sorted effect)")
+axes[1].set_ylabel("do(drill speed) per specification")
+axes[1].set_title(f"(b) {len(curve)} refitted control subsets: "
+                  f"{audit['n_specs'] - audit['n_flip'] - audit['n_negligible']} above the band, "
+                  f"{audit['n_flip']} below", fontsize=10)
+fig.suptitle("Collinearity collapses the drill speed effect; no specification goes materially negative",
+             y=1.03)
 fig.tight_layout()
 fig.savefig("figures/fig5_sign_flip.png", bbox_inches="tight")
 plt.close(fig)

@@ -45,6 +45,7 @@ MicSession(driver, pack=None)
 | `get_causal_graph(i=None, discovery=None)` | intervention graph; `discovery="pc"`, `"ges"`, or `"lingam"` adds structure discovery |
 | `temporal_causal_graph(max_lag=4, method="granger")` | Granger or PCMCI lagged channel causes with model reliance annotation |
 | `identify_real_effect(treatment, outcome="prediction")` | DoWhy backdoor and front-door identification of the real world effect, latent confounding refused |
+| `specification_audit(treatment, y, max_specs=200, sample_weight=None)` | refit the model family across control subsets; sign stability, minimal flip sets, chance band verdict |
 
 ### Level 3: mediation and fairness
 

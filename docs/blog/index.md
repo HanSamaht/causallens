@@ -1,5 +1,13 @@
 # Blog
 
+## 2026-10: The specification audit: when the control set decides your sign
+
+[Read the post](2026-10-the-specification-audit.md)
+
+The method that generalizes the NFL catch: refit across the control
+lattice, draw the chance band, name the minimal flip sets. It also
+corrected our own sign flip claim on the way.
+
 ## 2026-10: The attribution that failed its own intervention
 
 [Read the post](2026-10-the-attribution-that-failed.md)
