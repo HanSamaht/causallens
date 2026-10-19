@@ -159,6 +159,7 @@ def specification_audit(
     materiality: float | None = None,
     sample_weight=None,
     groups=None,
+    estimator_factory=None,
     seed: int = 0,
 ) -> dict:
     """Sign stability of the do-contrast for one treatment across specifications.
@@ -197,6 +198,10 @@ def specification_audit(
             the per group effects are compared to the pooled signs, so
             a finding that only exists in the pooled sample is named
             by the cohort that reverses it.
+        estimator_factory: callable returning an unfitted fit and
+            predict estimator, the escape hatch for model families
+            sklearn cannot clone (for example torch wrappers); used
+            for every specification refit.
         seed: reproducibility.
 
     Returns:
@@ -247,6 +252,14 @@ def specification_audit(
     cert = _cert_context(driver.model, bg)
     effects: dict[frozenset, float] = {}
 
+    def _new_model():
+        """A fresh unfitted member of the driver's family."""
+        if estimator_factory is not None:
+            return estimator_factory()
+        from sklearn.base import clone
+
+        return clone(driver.model)
+
     if cert is not None:
         Xc, penalty = cert
         sub_X = Xc[:, [t_idx] + others]
@@ -271,14 +284,13 @@ def specification_audit(
             return effects[orig_set]
     else:
         try:
-            from sklearn.base import clone
-
-            base = clone(driver.model)
+            base = _new_model()
         except Exception as e:  # noqa: BLE001
             raise ValueError(
-                "specification_audit refits the driver's model family and "
-                f"sklearn could not clone it ({type(e).__name__}: {e}); V1 "
-                "supports sklearn estimators and pipelines"
+                "specification_audit refits the driver's model family "
+                f"and sklearn could not clone it ({type(e).__name__}: "
+                f"{e}); pass estimator_factory returning an unfitted "
+                "fit and predict estimator for non sklearn families"
             ) from e
 
         anchor_idx = rng.choice(len(bg), size=min(n_anchor, len(bg)),
@@ -291,7 +303,7 @@ def specification_audit(
         def effect_of(orig_set: frozenset) -> float:
             if orig_set not in effects:
                 spec_cols = [t_idx] + sorted(orig_set)
-                m = _fit_with_weights(clone(base), bg[:, spec_cols], y,
+                m = _fit_with_weights(_new_model(), bg[:, spec_cols], y,
                                       sample_weight)
                 effects[orig_set] = float(np.mean(m.predict(A[:, spec_cols])
                                                  - m.predict(B[:, spec_cols])))
@@ -377,8 +389,6 @@ def specification_audit(
     # ---- leave-one-group-out stability of the lean and full effects
     fold_stability = None
     if groups is not None:
-        from sklearn.base import clone as _clone
-
         groups = np.asarray(groups)
         if len(groups) != len(bg):
             raise ValueError(
@@ -395,7 +405,7 @@ def specification_audit(
             entry = {"group": str(g), "n_rows": int(rows.sum())}
             for name, cols in (("lean", ()), ("full", tuple(others))):
                 spec_cols = [t_idx] + sorted(cols)
-                m = _fit_with_weights(_clone(driver.model),
+                m = _fit_with_weights(_new_model(),
                                       bg[np.ix_(rows, spec_cols)], y[rows],
                                       None if sw is None else sw[rows])
                 xg = bg[np.ix_(rows, spec_cols)]

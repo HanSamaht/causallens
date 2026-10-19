@@ -1,6 +1,6 @@
 # CausalLens Technical Report
 
-Version 0.14.0, October 2026
+Version 0.15.0, October 2026
 
 ## Abstract
 
@@ -245,7 +245,46 @@ fewer opportunities, medians 14 versus 315), three drill features drift
 across draft years, traditional drills are over 50 percent missing, and
 join coverage is 97 percent one direction.
 
-## 11. Benchmarks
+## 11. Depth and coverage in 0.15.0
+
+Four upgrades after the adversarial review of 0.14.1.
+
+Graph bootstrap: the shortcut diff no longer treats the discovered
+CPDAG as fixed. n_graph_boot replicates resample the rows, re-estimate
+the world graph, and reclassify every relied upon feature; each
+classification carries class_prob, its agreement across replicates, and
+features below 80 percent agreement are named unstable in the verdict.
+User edges are domain knowledge and pin orientations in every
+replicate. On the label echo scenario the pinned classifications are
+stable at 100 percent across replicates; ambiguous orientations show
+their true instability instead of hiding it.
+
+MNAR tipping sensitivity: data forensics answers the question every
+MAR finding invites, "but what if it is missing not at random", with an
+explicit bound: for each partly missing numeric column it reports the
+uniform shift (in observed SD units) the missing entries would need to
+move the full column mean by half a standard deviation, plus the
+tipping value in column units. The note is honest that this bounds
+sensitivity, it cannot rule MNAR out.
+
+Categorical and temporal coverage: MAR witnesses now include
+categorical columns via chi square on the missingness by category
+table (a strong association can leave few nonzero cells, so the table
+is trimmed to its nonzero core rather than rejected), drift scans read
+datetime columns as epoch seconds, and categorical columns get
+composition drift tests with per group top category shares. The
+constant column guard was restored after a Kruskal Wallis edge case it
+had covered.
+
+Non sklearn families: specification_audit accepts estimator_factory, a
+callable returning an unfitted fit and predict estimator, so torch
+wrappers and custom families can be specification audited without
+clone support; the refusal message without a factory names the escape
+hatch. The auditor role prompt now encodes the audit playbook: data
+forensics before any modeling claim, shortcut diff after the first
+attribution, specification audit before quoting any feature effect.
+
+## 12. Benchmarks
 
 - 125 tests, fast suite 95 in 69 seconds, slow suite 30 in 167 seconds
 - 24 real models across 15 domains interrogated during development,
@@ -257,7 +296,7 @@ join coverage is 97 percent one direction.
 - Granger validated on synthetic VAR data: true link found at p below
   1e-6 with correct lag, reverse direction null, noise channel silent
 
-## 12. Known limits
+## 13. Known limits
 
 - Pairwise Granger remains the default; PCMCI needs the tigramite
   extra and conditions on the observed past only
@@ -272,7 +311,7 @@ join coverage is 97 percent one direction.
 - Phrase counterfactual lexicons are English only and small
 - EIG planning relies on literal hypothesis to feature name matching
 
-## 13. Availability
+## 14. Availability
 
 AGPL-3.0, source at github.com/HanSamaht/causallens, package on PyPI as
 causallens, documentation hosted on GitHub Pages. Python 3.10 to 3.12,

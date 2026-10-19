@@ -227,6 +227,27 @@ def test_certificate_matches_pipeline_penalty_geometry():
     assert abs(out["effect_full"] - manual) < 1e-5
 
 
+def test_estimator_factory_for_non_cloneable_families():
+    """A model sklearn cannot clone must be refused with guidance, and
+    an estimator_factory must make the audit work for that family."""
+    X, y, feats = make_suppressor(n=400, seed=14)
+
+    class FakeNet:
+        pass
+
+    drv = detect_driver(FakeNet(), feats, X, name="fake")
+    with pytest.raises(ValueError, match="estimator_factory"):
+        specification_audit(drv, "x", y)
+
+    from sklearn.linear_model import Ridge
+
+    out = specification_audit(drv, "x", y,
+                              estimator_factory=lambda: Ridge(alpha=1.0))
+    assert out["engine"] == "refit_clone"
+    assert out["verdict"].startswith("FRAGILE SIGN")
+    assert out["minimal_flip_sets"]
+
+
 def test_session_and_agent_wiring():
     X, y, feats = make_suppressor(n=400, seed=6)
     model = LinearRegression().fit(X, y)

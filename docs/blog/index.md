@@ -1,5 +1,15 @@
 # Blog
 
+## 2026-10: Depth and coverage: graph uncertainty, MNAR bounds, categorical witnesses, the audit playbook
+
+[Read the post](2026-10-depth-and-coverage.md)
+
+Graph bootstrap puts a stability number on every shortcut
+classification, MNAR tipping bounds what missing data could hide,
+categorical and datetime columns join the forensic scans, torch
+families get specification audits, and the auditor prompt now enforces
+the playbook itself.
+
 ## 2026-10: Audit hardening: cohort folds, permutation nulls, automated forensics
 
 [Read the post](2026-10-audit-hardening.md)

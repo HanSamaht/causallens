@@ -128,3 +128,14 @@ def test_credit_demo_dirty_path():
     attr = session.get_attribution(0)
     top5 = [a["feature"] for a in attr["attributions"][:5]]
     assert "checking_status" in top5
+
+
+def test_auditor_playbook_names_the_audit_gates():
+    """The auditor prompt must keep the three discipline gates:
+    forensics before modeling claims, shortcut_diff after the first
+    attribution, specification_audit before quoting any effect."""
+    from causallens.agents.prompts import AUDITOR
+
+    for tool in ("data_forensics", "shortcut_diff", "specification_audit"):
+        assert tool in AUDITOR
+    assert "specification dependent" in AUDITOR

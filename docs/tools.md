@@ -7,7 +7,7 @@ mentally to the [API reference](api.md).
 
 | Tool | Kind | Gives you |
 |---|---|---|
-| `data_forensics` | descriptive plus rank tests | constant and duplicate columns, missingness inventory, MCAR versus MAR hints, drift across cohorts, two directional join audit |
+| `data_forensics` | descriptive plus rank tests | constant and duplicate columns, missingness inventory, MCAR versus MAR hints (numeric, categorical, datetime witnesses), MNAR tipping sensitivity, numeric and composition drift, two directional join audit |
 
 ## What drives the decision
 
@@ -26,8 +26,8 @@ mentally to the [API reference](api.md).
 | `get_causal_graph` | interventional | direct, interaction, correlational edges |
 | `get_causal_graph(discovery="pc")` | structure discovery | PC, GES, or LiNGAM edges over features plus prediction |
 | `identify_real_effect` | DoWhy identification | backdoor or front-door verdict on the real world effect, latent confounding refused |
-| `specification_audit` | specification curve | sign stability of the intervention effect across control subsets, minimal flip sets named, cohort fold stability with groups |
-| `shortcut_diff` | two graph diff | model reliance classified CAUSAL PATH, PROXY, UNRESOLVED PATH, INDEPENDENT against the discovered world graph, shares tested against permutation nulls |
+| `specification_audit` | specification curve | sign stability across control subsets, minimal flip sets, cohort fold stability, estimator_factory for non sklearn families |
+| `shortcut_diff` | two graph diff | reliance classified against the discovered world graph, permutation nulls per share, classification stability under graph bootstrap |
 | `temporal_causal_graph` | interventional plus discovery | Granger or PCMCI lagged channel causes with model reliance per lag |
 
 ## Is it fair

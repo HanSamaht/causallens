@@ -167,6 +167,39 @@ def test_unknown_edge_name_raises():
         shortcut_diff(drv, y, edges=[("unobserved_cause", "x")])
 
 
+def test_graph_bootstrap_stability():
+    """Pinned user edges make classifications stable across graph
+    re-estimation; the class_prob field reports that stability."""
+    X, y, feats = make_proxy()
+    gbm = GradientBoostingRegressor(n_estimators=60, max_depth=3,
+                                    random_state=0).fit(X, y)
+    drv = detect_driver(gbm, feats, X, name="gboot")
+    out = shortcut_diff(drv, y, edges=[("x", "outcome"), ("outcome", "p")],
+                        n_perm=0, n_graph_boot=8)
+    by_name = {r["feature"]: r for r in out["reliance"]}
+    assert by_name["p"]["class_prob"] == 1.0
+    assert by_name["x"]["class_prob"] == 1.0
+    assert out["graph_bootstrap"]["n"] == 8
+
+    # without pinned edges the orientation is data driven, probabilities
+    # must still be present and calibrated in [0, 1]
+    out2 = shortcut_diff(drv, y, n_perm=0, n_graph_boot=8)
+    for r in out2["reliance"]:
+        if "class_prob" in r:
+            assert 0.0 <= r["class_prob"] <= 1.0
+
+
+def test_graph_bootstrap_disabled():
+    X, y, feats = make_spurious()
+    gbm = GradientBoostingRegressor(n_estimators=40, max_depth=3,
+                                    random_state=0).fit(X, y)
+    drv = detect_driver(gbm, feats, X, name="noboot")
+    out = shortcut_diff(drv, y, edges=[("x", "outcome")], n_perm=0,
+                        n_graph_boot=0)
+    assert out["graph_bootstrap"] is None
+    assert all("class_prob" not in r for r in out["reliance"])
+
+
 def test_session_and_agent_wiring():
     X, y, feats = make_proxy()
     gbm = GradientBoostingRegressor(n_estimators=60, max_depth=3,

@@ -100,6 +100,7 @@ def shortcut_diff(
     edges: list[tuple[str, str]] | None = None,
     min_reliance: float = 0.03,
     n_perm: int = 20,
+    n_graph_boot: int = 10,
     quantiles: tuple[float, float] = (0.10, 0.90),
     n_anchor: int = 64,
     seed: int = 0,
@@ -123,6 +124,11 @@ def shortcut_diff(
             reliance share (refit on shuffled outcome); 0 disables.
             Skipped automatically when the model family cannot be
             refit.
+        n_graph_boot: bootstrap replicates for the world graph itself;
+            each replicate re-estimates the CPDAG on resampled rows and
+            reclassifies, so every classification carries its stability.
+            0 disables. User edges are domain knowledge and pin
+            orientations in every replicate.
         quantiles: contrast pair defining each intervention.
         n_anchor: rows over which reliance is averaged.
         seed: reproducibility.
@@ -171,12 +177,8 @@ def shortcut_diff(
         names_kept = names
     outcome_idx = remap[outcome_idx]
 
-    world = _world_edges(data, names_kept, method, alpha)
-
+    # unknown user edge names refuse before any discovery work runs
     if edges:
-        by_pair: dict[tuple[int, int], tuple[int, int, bool]] = {}
-        for i, j, d in world:
-            by_pair[(min(i, j), max(i, j))] = (i, j, d)
         unknown = sorted({n for src, dst in edges for n in (src, dst)
                           if n not in names_kept})
         if unknown:
@@ -186,18 +188,28 @@ def shortcut_diff(
                 f"'{_OUTCOME}'; latent variables cannot orient a "
                 "discovered edge"
             )
-        for src, dst in edges:
-            i, j = names_kept.index(src), names_kept.index(dst)
-            by_pair[(min(i, j), max(i, j))] = (i, j, True)
-        world = list(by_pair.values())
 
-    directed: dict[int, list[int]] = {}
-    skeleton: dict[int, list[int]] = {}
-    for i, j, d in world:
-        skeleton.setdefault(i, []).append(j)
-        skeleton.setdefault(j, []).append(i)
-        if d:
-            directed.setdefault(i, []).append(j)
+    def build_graph(sample: np.ndarray):
+        """World graph on a (possibly resampled) data matrix."""
+        w = _world_edges(sample, names_kept, method, alpha)
+        if edges:
+            by_pair: dict[tuple[int, int], tuple[int, int, bool]] = {}
+            for i, j, d in w:
+                by_pair[(min(i, j), max(i, j))] = (i, j, d)
+            for src, dst in edges:
+                i, j = names_kept.index(src), names_kept.index(dst)
+                by_pair[(min(i, j), max(i, j))] = (i, j, True)
+            w = list(by_pair.values())
+        d_out: dict[int, list[int]] = {}
+        s_out: dict[int, list[int]] = {}
+        for i, j, d in w:
+            s_out.setdefault(i, []).append(j)
+            s_out.setdefault(j, []).append(i)
+            if d:
+                d_out.setdefault(i, []).append(j)
+        return w, d_out, s_out
+
+    world, directed, skeleton = build_graph(data)
 
     # ---- model-implied reliance: intervention contrast per feature
     rng = np.random.default_rng(seed)
@@ -241,6 +253,36 @@ def shortcut_diff(
             perm = None
 
     # ---- classify each relied upon feature against the world graph
+    def classify(node: int, d_map: dict, s_map: dict) -> str:
+        if _directed_path(d_map, node, outcome_idx):
+            return "CAUSAL PATH"
+        if _directed_path(d_map, outcome_idx, node):
+            return "PROXY"
+        if _directed_path(s_map, node, outcome_idx):
+            return "UNRESOLVED PATH"
+        return "INDEPENDENT"
+
+    # the CPDAG itself is estimated from finite data, so classifications
+    # carry their stability under graph re-estimation
+    boot = None
+    if n_graph_boot and n_graph_boot > 0:
+        sig = [j for j in range(len(feats)) if shares[j] >= min_reliance]
+        counts: dict[int, dict[str, int]] = {j: {} for j in sig}
+        n_ok = 0
+        for _ in range(n_graph_boot):
+            idx = rng.integers(0, len(data), len(data))
+            try:
+                _, d_b, s_b = build_graph(data[idx])
+            except Exception:  # noqa: BLE001 - degenerate resample, skip it
+                continue
+            n_ok += 1
+            for j in sig:
+                c = classify(remap.get(j, j), d_b, s_b)
+                counts[j][c] = counts[j].get(c, 0) + 1
+        if n_ok:
+            boot = {feats[j]: {k: v / n_ok for k, v in counts[j].items()}
+                    for j in sig if counts[j]}
+
     rows = []
     at_risk = 0.0
     order = np.argsort(-shares)
@@ -249,25 +291,24 @@ def shortcut_diff(
         if share < min_reliance and share < 1e-6:
             continue
         node = remap.get(j, j)
-        if _directed_path(directed, node, outcome_idx):
-            cls = "CAUSAL PATH"
-        elif _directed_path(directed, outcome_idx, node):
-            cls = "PROXY"
-        elif _directed_path(skeleton, node, outcome_idx):
-            cls = "UNRESOLVED PATH"
-        else:
-            cls = "INDEPENDENT"
-        rows.append({
+        cls = classify(node, directed, skeleton)
+        row = {
             "feature": feats[j],
             "reliance_share": round(share, 4),
             "classification": cls if share >= min_reliance else "BELOW THRESHOLD",
-            **({"null_share_median": round(float(perm["null_share_median"][j]), 4),
-                "perm_p": round(float(perm["p_value"][j]), 3)}
-               if perm else {}),
-        })
+        }
+        if boot and feats[j] in boot and share >= min_reliance:
+            row["class_prob"] = round(boot[feats[j]].get(row["classification"], 0.0), 2)
+            if row["class_prob"] < 0.8:
+                row["classification_unstable"] = True
+        if perm:
+            row["null_share_median"] = round(float(perm["null_share_median"][j]), 4)
+            row["perm_p"] = round(float(perm["p_value"][j]), 3)
+        rows.append(row)
         if share >= min_reliance and cls != "CAUSAL PATH":
             at_risk += share
 
+    unstable = [r["feature"] for r in rows if r.get("classification_unstable")]
     risky = [r for r in rows if r["classification"] not in ("CAUSAL PATH", "BELOW THRESHOLD")]
     if risky:
         detail = ", ".join(
@@ -285,6 +326,9 @@ def shortcut_diff(
             "features with a directed causal path to the outcome in the "
             f"{method} graph"
         )
+    if unstable:
+        verdict += (f"; classification unstable under graph bootstrap "
+                    f"(<80% agreement): {', '.join(unstable)}")
 
     world_out = [
         {"source": names_kept[i], "target": names_kept[j],
@@ -300,6 +344,8 @@ def shortcut_diff(
         "reliance": rows,
         "reliance_at_risk": round(at_risk, 4),
         "permutation": ({"n_perm": perm["n_perm"]} if perm else None),
+        "graph_bootstrap": ({"n": n_graph_boot,
+                             "class_probabilities": boot} if boot else None),
         "verdict": verdict,
         "method": "world_graph_vs_interventional_reliance",
         "reference": (

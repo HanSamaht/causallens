@@ -45,9 +45,9 @@ MicSession(driver, pack=None)
 | `get_causal_graph(i=None, discovery=None)` | intervention graph; `discovery="pc"`, `"ges"`, or `"lingam"` adds structure discovery |
 | `temporal_causal_graph(max_lag=4, method="granger")` | Granger or PCMCI lagged channel causes with model reliance annotation |
 | `identify_real_effect(treatment, outcome="prediction")` | DoWhy backdoor and front-door identification of the real world effect, latent confounding refused |
-| `specification_audit(treatment, y, max_specs=200, sample_weight=None, groups=None)` | refit the model family across control subsets; sign stability, minimal flip sets, chance band verdict, per cohort effect heterogeneity |
-| `shortcut_diff(y, method="pc", edges=None, n_perm=20)` | classify every relied upon feature against the world graph; reliance share at risk, permutation p values per share |
-| `data_forensics(df, groups=None, other_df=None, key=None)` | pre modeling audit: missingness mechanism hints, cohort drift, join coverage, severity ordered verdict |
+| `specification_audit(treatment, y, max_specs=200, sample_weight=None, groups=None, estimator_factory=None)` | refit the model family across control subsets; sign stability, minimal flip sets, chance band verdict, per cohort effect heterogeneity, non sklearn families via factory |
+| `shortcut_diff(y, method="pc", edges=None, n_perm=20, n_graph_boot=10)` | classify every relied upon feature against the world graph; reliance at risk, permutation p values, classification stability under graph bootstrap |
+| `data_forensics(df, groups=None, other_df=None, key=None)` | pre modeling audit: mechanism hints across numeric, categorical, and datetime witnesses, MNAR tipping, numeric and composition drift, join coverage |
 
 ### Level 3: mediation and fairness
 
