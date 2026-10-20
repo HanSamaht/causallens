@@ -313,6 +313,174 @@ class Interrogator:
             {
                 "type": "function",
                 "function": {
+                    "name": "cate_heterogeneity",
+                    "description": (
+                        "who does the treatment work for: per-row do "
+                        "contrasts mined by a depth-two subgroup tree, "
+                        "with bootstrap stability; call before any "
+                        "targeting or subgroup claim"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "treatment": {
+                                "type": "string",
+                                "description": "feature whose effect is mapped",
+                            },
+                            "y_ref": {
+                                "type": "string",
+                                "description": "registered outcome, default y",
+                            },
+                        },
+                        "required": ["treatment"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "double_ml_effect",
+                    "description": (
+                        "cross-fitted double ML estimate of the "
+                        "observational effect with robust inference; "
+                        "call before quoting any observational effect"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "treatment": {
+                                "type": "string",
+                            },
+                            "y_ref": {
+                                "type": "string",
+                            },
+                            "n_folds": {
+                                "type": "integer",
+                                "description": "cross-fitting folds, default 5",
+                            },
+                        },
+                        "required": ["treatment"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "omitted_variable_sensitivity",
+                    "description": (
+                        "Oster delta: how strong would an unobservable "
+                        "need to be to kill the finding; call before "
+                        "any robustness claim"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "treatment": {
+                                "type": "string",
+                            },
+                            "y_ref": {
+                                "type": "string",
+                            },
+                        },
+                        "required": ["treatment"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "panel_fixed_effects",
+                    "description": (
+                        "within-group fixed effects with cluster-robust "
+                        "standard errors; call for any repeated-measures "
+                        "or panel claim"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "data_ref": {
+                                "type": "string",
+                                "description": "registered DataFrame name",
+                            },
+                            "outcome": {
+                                "type": "string",
+                            },
+                            "features": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                            },
+                            "group": {
+                                "type": "string",
+                                "description": "unit identifier",
+                            },
+                        },
+                        "required": ["data_ref", "outcome", "features", "group"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "mediation_chain",
+                    "description": (
+                        "standardized a-times-b mediation with bootstrap "
+                        "intervals and a suppression guard; call before "
+                        "any mechanism claim"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "data_ref": {
+                                "type": "string",
+                            },
+                            "treatment": {
+                                "type": "string",
+                            },
+                            "mediator": {
+                                "type": "string",
+                            },
+                            "outcome": {
+                                "type": "string",
+                            },
+                        },
+                        "required": ["data_ref", "treatment", "mediator", "outcome"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "holdout_evaluation",
+                    "description": (
+                        "entire group levels held out, scored with AUC "
+                        "Brier calibration and the prior baseline; call "
+                        "before any generalization claim"
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "data_ref": {
+                                "type": "string",
+                            },
+                            "outcome": {
+                                "type": "string",
+                            },
+                            "features": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                            },
+                            "group": {
+                                "type": "string",
+                                "description": "column whose levels define the holdout",
+                            },
+                        },
+                        "required": ["data_ref", "outcome", "features", "group"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
                     "name": "specification_audit",
                     "description": (
                         "refit the model family on every control subset and "

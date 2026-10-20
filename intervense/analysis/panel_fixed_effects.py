@@ -20,14 +20,20 @@ import pandas as pd
 
 def _cluster_vcov(X: np.ndarray, resid: np.ndarray,
                   groups: np.ndarray) -> np.ndarray:
-    """Sandwich covariance with Stata's finite sample correction."""
+    """Sandwich covariance with Stata's finite sample correction.
+
+    The meat is the sum of outer products of GROUP-LEVEL score
+    vectors, not the sum of individual outer products: the whole
+    point of clustering is the cross-products WITHIN a group's
+    residuals, which the White/heteroskedasticity sandwich discards.
+    """
     XtX_inv = np.linalg.inv(X.T @ X)
     unique = np.unique(groups)
     meat = np.zeros((X.shape[1], X.shape[1]))
     for g in unique:
         m = groups == g
-        Xg = X[m] * resid[m][:, None]
-        meat += Xg.T @ Xg
+        score_g = X[m].T @ resid[m]       # X_g' e_g, a K x 1 vector
+        meat += np.outer(score_g, score_g) # (X_g'e_g)(X_g'e_g)'
     g_, n_, k_ = len(unique), len(X), X.shape[1]
     corr = (g_ / max(g_ - 1, 1)) * ((n_ - 1) / max(n_ - k_, 1))
     return corr * (XtX_inv @ meat @ XtX_inv)
