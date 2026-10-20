@@ -1,6 +1,6 @@
 # Intervense Technical Report
 
-Version 0.15.0, October 2026
+Version 0.17.0, October 2026
 
 ## Abstract
 
@@ -284,7 +284,48 @@ hatch. The auditor role prompt now encodes the audit playbook: data
 forensics before any modeling claim, shortcut diff after the first
 attribution, specification audit before quoting any feature effect.
 
-## 12. Benchmarks
+## 12. Causal judgment depth in 0.17.0
+
+Three methods move the verdicts from whether an effect exists to how
+far the data licenses believing it.
+
+Double ML: cross-fitted partially linear estimation (Chernozhukov et
+al. 2018). Nuisance functions are learned by the driver's own model
+family, residuals are computed out of fold, and the treatment effect
+carries a Neyman-orthogonal robust interval. The output also prints
+the naive uncontrolled and controlled OLS estimates, so the confounding
+gap is a number on the page, not a footnote. On a planted confounded
+simulation (theta 0.8, confounding paths through two covariates) the
+cross-fitted estimate lands within 0.1 of the truth while the naive
+uncontrolled estimate is visibly biased, and the interval covers the
+truth.
+
+CATE heterogeneity: per-row do-contrasts from the fitted family are
+mined by a depth-two subgroup tree with a minimum leaf size, so every
+subgroup is a rule a decision maker can read (for example one feature
+threshold). The strongest-versus-weakest subgroup contrast carries a
+bootstrap interval and the top split feature reports its stability
+across refits. On a planted design where the effect is 2.0 for one
+half of the population and 0.2 for the other, the module returns
+HETEROGENEOUS with the split on the right feature and both subgroup
+means recovered.
+
+Omitted variable sensitivity: Oster's delta. Comparing the coefficient
+before and after controls together with their R-squareds, delta is the
+ratio of unobservable to observable selection that nullifies the
+effect; values above 1 are the robust convention, values below 1 are
+fragile, and the case where controls moved the coefficient away from
+zero is refused to an honest INCONCLUSIVE verdict rather than bent
+into a pass. The fragility semantics follow Oster's own: a large
+coefficient movement under control addition is itself evidence that
+selection of the same character may be hiding in the unobservables.
+
+The auditor playbook now chains them: quote no observational effect
+without double_ml_effect, no targeting claim without
+cate_heterogeneity, and no robustness claim without
+omitted_variable_sensitivity.
+
+## 13. Benchmarks
 
 - 125 tests, fast suite 95 in 69 seconds, slow suite 30 in 167 seconds
 - 24 real models across 15 domains interrogated during development,
@@ -296,7 +337,7 @@ attribution, specification audit before quoting any feature effect.
 - Granger validated on synthetic VAR data: true link found at p below
   1e-6 with correct lag, reverse direction null, noise channel silent
 
-## 13. Known limits
+## 14. Known limits
 
 - Pairwise Granger remains the default; PCMCI needs the tigramite
   extra and conditions on the observed past only
@@ -311,7 +352,7 @@ attribution, specification audit before quoting any feature effect.
 - Phrase counterfactual lexicons are English only and small
 - EIG planning relies on literal hypothesis to feature name matching
 
-## 14. Availability
+## 15. Availability
 
 AGPL-3.0, source at github.com/HanSamaht/intervense, package on PyPI as
 intervense, documentation hosted on GitHub Pages. Python 3.10 to 3.12,

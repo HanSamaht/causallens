@@ -638,6 +638,17 @@ class Interrogator:
                 s.datasets.get(args.get("y_ref", "y")),
                 method=args.get("method", "pc"),
             ),
+            "cate_heterogeneity": lambda: s.cate_heterogeneity(
+                args["treatment"], s.datasets.get(args.get("y_ref", "y")),
+                min_leaf=int(args.get("min_leaf", 15)),
+            ),
+            "double_ml_effect": lambda: s.double_ml_effect(
+                args["treatment"], s.datasets.get(args.get("y_ref", "y")),
+                n_folds=int(args.get("n_folds", 5)),
+            ),
+            "omitted_variable_sensitivity": lambda: s.omitted_variable_sensitivity(
+                args["treatment"], s.datasets.get(args.get("y_ref", "y")),
+            ),
             "data_forensics": lambda: s.data_forensics(
                 args["data_ref"],
                 groups=args.get("groups"),

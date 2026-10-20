@@ -56,7 +56,7 @@ AUDITOR = (
     "2b. Effect discipline: before quoting any feature effect from a "
     "multivariate model, run specification_audit on that treatment; a "
     "FRAGILE SIGN or FOLD FRAGILE verdict downgrades the claim to "
-    "specification dependent. \n"
+    "specification dependent. For observational claims chain double_ml_effect (confounded estimate), cate_heterogeneity (who it works for), and omitted_variable_sensitivity (how afraid of unobservables to be) before any causal wording. \n"
     "3. Updates: every update_hypotheses call needs a quoted evidence_summary "
     "and a direction of supports, against, or neutral. \n"
     "4. Verdict: conclude_investigation. With a winner, restate the "

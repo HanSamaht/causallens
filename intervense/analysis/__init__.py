@@ -4,7 +4,10 @@ from .counterfactual import default_threshold, search_counterfactual, search_cou
 from .discovery import discovery_edges
 from .faithfulness import aggregate_faithfulness, evaluate_faithfulness, explain_simulate_score
 from .data_forensics import data_forensics
+from .cate_heterogeneity import cate_heterogeneity
+from .double_ml import double_ml_effect
 from .identifiability import identify_real_effect
+from .omitted_variable import omitted_variable_sensitivity
 from .shortcut_diff import shortcut_diff
 from .specification_audit import specification_audit
 
@@ -23,4 +26,7 @@ __all__ = [
     "specification_audit",
     "shortcut_diff",
     "data_forensics",
+    "cate_heterogeneity",
+    "double_ml_effect",
+    "omitted_variable_sensitivity",
 ]

@@ -512,6 +512,41 @@ class MicSession:
                      edges=edges, min_reliance=min_reliance, seed=seed)
         return self._log("shortcut_diff", result)
 
+    def cate_heterogeneity(self, treatment: str, y,
+                           quantiles: tuple[float, float] = (0.10, 0.90),
+                           min_leaf: int = 15, seed: int = 0) -> dict:
+        """Who does the treatment work for: per-row contrasts plus
+        readable subgroups with bootstrap stability."""
+        from ..analysis.cate_heterogeneity import (
+            cate_heterogeneity as _cate,
+        )
+
+        result = _cate(self.driver, treatment, y, quantiles=quantiles,
+                       min_leaf=min_leaf, seed=seed)
+        return self._log("cate_heterogeneity", result)
+
+    def double_ml_effect(self, treatment: str, y, n_folds: int = 5,
+                         sample_weight=None, seed: int = 0) -> dict:
+        """Cross-fitted double ML estimate of the confounded
+        observational effect, with robust inference and the naive
+        comparison laid bare."""
+        from ..analysis.double_ml import double_ml_effect as _dml
+
+        result = _dml(self.driver, treatment, y, n_folds=n_folds,
+                      sample_weight=sample_weight, seed=seed)
+        return self._log("double_ml_effect", result)
+
+    def omitted_variable_sensitivity(self, treatment: str, y,
+                                     r_max_factor: float = 1.3) -> dict:
+        """How strong would an unobservable need to be to kill the
+        finding: Oster delta and bias-adjusted bounds."""
+        from ..analysis.omitted_variable import (
+            omitted_variable_sensitivity as _ovs,
+        )
+
+        result = _ovs(self.driver, treatment, y, r_max_factor=r_max_factor)
+        return self._log("omitted_variable_sensitivity", result)
+
     def data_forensics(self, df, groups=None, other_df=None,
                        key=None, alpha: float = 0.05) -> dict:
         """One call audit of a dataframe before modeling begins.
