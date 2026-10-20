@@ -12,10 +12,10 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis import explain_sample, search_counterfactuals
-from causallens.backtest import BTParams, assumption_gap, live_faithfulness, make_synthetic_4h, run_backtest, slippage_stress
-from causallens.core import ConceptPack, MicSession
-from causallens.drivers.backtest import BacktestDriver
+from intervense.analysis import explain_sample, search_counterfactuals
+from intervense.backtest import BTParams, assumption_gap, live_faithfulness, make_synthetic_4h, run_backtest, slippage_stress
+from intervense.core import ConceptPack, MicSession
+from intervense.drivers.backtest import BacktestDriver
 
 
 @pytest.fixture(scope="module")

@@ -2,7 +2,7 @@
 
 October 2026
 
-Version 0.2.x of CausalLens shipped seven new causal tools. Each one
+Version 0.2.x of Intervense shipped seven new causal tools. Each one
 was validated on synthetic data with ground truth, then run against
 real Kaggle artifacts on disk: a lending trio (Random Forest, LightGBM,
 XGBoost), a 3-layer bidirectional gesture GRU over 17 IMU channels, and

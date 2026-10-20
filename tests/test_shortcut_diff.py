@@ -4,10 +4,10 @@ import pytest
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
 
-from causallens.analysis.discovery import HAS_CAUSAL_LEARN
-from causallens.analysis.shortcut_diff import shortcut_diff
-from causallens.core import MicSession
-from causallens.drivers import detect_driver
+from intervense.analysis.discovery import HAS_CAUSAL_LEARN
+from intervense.analysis.shortcut_diff import shortcut_diff
+from intervense.core import MicSession
+from intervense.drivers import detect_driver
 
 pytestmark = pytest.mark.skipif(
     not HAS_CAUSAL_LEARN, reason="causal-learn is not installed"
@@ -209,7 +209,7 @@ def test_session_and_agent_wiring():
     assert out["verdict"].startswith("SHORTCUT RISK")
     assert session.evidence_log[-1]["tool"] == "shortcut_diff"
 
-    from causallens.agents.interrogator import Interrogator
+    from intervense.agents.interrogator import Interrogator
 
     session.register_data("y", y.tolist())
     result = Interrogator(session)._execute_tool("shortcut_diff", {})

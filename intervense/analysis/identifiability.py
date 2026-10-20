@@ -9,7 +9,7 @@ criteria, via DoWhy.
 
 Graph provenance, in priority order:
   1. caller supplied edges, for when the user knows the domain
-  2. the CausalLens intervention causal graph plus priors, where
+  2. the Intervense intervention causal graph plus priors, where
      interaction and discovered edges become directed arrows and
      correlational edges become latent common causes (U nodes), which
      is the honest translation: correlation is unexplained, so it is
@@ -109,7 +109,7 @@ def identify_real_effect(
     """Identify and optionally estimate the real causal effect.
 
     Args:
-        driver: any CausalLens driver, the background is the data.
+        driver: any Intervense driver, the background is the data.
         treatment: feature name to intervene on in the world.
         outcome: "prediction" for the model output, or a feature name.
         edges: optional explicit [(source, target)] arrows. Correlation
@@ -136,7 +136,7 @@ def identify_real_effect(
         provenance = "user supplied graph"
     else:
         triples = _edges_from_framework(driver, n_samples)
-        provenance = "CausalLens intervention graph, correlational edges as latent confounders"
+        provenance = "Intervense intervention graph, correlational edges as latent confounders"
 
     n = min(n_samples, len(driver.background))
     X = driver.background[:n]

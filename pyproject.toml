@@ -3,13 +3,13 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "causallens"
-version = "0.15.3"
+name = "intervense"
+version = "0.16.0"
 description = "Make all black-box models transparent"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = { text = "AGPL-3.0-only" }
-authors = [{ name = "CausalLens contributors" }]
+authors = [{ name = "Intervense contributors" }]
 keywords = [
     "interpretability", "explainability", "causal-inference", "machine-learning",
     "shap", "counterfactual", "fairness", "model-audit", "interrogation",
@@ -33,10 +33,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/HanSamaht/causallens"
-Documentation = "https://hansamaht.github.io/causallens/"
-Issues = "https://github.com/HanSamaht/causallens/issues"
-Changelog = "https://github.com/HanSamaht/causallens/releases"
+Homepage = "https://github.com/HanSamaht/intervense"
+Documentation = "https://hansamaht.github.io/intervense/"
+Issues = "https://github.com/HanSamaht/intervense/issues"
+Changelog = "https://github.com/HanSamaht/intervense/releases"
 
 [project.optional-dependencies]
 torch = ["torch>=2.0"]
@@ -49,7 +49,7 @@ tigramite = ["tigramite>=5.2"]
 all = ["torch>=2.0", "onnxruntime>=1.16", "skl2onnx>=1.16", "mcp>=1.8", "causal-learn>=0.1.3", "dowhy>=0.12", "tigramite>=5.2"]
 
 [project.scripts]
-causallens = "causallens.cli:main"
+intervense = "intervense.cli:main"
 
 [tool.pytest.ini_options]
 markers = [
@@ -57,4 +57,4 @@ markers = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["causallens*"]
+include = ["intervense*"]

@@ -1,11 +1,11 @@
-# CausalLens Technical Report
+# Intervense Technical Report
 
 Version 0.15.0, October 2026
 
 ## Abstract
 
-CausalLens is a causal interrogation engine for black-box models. Where
-conventional explainability reports attributions, CausalLens runs
+Intervense is a causal interrogation engine for black-box models. Where
+conventional explainability reports attributions, Intervense runs
 interventions, maintains a Bayesian hypothesis tracker, and chain hashes
 every claim into an evidence ledger. This report describes the method,
 the seven causal extensions shipped in 0.2.x, and the case studies that
@@ -19,7 +19,7 @@ SHAP answers "which features does the model use". It cannot answer
 disagreement is exactly where explainability tools quietly fail their
 users, and it is detectable only by running the intervention.
 
-CausalLens is built around that gap. Every tool is an experiment first
+Intervense is built around that gap. Every tool is an experiment first
 and a summary second.
 
 ## 2. Architecture
@@ -313,6 +313,6 @@ attribution, specification audit before quoting any feature effect.
 
 ## 14. Availability
 
-AGPL-3.0, source at github.com/HanSamaht/causallens, package on PyPI as
-causallens, documentation hosted on GitHub Pages. Python 3.10 to 3.12,
+AGPL-3.0, source at github.com/HanSamaht/intervense, package on PyPI as
+intervense, documentation hosted on GitHub Pages. Python 3.10 to 3.12,
 Linux, macOS, and Windows, CPU only for all features.

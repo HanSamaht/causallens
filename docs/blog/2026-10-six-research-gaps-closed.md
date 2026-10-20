@@ -2,7 +2,7 @@
 
 October 2026
 
-The first technical report listed six things CausalLens could not do.
+The first technical report listed six things Intervense could not do.
 Versions 0.3.0 through 0.8.0 closed all six, each pushed separately,
 each tested against real Kaggle artifacts. This post is what shipped
 and what the artifacts said back.

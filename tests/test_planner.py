@@ -13,9 +13,9 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import MicSession
-from causallens.demos import train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.core import MicSession
+from intervense.demos import train_finance_demo
+from intervense.drivers import detect_driver
 
 _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -27,7 +27,7 @@ def session():
 
 
 def test_requires_hypotheses(session):
-    from causallens.analysis.experiment_planner import plan_next_intervention
+    from intervense.analysis.experiment_planner import plan_next_intervention
 
     with pytest.raises(ValueError, match="form_hypotheses"):
         plan_next_intervention(session)
@@ -38,7 +38,7 @@ def test_planner_ranks_real_driver_first(session):
         "momentum drives the lending style decision",
         "month_index seasonality drives the decision",
     ])
-    from causallens.analysis.experiment_planner import plan_next_intervention
+    from intervense.analysis.experiment_planner import plan_next_intervention
 
     out = plan_next_intervention(session, n_candidates=8, top_k=5, seed=0)
     assert "candidates" in out and out["candidates"]
@@ -59,7 +59,7 @@ def test_eig_bounded_and_deterministic(session):
         "momentum drives the decision",
         "size drives the decision",
     ])
-    from causallens.analysis.experiment_planner import plan_next_intervention
+    from intervense.analysis.experiment_planner import plan_next_intervention
 
     a = plan_next_intervention(session, n_candidates=6, top_k=3, seed=1)
     b = plan_next_intervention(session, n_candidates=6, top_k=3, seed=1)
@@ -69,7 +69,7 @@ def test_eig_bounded_and_deterministic(session):
 
 
 def test_interrogator_exposes_planner(session):
-    from causallens.agents.interrogator import Interrogator
+    from intervense.agents.interrogator import Interrogator
 
     inter = Interrogator(session)
     names = {t["function"]["name"] for t in inter.tool_schemas()}

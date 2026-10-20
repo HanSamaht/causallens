@@ -12,7 +12,7 @@ _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @pytest.fixture()
 def ledger(tmp_path):
-    from causallens.ledger import Ledger
+    from intervense.ledger import Ledger
 
     return Ledger(str(tmp_path / "test_ledger.db"))
 
@@ -52,10 +52,10 @@ def test_hypothesis_bi_temporal_supersede(ledger):
 
 
 def test_session_autopersist_and_priors(tmp_path):
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
-    from causallens.ledger import Ledger
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
+    from intervense.ledger import Ledger
 
     led = Ledger(str(tmp_path / "l.db"))
     model, feats, bg, _ = train_finance_demo()
@@ -80,11 +80,11 @@ def test_session_autopersist_and_priors(tmp_path):
 
 
 def test_correction_recorded(tmp_path):
-    from causallens.core import ConceptPack, MicSession
-    from causallens.core.graph_review import apply_corrections, export_graph
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
-    from causallens.ledger import Ledger
+    from intervense.core import ConceptPack, MicSession
+    from intervense.core.graph_review import apply_corrections, export_graph
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
+    from intervense.ledger import Ledger
 
     import json
 

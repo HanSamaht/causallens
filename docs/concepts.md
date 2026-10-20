@@ -1,10 +1,10 @@
 # Concepts
 
-The evidence model behind every claim CausalLens makes.
+The evidence model behind every claim Intervense makes.
 
 ## Interrogation, not explanation
 
-An explanation describes. An interrogation intervenes. CausalLens treats
+An explanation describes. An interrogation intervenes. Intervense treats
 the model as a witness that cannot lie under do() experiments: change an
 input, hold the rest fixed, measure the response. Every claim in a report
 traces to such an experiment or is labeled correlational.

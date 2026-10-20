@@ -57,9 +57,9 @@ Same data, same features, one model reads debt pressure and its
 structure discovery agrees with its behavior. The other bills age and
 its behavior disagrees.
 
-## Why we built CausalLens this way
+## Why we built Intervense this way
 
-CausalLens is an interrogation engine. It treats a model as a witness
+Intervense is an interrogation engine. It treats a model as a witness
 that cannot lie under experiment:
 
 - every claim traces to an intervention or is labeled correlational,
@@ -79,11 +79,11 @@ experiment, then report.
 ## Try it
 
 ```
-pip install causallens
+pip install intervense
 ```
 
 ```python
-from causallens.core import MicSession
+from intervense.core import MicSession
 
 # load your model, then:
 result = session.fairness_path_decomposition("person_age", 25.0, 60.0)

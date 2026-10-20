@@ -12,9 +12,9 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import MicSession
-from causallens.demos import train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.core import MicSession
+from intervense.demos import train_finance_demo
+from intervense.drivers import detect_driver
 
 _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

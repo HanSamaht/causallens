@@ -1,6 +1,6 @@
-# CausalLens: Make All Black-Box Models Transparent
+# Intervense: Make All Black-Box Models Transparent
 
-CausalLens is a framework for interrogating black-box models. It accepts any model with a `predict` function and runs intervention experiments, faithfulness verification, and (with LLM configured) Bayesian hypothesis testing.
+Intervense is a framework for interrogating black-box models. It accepts any model with a `predict` function and runs intervention experiments, faithfulness verification, and (with LLM configured) Bayesian hypothesis testing.
 
 Given a model file and background data, it produces:
 
@@ -35,7 +35,7 @@ A Random Forest from a different Kaggle author, trained on the same dataset, sho
 
 ## Comparison with SHAP
 
-CausalLens uses SHAP for feature attribution. SHAP is one component. The following capabilities are not available in SHAP:
+Intervense uses SHAP for feature attribution. SHAP is one component. The following capabilities are not available in SHAP:
 
 - Direct intervention: set feature to specific value and measure prediction change (SHAP's interventional mode marginalizes over a background distribution instead)
 - Counterfactual search: minimal feature changes that flip predictions
@@ -113,7 +113,7 @@ These match cardiology exercise test indicators. Concept pack was drafted by GLM
 
 No source code, only a `.pt` weights file.
 
-1. Architecture manually inferred from state_dict keys using CausalLens's inspection utilities
+1. Architecture manually inferred from state_dict keys using Intervense's inspection utilities
 2. Model class manually reconstructed: `Embedding(50001, 128)` + `LSTM(128 to 256, bidirectional)` + `FC(512 to 10)`
 3. Weights loaded with `strict=True`
 4. Neuron ranking identified decision units
@@ -122,11 +122,11 @@ No source code, only a `.pt` weights file.
 
 ```bash
 pip install -e .
-python -m causallens hero
+python -m intervense hero
 ```
 
 ```bash
-python -m causallens ask --demo geo --concepts concepts/geo.json \
+python -m intervense ask --demo geo --concepts concepts/geo.json \
     "if precipitation increases by 50%, how does landslide risk change?"
 ```
 
@@ -137,8 +137,8 @@ python -m causallens ask --demo geo --concepts concepts/geo.json \
 ```
 
 ```bash
-python -m causallens attach --model your_model.pkl --background data.csv --domain "credit risk"
-python -m causallens visualize --demo timeseries
+python -m intervense attach --model your_model.pkl --background data.csv --domain "credit risk"
+python -m intervense visualize --demo timeseries
 ```
 
 ## Architecture

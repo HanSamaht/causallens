@@ -1,4 +1,4 @@
-"""`causallens ask`: causal reasoning over a what-if question.
+"""`intervense ask`: causal reasoning over a what-if question.
 
     python -m mic ask --demo geo --concepts concepts/geo.json \
         "ifincreases50%,mostsample?"

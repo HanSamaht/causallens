@@ -20,7 +20,7 @@ def text_model():
         model = AutoModelForSequenceClassification.from_pretrained(name)
     except Exception as e:
         pytest.skip(f"Cannot load model: {e}")
-    from causallens.drivers.text import TextDriver
+    from intervense.drivers.text import TextDriver
     return TextDriver(model, tokenizer, name="sst2")
 
 

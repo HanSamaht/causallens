@@ -15,8 +15,8 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis.fairness import fairness_path_decomposition
-from causallens.drivers import detect_driver
+from intervense.analysis.fairness import fairness_path_decomposition
+from intervense.drivers import detect_driver
 
 
 @pytest.fixture(scope="module")
@@ -94,7 +94,7 @@ def test_unknown_feature_rejected(biased_driver):
 
 
 def test_session_wiring(biased_driver):
-    from causallens.core import MicSession
+    from intervense.core import MicSession
 
     session = MicSession(biased_driver)
     out = session.fairness_path_decomposition("age", 25.0, 60.0, n_samples=25)

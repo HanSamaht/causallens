@@ -19,8 +19,8 @@ from sklearn.linear_model import LinearRegression
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from causallens.analysis.shortcut_diff import shortcut_diff
-from causallens.drivers import detect_driver
+from intervense.analysis.shortcut_diff import shortcut_diff
+from intervense.drivers import detect_driver
 
 
 def banner(title: str):

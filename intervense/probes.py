@@ -10,7 +10,7 @@ Probes:
   2. leak probe: a planted leakage feature, the auditor must flag it
   3. interaction probe: y = x1 times x2, the causal graph must find it
 
-Run: python -m causallens probe
+Run: python -m intervense probe
 """
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ def probe_linear() -> tuple[bool, str]:
 
     # 1:attribution vs || ,Spearman ≥ 0.8
     sm = np.abs(np.array([a.shap_value for a in explain_sample(session.driver, X[0], pack)] * 1))
-    from causallens.analysis.attribution import shap_matrix
+    from intervense.analysis.attribution import shap_matrix
 
     mean_abs = np.abs(shap_matrix(session.driver, X[:300])).mean(axis=0)
     rho = _spearman(mean_abs, np.abs(list(coef.values())))

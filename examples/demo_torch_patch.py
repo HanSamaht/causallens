@@ -8,9 +8,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import ConceptPack, MicSession
-from causallens.demos import FinanceMLP
-from causallens.drivers.torch_model import TorchDriver
+from intervense.core import ConceptPack, MicSession
+from intervense.demos import FinanceMLP
+from intervense.drivers.torch_model import TorchDriver
 
 # 1) train a small MLP on the finance demo task
 net, feats, background, auc = FinanceMLP.train()

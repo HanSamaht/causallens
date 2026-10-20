@@ -24,7 +24,7 @@ def text_model():
     except (OSError, ConnectionError, Exception) as e:
         pytest.skip(f"Cannot reach HuggingFace or model unavailable: {e}")
 
-    from causallens.drivers.text import TextDriver
+    from intervense.drivers.text import TextDriver
     return TextDriver(model, tokenizer, name="sst2_bert")
 
 

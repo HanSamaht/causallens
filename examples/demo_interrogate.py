@@ -7,9 +7,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import ConceptPack, MicSession
-from causallens.demos import train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.core import ConceptPack, MicSession
+from intervense.demos import train_finance_demo
+from intervense.drivers import detect_driver
 
 # 1) prepare the model (in a real case, load your own model plus background data)
 model, feats, background, auc = train_finance_demo()

@@ -6,7 +6,7 @@ in a counterfactual world where only a protected attribute changed.
 Reference: Kusner et al. "Counterfactual Fairness" (NeurIPS 2017),
 "Counterfactual Fairness: Removing Influence of Sensitive Attributes".
 
-Uses CausalLens's existing intervene() infrastructure.
+Uses Intervense's existing intervene() infrastructure.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ def counterfactual_fairness_check(
     protected attribute.
 
     Args:
-        driver: Any CausalLens driver with intervene() support.
+        driver: Any Intervense driver with intervene() support.
         sample_indices: Background sample indices to test.
         protected_feature: Feature name (e.g. "person_age", "sex").
         contrast_values: Values to set (e.g. [25.0, 45.0, 65.0]).

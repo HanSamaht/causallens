@@ -12,15 +12,15 @@ pytestmark = [pytest.mark.slow]
 @pytest.fixture(scope="module")
 def gru():
     pytest.importorskip("torch")
-    from causallens.demos import train_timeseries_demo
-    from causallens.drivers.timeseries import TimeSeriesDriver
+    from intervense.demos import train_timeseries_demo
+    from intervense.drivers.timeseries import TimeSeriesDriver
 
     net, feats, bg, _ = train_timeseries_demo(epochs=60)
     return TimeSeriesDriver(net, feats, bg, name="gru_deep")
 
 
 def test_param_ablation_reversible(gru):
-    from causallens.analysis.param_ablation import param_ablation
+    from intervense.analysis.param_ablation import param_ablation
     import numpy as np
 
     p0 = gru.predict(gru.background[:20]).copy()
@@ -43,7 +43,7 @@ def test_unit_mask_reversible(gru):
 
 
 def test_discover_circuit_sparse_and_valid(gru):
-    from causallens.analysis.param_ablation import discover_circuit
+    from intervense.analysis.param_ablation import discover_circuit
 
     c = discover_circuit(gru, capability_samples=12, tolerance=0.02)
     assert "circuit_units" in c
@@ -53,7 +53,7 @@ def test_discover_circuit_sparse_and_valid(gru):
 
 
 def test_sae_features_labeled_and_falsified(gru):
-    from causallens.analysis.sae_lite import sae_features
+    from intervense.analysis.sae_lite import sae_features
 
     s = sae_features(gru, top_k=5)
     assert s["recon_mse"] < 0.05 #

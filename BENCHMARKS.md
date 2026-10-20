@@ -1,7 +1,7 @@
-# CausalLens Cross-Domain Model Test Results
+# Intervense Cross-Domain Model Test Results
 
 > 24 real models, 15 domains, 6 sources (self-owned quant models + Kaggle stranger models).
-> Each model runs the full `causallens attach` pipeline: driver detection → concept pack (LLM-drafted) → full interrogation → case file storage.
+> Each model runs the full `intervense attach` pipeline: driver detection → concept pack (LLM-drafted) → full interrogation → case file storage.
 
 ---
 

@@ -1,4 +1,4 @@
-# CausalLens Project Rules (Mandatory for all AI agents)
+# Intervense Project Rules (Mandatory for all AI agents)
 
 ## Absolute rule: English only
 
@@ -29,7 +29,7 @@ ALL files must contain ZERO Chinese characters. This includes code, comments, do
 ## Version discipline
 
 1. Every pushed change bumps the version: patch for fixes and cleanup, minor for features
-2. Bump in both pyproject.toml and causallens/__init__.py `__version__`
+2. Bump in both pyproject.toml and intervense/__init__.py `__version__`
 3. The commit message states the new version
 
 ## Test layering

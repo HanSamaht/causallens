@@ -29,7 +29,7 @@ def attribution_with_ci(
     """Bootstrap the mean absolute SHAP share per feature.
 
     Args:
-        driver: any CausalLens driver.
+        driver: any Intervense driver.
         n_bootstrap: number of resamples. 50 is the practical floor for
             a 95 percent percentile interval.
         sample_frac: rows drawn per replicate, without replacement.

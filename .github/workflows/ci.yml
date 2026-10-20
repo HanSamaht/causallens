@@ -27,5 +27,5 @@ jobs:
       - name: Fast unit tests (slow end-to-end deselected)
         run: python -m pytest tests/ -m "not slow" -q
       - name: Self-validation probes
-        run: python -m causallens probe
+        run: python -m intervense probe
         continue-on-error: true

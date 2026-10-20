@@ -5,14 +5,14 @@ From zero to interrogating your own model in ten minutes.
 ## 1. Install
 
 ```
-pip install causallens
+pip install intervense
 ```
 
 For torch internals, activation patching, circuit discovery, and the
 Crosscoder, add the extra:
 
 ```
-pip install causallens[torch]
+pip install intervense[torch]
 ```
 
 ## 2. Load your model
@@ -23,7 +23,7 @@ picks the right interrogation path automatically.
 ```python
 import joblib
 import pandas as pd
-from causallens.drivers import detect_driver
+from intervense.drivers import detect_driver
 
 model = joblib.load("my_model.pkl")
 background = pd.read_csv("my_background.csv")
@@ -42,7 +42,7 @@ logs, and text classifiers.
 ## 3. Open a session
 
 ```python
-from causallens.core import MicSession
+from intervense.core import MicSession
 
 session = MicSession(driver)
 ```
@@ -50,7 +50,7 @@ session = MicSession(driver)
 Optional: attach a concept pack to ground features in domain language.
 
 ```python
-from causallens.core import ConceptPack
+from intervense.core import ConceptPack
 
 pack = ConceptPack.load("concepts/finance.json")
 session = MicSession(driver, pack)
@@ -106,7 +106,7 @@ are covered in [Tools](tools.md).
 ## 6. Keep the evidence
 
 ```python
-from causallens.ledger import Ledger
+from intervense.ledger import Ledger
 
 ledger = Ledger("my_ledger.db")
 session.attach_ledger(ledger, model_version="v1")
@@ -118,10 +118,10 @@ the chain and `session.case_briefing()` says where.
 ## 7. Command line
 
 ```
-python -m causallens report --model model.pkl --background bg.csv
-python -m causallens audit --model model.pkl --background bg.csv
-python -m causallens hero
-python -m causallens serve --model model.pkl --background bg.csv
+python -m intervense report --model model.pkl --background bg.csv
+python -m intervense audit --model model.pkl --background bg.csv
+python -m intervense hero
+python -m intervense serve --model model.pkl --background bg.csv
 ```
 
 `serve` starts an MCP server so any MCP client, including an LLM

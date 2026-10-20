@@ -8,9 +8,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 @pytest.fixture(scope="module")
 def gru_session():
     pytest.importorskip("torch")
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_timeseries_demo
-    from causallens.drivers.timeseries import TimeSeriesDriver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_timeseries_demo
+    from intervense.drivers.timeseries import TimeSeriesDriver
 
     net, feats, bg, _ = train_timeseries_demo(epochs=40)
     return MicSession(TimeSeriesDriver(net, feats, bg, name="gru_test"), ConceptPack())
@@ -47,9 +47,9 @@ def test_neuron_ranking_engine_reported(gru_session):
 def test_mlp_activation_graph_unchanged():
     """:MLP unchanged."""
     pytest.importorskip("torch")
-    from causallens.demos import FinanceMLP
-    from causallens.drivers.torch_model import TorchDriver
-    from causallens.analysis.activation_graph import build_activation_graph
+    from intervense.demos import FinanceMLP
+    from intervense.drivers.torch_model import TorchDriver
+    from intervense.analysis.activation_graph import build_activation_graph
 
     net, feats, bg, _ = FinanceMLP.train(epochs=40)
     drv = TorchDriver(net, feats, bg, name="mlp_guard")

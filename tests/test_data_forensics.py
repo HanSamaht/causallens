@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from causallens.analysis.data_forensics import data_forensics
-from causallens.core import MicSession
-from causallens.demos import train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.analysis.data_forensics import data_forensics
+from intervense.core import MicSession
+from intervense.demos import train_finance_demo
+from intervense.drivers import detect_driver
 
 
 @pytest.fixture(scope="module")
@@ -173,7 +173,7 @@ def test_session_and_agent_wiring():
     out2 = session.data_forensics("cohort_frame")
     assert "heavy" in out2["missingness"]["columns"]
 
-    from causallens.agents.interrogator import Interrogator
+    from intervense.agents.interrogator import Interrogator
 
     result = Interrogator(session)._execute_tool(
         "data_forensics", {"data_ref": "cohort_frame"}
@@ -184,7 +184,7 @@ def test_session_and_agent_wiring():
 def test_nat_datetime_becomes_nan_not_sentinel():
     """A missing timestamp must surface as NaN, not the int64 sentinel
     year 1677 that silently poisons drift, MAR tests, and tipping."""
-    from causallens.analysis.data_forensics import _numeric_view
+    from intervense.analysis.data_forensics import _numeric_view
 
     rng = np.random.default_rng(0)
     n = 200

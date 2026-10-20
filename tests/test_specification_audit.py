@@ -4,9 +4,9 @@ import pytest
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression, Ridge, RidgeCV
 
-from causallens.analysis.specification_audit import specification_audit
-from causallens.core import MicSession
-from causallens.drivers import detect_driver
+from intervense.analysis.specification_audit import specification_audit
+from intervense.core import MicSession
+from intervense.drivers import detect_driver
 
 
 def make_suppressor(n=800, seed=21):
@@ -256,7 +256,7 @@ def test_session_and_agent_wiring():
     assert out["verdict"].startswith("FRAGILE SIGN")
     assert session.evidence_log[-1]["tool"] == "specification_audit"
 
-    from causallens.agents.interrogator import Interrogator
+    from intervense.agents.interrogator import Interrogator
 
     session.register_data("y", y.tolist())
     result = Interrogator(session)._execute_tool(

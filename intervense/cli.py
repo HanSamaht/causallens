@@ -1,10 +1,10 @@
-"""CausalLens command line interface.
+"""Intervense command line interface.
 
-    python -m causallens demo finance          train a demo model
-    python -m causallens report --model ... --sample 3 --concepts concepts/finance.json
-    python -m causallens audit --model ...
-    python -m causallens chat --model ... --role auditor    needs a configured LLM
-    python -m causallens serve --model ...     MCP stdio server
+    python -m intervense demo finance          train a demo model
+    python -m intervense report --model ... --sample 3 --concepts concepts/finance.json
+    python -m intervense audit --model ...
+    python -m intervense chat --model ... --role auditor    needs a configured LLM
+    python -m intervense serve --model ...     MCP stdio server
 """
 from __future__ import annotations
 
@@ -26,68 +26,68 @@ def _save_artifacts(tag: str, model, features, background: np.ndarray, auc: floa
     with open(path_model, "wb") as f:
         pickle.dump(model, f)
     pd.DataFrame(background, columns=features).to_csv(path_bg, index=False)
-    print(f"[causallens] {tag} model auc={auc:.4f}, model={path_model}, background={path_bg}")
+    print(f"[intervense] {tag} model auc={auc:.4f}, model={path_model}, background={path_bg}")
     if extra:
         print(" " + extra)
 
 
 def _load_session(args):
     """Load session."""
-    from causallens.core import ConceptPack, MicSession
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.drivers import detect_driver
 
     if getattr(args, "demo", None):
         # directtraining(not pickle )
         if args.demo == "finance":
-            from causallens.demos import train_finance_demo
+            from intervense.demos import train_finance_demo
 
             model, feats, bg, auc = train_finance_demo()
         elif args.demo == "medicine":
-            from causallens.demos import train_medicine_demo
+            from intervense.demos import train_medicine_demo
 
             model, feats, bg, auc = train_medicine_demo()
         elif args.demo == "torch":
-            from causallens.demos import FinanceMLP
+            from intervense.demos import FinanceMLP
 
             model, feats, bg, auc = FinanceMLP.train()
         elif args.demo == "agent":
-            from causallens.demos import AGENT_LOG_FEATURES, make_agent_logs
-            from causallens.drivers.decision_log import DecisionLogDriver
+            from intervense.demos import AGENT_LOG_FEATURES, make_agent_logs
+            from intervense.drivers.decision_log import DecisionLogDriver
 
             X, y = make_agent_logs()
             driver = DecisionLogDriver(X, y, AGENT_LOG_FEATURES, name="log")
             auc = driver.fidelity["action_agreement"]
         elif args.demo == "iris":
-            from causallens.demos import train_iris_demo
+            from intervense.demos import train_iris_demo
 
             model, feats, bg, auc = train_iris_demo()
         elif args.demo == "credit":
-            from causallens.demos import train_credit_demo
+            from intervense.demos import train_credit_demo
 
             model, feats, bg, auc = train_credit_demo()
         elif args.demo == "geo":
-            from causallens.demos import train_geo_demo
+            from intervense.demos import train_geo_demo
 
             model, feats, bg, auc = train_geo_demo()
         elif args.demo == "backtest":
-            from causallens.backtest import make_synthetic_4h
-            from causallens.drivers.backtest import BacktestDriver
+            from intervense.backtest import make_synthetic_4h
+            from intervense.drivers.backtest import BacktestDriver
 
             driver = BacktestDriver(make_synthetic_4h(8000), name="bt_engine")
             auc = driver.run(fill_market=0.0)["pf"]
         elif args.demo == "timeseries":
-            from causallens.demos import train_timeseries_demo
-            from causallens.drivers.timeseries import TimeSeriesDriver
+            from intervense.demos import train_timeseries_demo
+            from intervense.drivers.timeseries import TimeSeriesDriver
 
             model, feats, bg, r2 = train_timeseries_demo()
             auc = r2
         else:
             sys.exit(f"unknown demo: {args.demo}")
-        print(f"[causallens] training {args.demo} demo, auc={auc:.3f}", file=sys.stderr)
+        print(f"[intervense] training {args.demo} demo, auc={auc:.3f}", file=sys.stderr)
         if args.demo in ("backtest", "agent"):
             pass # driver inon
         elif args.demo == "timeseries":
-            from causallens.drivers.timeseries import TimeSeriesDriver
+            from intervense.drivers.timeseries import TimeSeriesDriver
 
             driver = TimeSeriesDriver(model, feats, bg, name="ts_returns_demo")
         else:
@@ -96,10 +96,10 @@ def _load_session(args):
         if str(getattr(args, "model", "")).lower().endswith(".onnx"):
             pass # ONNX iscompute, safe
         else:
-            print("[causallens] warning: loading a pickle model executes code on load; "
+            print("[intervense] warning: loading a pickle model executes code on load; "
                   "prefer ONNX artifacts from a trusted source", file=sys.stderr)
         if str(getattr(args, "model", "")).lower().endswith(".onnx"):
-            from causallens.drivers import detect_driver as _dd
+            from intervense.drivers import detect_driver as _dd
 
             bg_df = pd.read_csv(args.background)
             feats = list(bg_df.columns)
@@ -115,7 +115,7 @@ def _load_session(args):
     pack = ConceptPack.load(args.concepts) if getattr(args, "concepts", None) else None
     session = MicSession(driver, pack)
     if getattr(args, "ledger", None):
-        from causallens.ledger import Ledger
+        from intervense.ledger import Ledger
 
         session.attach_ledger(Ledger(args.ledger), args.model_version)
     return session
@@ -124,31 +124,31 @@ def _load_session(args):
 def cmd_demo(args):
     """Cmd demo."""
     if args.demo == "finance":
-        from causallens.demos import train_finance_demo
+        from intervense.demos import train_finance_demo
 
         model, feats, bg, auc = train_finance_demo()
         _save_artifacts("finance", model, feats, bg, auc)
     elif args.demo == "medicine":
-        from causallens.demos import train_medicine_demo
+        from intervense.demos import train_medicine_demo
 
         model, feats, bg, auc = train_medicine_demo()
         _save_artifacts("medicine", model, feats, bg, auc)
     elif args.demo == "geo":
-        from causallens.demos import train_geo_demo
+        from intervense.demos import train_geo_demo
 
         model, feats, bg, auc = train_geo_demo()
         _save_artifacts("geo", model, feats, bg, auc)
     elif args.demo == "torch":
         import torch
 
-        from causallens.demos import FinanceMLP
+        from intervense.demos import FinanceMLP
 
         net, feats, bg, auc = FinanceMLP.train()
         os.makedirs("examples/artifacts", exist_ok=True)
         path = "examples/artifacts/torch_model.pt"
         torch.save(net.state_dict(), path)
         pd.DataFrame(bg, columns=feats).to_csv("examples/artifacts/torch_background.csv", index=False)
-        print(f"[causallens] torch demo auc={auc:.4f}, state_dict={path}")
+        print(f"[intervense] torch demo auc={auc:.4f}, state_dict={path}")
 
 
 def cmd_report(args):
@@ -166,18 +166,18 @@ def cmd_audit(args):
 
 def cmd_chat(args):
     """Cmd chat."""
-    from causallens.agents import Interrogator, LLMClient
+    from intervense.agents import Interrogator, LLMClient
 
     try:
         llm = LLMClient()
     except Exception as e:
-        print(f"[causallens] {e}; chat runs in offline mode (set ZHIPUAI_API_KEY or OPENAI_API_KEY for LLM)")
+        print(f"[intervense] {e}; chat runs in offline mode (set ZHIPUAI_API_KEY or OPENAI_API_KEY for LLM)")
         llm = None
 
     session = _load_session(args)
     interrogator = Interrogator(session, llm=llm, role=args.role)
-    print(f"[causallens] model={session.driver.name} role={args.role}")
-    print("[causallens] type a question to interrogate, empty line exits")
+    print(f"[intervense] model={session.driver.name} role={args.role}")
+    print("[intervense] type a question to interrogate, empty line exits")
     while True:
         try:
             q = input("\n> ").strip()
@@ -194,9 +194,9 @@ def cmd_attach(args):
     """model: - LLMconcept pack - interrogationreport. """
     import json
 
-    from causallens.concepts_draft import draft_concept_pack
-    from causallens.core import ConceptPack, MicSession
-    from causallens.agents import LLMClient
+    from intervense.concepts_draft import draft_concept_pack
+    from intervense.core import ConceptPack, MicSession
+    from intervense.agents import LLMClient
 
     session = _load_session_with(args, ConceptPack())
     llm = None
@@ -213,13 +213,13 @@ def cmd_attach(args):
     out = f"concepts/auto_{session.driver.name}.json"
     with open(out, "w", encoding="utf-8") as f:
         json.dump(pack_data, f, ensure_ascii=False, indent=2)
-    print(f"[causallens] concept pack written to {out}, engine: {'LLM' if llm else 'fallback'})")
+    print(f"[intervense] concept pack written to {out}, engine: {'LLM' if llm else 'fallback'})")
     print(session.offline_report(args.sample))
 
 
 def _load_session_with(args, pack):
     """Load session with."""
-    from causallens.core import MicSession
+    from intervense.core import MicSession
 
     ns = argparse.Namespace(**vars(args))
     s = _load_session(ns)
@@ -230,15 +230,15 @@ def cmd_visualize(args):
     """Cmd visualize."""
     session = _load_session(args)
     path = session.visualize(args.sample, args.out)
-    print(f"[causallens] HTML report generated at {path}")
+    print(f"[intervense] HTML report generated at {path}")
     import webbrowser
     webbrowser.open(f"file:///{path.replace(chr(92), '/')}")
 
 
 def cmd_ask(args):
     """Cmd ask."""
-    from causallens.ask import AskEngine
-    from causallens.agents import LLMClient
+    from intervense.ask import AskEngine
+    from intervense.agents import LLMClient
 
     session = _load_session(args)
     llm = None
@@ -251,7 +251,7 @@ def cmd_ask(args):
 
 def cmd_graph_export(args):
     """Cmd graph export."""
-    from causallens.core.graph_review import export_graph
+    from intervense.core.graph_review import export_graph
 
     session = _load_session(args)
     print(json.dumps(export_graph(session, args.out, args.sample), ensure_ascii=False, indent=2))
@@ -259,7 +259,7 @@ def cmd_graph_export(args):
 
 def cmd_graph_apply(args):
     """Cmd graph apply."""
-    from causallens.core.graph_review import apply_corrections
+    from intervense.core.graph_review import apply_corrections
 
     session = _load_session(args)
     result = apply_corrections(session, args.corrections)
@@ -268,12 +268,12 @@ def cmd_graph_apply(args):
 
 def cmd_history(args):
     """Cmd history."""
-    from causallens.ledger import Ledger
+    from intervense.ledger import Ledger
 
     led = Ledger(args.ledger)
     cases = led.history(args.model)
     if not cases:
-        print("[causallens] no history found for this ledger")
+        print("[intervense] no history found for this ledger")
         return
     for c in cases:
         print(f"#{c['id']} {c['model_name']} @ {c['model_version']} "
@@ -291,10 +291,10 @@ def cmd_history(args):
 
 def cmd_llm_check(args):
     """: configurationidentify - - tool. GLM this. """
-    from causallens.agents.llm import LLMClient, LLMConfigError
-    from causallens.agents.providers import env_status
+    from intervense.agents.llm import LLMClient, LLMConfigError
+    from intervense.agents.providers import env_status
 
-    print("[causallens] LLM configuration:")
+    print("[intervense] LLM configuration:")
     for row in env_status():
         mark = "✓" if row["configured"] else " "
         print(f" [{mark}] {row['provider']:<12} {row['default_model']:<28} key: {row['key_env']}")
@@ -303,19 +303,19 @@ def cmd_llm_check(args):
     try:
         llm = LLMClient()
     except LLMConfigError as e:
-        print(f"[causallens] failed: {e}")
+        print(f"[intervense] failed: {e}")
         sys.exit(1)
 
     src = llm.provider.name if llm.provider else "custom"
-    print(f"[causallens] active provider: {src} | model={llm.model} | base={llm.base_url}")
+    print(f"[intervense] active provider: {src} | model={llm.model} | base={llm.base_url}")
 
     # ---- 1: ----
     try:
         resp = llm.chat([{"role": "user", "content": "only: normal"}], temperature=0.0)
         content = resp["choices"][0]["message"].get("content") or "(empty)"
-        print(f"[causallens] step 1 plain chat ok: {content[:40]}")
+        print(f"[intervense] step 1 plain chat ok: {content[:40]}")
     except Exception as e:
-        print(f"[causallens] step 1 plain chat failed: {e}")
+        print(f"[intervense] step 1 plain chat failed: {e}")
         sys.exit(1)
 
     # ---- 2: tool ----
@@ -340,21 +340,21 @@ def cmd_llm_check(args):
         msg = resp["choices"][0]["message"]
         calls = LLMClient.normalize_tool_calls(msg)
         if not calls:
-            print(f"[causallens] step 2 no tool call, the model may not support function calling: {(msg.get('content') or '')[:60]}")
+            print(f"[intervense] step 2 no tool call, the model may not support function calling: {(msg.get('content') or '')[:60]}")
             sys.exit(1)
-        print(f"[causallens] step 2 tool call ok: {calls[0]['name']}({calls[0]['arguments']})")
+        print(f"[intervense] step 2 tool call ok: {calls[0]['name']}({calls[0]['arguments']})")
         messages.append({"role": "assistant", "content": msg.get("content") or "", "tool_calls": msg.get("tool_calls")})
         messages.append({"role": "tool", "tool_call_id": calls[0]["id"], "content": "test-OK"})
         resp2 = llm.chat(messages, tools=echo_tool, temperature=0.0)
         final = resp2["choices"][0]["message"].get("content") or "(empty)"
-        print(f"[causallens] step 3 tool result round trip ok: {final[:60]}")
+        print(f"[intervense] step 3 tool result round trip ok: {final[:60]}")
     except SystemExit:
         raise
     except Exception as e:
-        print(f"[causallens] step 2 or 3 failed: {e}")
+        print(f"[intervense] step 2 or 3 failed: {e}")
         sys.exit(1)
 
-    print("[causallens] all checks passed, try: python -m causallens chat "
+    print("[intervense] all checks passed, try: python -m intervense chat "
           "--demo finance --concepts concepts/finance.json --role auditor")
 
 
@@ -367,7 +367,7 @@ def cmd_drift(args):
 
 def cmd_diff(args):
     """versioncontrastinterrogation: v1 vs v2 behaviordifference. """
-    from causallens.analysis.model_diff import diff_sessions
+    from intervense.analysis.model_diff import diff_sessions
 
     s_old = _load_session(args)
     # v2: --demo-b( --seed-b retrainnotversion)or --model-b
@@ -375,17 +375,17 @@ def cmd_diff(args):
     if getattr(args, "demo_b", None):
         seed_b = getattr(args, "seed_b", None)
         if args.demo_b == "finance":
-            import causallens.demos as demos
+            import intervense.demos as demos
 
             model, feats, bg, _ = demos.train_finance_demo() if seed_b is None else _finance_with_seed(seed_b)
         elif args.demo_b == "medicine":
-            from causallens.demos import train_medicine_demo
+            from intervense.demos import train_medicine_demo
 
             model, feats, bg, _ = train_medicine_demo()
         else:
             sys.exit(f"notsupport --demo-b: {args.demo_b}")
-        from causallens.core import MicSession
-        from causallens.drivers import detect_driver
+        from intervense.core import MicSession
+        from intervense.drivers import detect_driver
 
         s_new = MicSession(detect_driver(model, feats, bg, name="v2"), s_old.pack)
     elif getattr(args, "model_b", None):
@@ -399,7 +399,7 @@ def cmd_diff(args):
 
 def _finance_with_seed(seed: int):
     """Finance with seed."""
-    import causallens.demos as demos
+    import intervense.demos as demos
     import numpy as np
     from sklearn.ensemble import GradientBoostingClassifier
     from sklearn.metrics import roc_auc_score
@@ -413,7 +413,7 @@ def _finance_with_seed(seed: int):
 
 def cmd_probe(args):
     """Cmd probe."""
-    from causallens.probes import run_probes
+    from intervense.probes import run_probes
 
     results = run_probes()
     all_ok = True
@@ -428,20 +428,20 @@ def cmd_serve(args):
     """Cmd serve."""
     session = _load_session(args)
     if getattr(args, "http", False):
-        from causallens.server.http_mcp import serve_http
+        from intervense.server.http_mcp import serve_http
 
         serve_http(session, port=args.port)
         return
-    from causallens.server import serve_stdio
+    from intervense.server import serve_stdio
 
-    print(f"[causallens] MCP stdio server starting for {session.driver.name}", file=sys.stderr)
+    print(f"[intervense] MCP stdio server starting for {session.driver.name}", file=sys.stderr)
     serve_stdio(session)
 
 
 def main(argv=None):
     """Main."""
-    p = argparse.ArgumentParser(prog="causallens",
-                                 description="CausalLens: interrogate any black-box model with interventions")
+    p = argparse.ArgumentParser(prog="intervense",
+                                 description="Intervense: interrogate any black-box model with interventions")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     demo = sub.add_parser("demo", help="train a demo model")
@@ -527,7 +527,7 @@ def main(argv=None):
     ask.set_defaults(func=cmd_ask)
 
     hero = sub.add_parser("hero", help="self-contained end-to-end demo, no API key needed")
-    hero.set_defaults(func=lambda a: __import__("causallens.cli_hero", fromlist=["cmd_hero"]).cmd_hero(a))
+    hero.set_defaults(func=lambda a: __import__("intervense.cli_hero", fromlist=["cmd_hero"]).cmd_hero(a))
 
     chk = sub.add_parser("llm-check", help="check LLM configuration and run a tool round trip")
     chk.set_defaults(func=cmd_llm_check, model=None, background=None, concepts=None)

@@ -4,7 +4,7 @@ A model can score beautifully on the validation set and still be a
 time bomb, because part of its accuracy rides on correlations that
 carry no causal path to the outcome. When the population shifts, that
 part breaks and nobody warned you. The shortcut diff, new in
-CausalLens 0.13.0, is the warning.
+Intervense 0.13.0, is the warning.
 
 ## Two graphs, one call
 

@@ -13,15 +13,15 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis import (
+from intervense.analysis import (
     build_causal_graph,
     evaluate_faithfulness,
     explain_sample,
     search_counterfactual,
 )
-from causallens.core import ConceptPack, MicSession
-from causallens.demos import FINANCE_FEATURES, make_finance_data, train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.core import ConceptPack, MicSession
+from intervense.demos import FINANCE_FEATURES, make_finance_data, train_finance_demo
+from intervense.drivers import detect_driver
 
 
 pytestmark = [pytest.mark.slow]
@@ -130,16 +130,16 @@ def test_offline_report_text(finance_env):
 def test_regression_semantics_and_cf():
     from sklearn.ensemble import GradientBoostingRegressor
 
-    from causallens.analysis import search_counterfactuals
-    from causallens.demos import make_finance_data
+    from intervense.analysis import search_counterfactuals
+    from intervense.demos import make_finance_data
 
     X, y = make_finance_data()
     import numpy as np
 
     logit = 1.6 * X[:, 0] - 1.1 * X[:, 2] + 0.25 * np.random.default_rng(0).normal(size=len(X))
     reg = GradientBoostingRegressor(n_estimators=80, max_depth=3, random_state=0).fit(X, logit)
-    from causallens.drivers import detect_driver
-    from causallens.demos import FINANCE_FEATURES
+    from intervense.drivers import detect_driver
+    from intervense.demos import FINANCE_FEATURES
 
     drv = detect_driver(reg, FINANCE_FEATURES, X[:500], name="reg")
     assert drv.prediction_semantics == "score"
@@ -152,7 +152,7 @@ def test_regression_semantics_and_cf():
 
 
 def test_diverse_counterfactual_paths(finance_env):
-    from causallens.analysis import search_counterfactuals
+    from intervense.analysis import search_counterfactuals
 
     session, _ = finance_env
     drv = session.driver
@@ -167,7 +167,7 @@ def test_diverse_counterfactual_paths(finance_env):
 
 
 def test_faithfulness_profile(finance_env):
-    from causallens.analysis import aggregate_faithfulness
+    from intervense.analysis import aggregate_faithfulness
 
     session, _ = finance_env
     prof = aggregate_faithfulness(session.driver, n_samples=8)
@@ -177,7 +177,7 @@ def test_faithfulness_profile(finance_env):
 
 
 def test_explain_simulate_score(finance_env):
-    from causallens.analysis import explain_simulate_score
+    from intervense.analysis import explain_simulate_score
 
     session, _ = finance_env
     res = explain_simulate_score(session.driver, session.driver.sample_at(0))
@@ -191,9 +191,9 @@ def test_explain_simulate_score(finance_env):
 
 def test_timeseries_driver_end_to_end():
     torch = pytest.importorskip("torch")
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_timeseries_demo
-    from causallens.drivers.timeseries import TimeSeriesDriver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_timeseries_demo
+    from intervense.drivers.timeseries import TimeSeriesDriver
 
     model, feats, bg, r2 = train_timeseries_demo(epochs=30)
     assert r2 > 0.3 # ,model
@@ -235,7 +235,7 @@ def test_timeseries_driver_end_to_end():
 def test_drift_detection(finance_env):
     import numpy as np
 
-    from causallens.analysis.drift import check_drift
+    from intervense.analysis.drift import check_drift
 
     session, _ = finance_env
     drv = session.driver
@@ -253,14 +253,14 @@ def test_drift_detection(finance_env):
 def test_model_diff():
     import numpy as np
 
-    from causallens.analysis.model_diff import diff_sessions
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
+    from intervense.analysis.model_diff import diff_sessions
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
 
     m1, feats, bg, _ = train_finance_demo()
     d1 = detect_driver(m1, feats, bg, name="v1")
     # v2:training()
-    from causallens.demos import make_finance_data
+    from intervense.demos import make_finance_data
     from sklearn.ensemble import GradientBoostingClassifier
     from sklearn.model_selection import train_test_split
 
@@ -278,7 +278,7 @@ def test_model_diff():
 # ---------- Roadmap:symbolic distillation / causal / steering ----------
 
 def test_symbolic_distill(finance_env):
-    from causallens.analysis.symbolic import symbolic_distill
+    from intervense.analysis.symbolic import symbolic_distill
 
     session, _ = finance_env
     res = symbolic_distill(session.driver, n_samples=300)
@@ -289,10 +289,10 @@ def test_symbolic_distill(finance_env):
 
 def test_activation_graph():
     torch = pytest.importorskip("torch")
-    from causallens.demos import FinanceMLP
-    from causallens.drivers.torch_model import TorchDriver
+    from intervense.demos import FinanceMLP
+    from intervense.drivers.torch_model import TorchDriver
 
-    from causallens.analysis.activation_graph import build_activation_graph
+    from intervense.analysis.activation_graph import build_activation_graph
 
     net, feats, bg, _ = FinanceMLP.train(epochs=40)
     drv = TorchDriver(net, feats, bg, name="ag_test")
@@ -305,9 +305,9 @@ def test_activation_graph():
 
 def test_steering_repair():
     torch = pytest.importorskip("torch")
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import FinanceMLP
-    from causallens.drivers.torch_model import TorchDriver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import FinanceMLP
+    from intervense.drivers.torch_model import TorchDriver
 
     net, feats, bg, _ = FinanceMLP.train(epochs=40)
     drv = TorchDriver(net, feats, bg, name="steer_test")
@@ -322,9 +322,9 @@ def test_steering_repair():
 # ---------- Geo demo ----------
 
 def test_geo_demo():
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_geo_demo
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_geo_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, auc = train_geo_demo()
     assert auc > 0.8
@@ -342,7 +342,7 @@ def test_geo_demo():
 # ---------- G: ----------
 
 def test_synthetic_probes():
-    from causallens.probes import run_probes
+    from intervense.probes import run_probes
 
     results = run_probes()
     for name, r in results.items():
@@ -356,8 +356,8 @@ def test_onnx_driver():
     pytest.importorskip("skl2onnx")
     import numpy as np
 
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
     from skl2onnx import to_onnx
@@ -377,7 +377,7 @@ def test_onnx_driver():
 
 
 def MicSessionSafe(drv):
-    from causallens.core import ConceptPack, MicSession
+    from intervense.core import ConceptPack, MicSession
 
     return MicSession(drv, ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json")))
 
@@ -389,8 +389,8 @@ def test_provider_detection_zhipu(monkeypatch):
         if v.endswith("_API_KEY") or v.startswith("MIC_LLM"):
             monkeypatch.delenv(v, raising=False)
     monkeypatch.setenv("ZHIPUAI_API_KEY", "k-test")
-    from causallens.agents.llm import LLMClient
-    from causallens.agents.providers import detect_provider
+    from intervense.agents.llm import LLMClient
+    from intervense.agents.providers import detect_provider
 
     p, key = detect_provider()
     assert p is not None and p.name == "zhipu"
@@ -407,7 +407,7 @@ def test_provider_detection_custom(monkeypatch):
     monkeypatch.setenv("MIC_LLM_BASE_URL", "http://localhost:8000/v1")
     monkeypatch.setenv("MIC_LLM_API_KEY", "local")
     monkeypatch.setenv("MIC_LLM_MODEL", "my-model")
-    from causallens.agents.llm import LLMClient
+    from intervense.agents.llm import LLMClient
 
     c = LLMClient()
     assert c.base_url == "http://localhost:8000/v1" and c.model == "my-model"
@@ -415,7 +415,7 @@ def test_provider_detection_custom(monkeypatch):
 
 def test_tool_call_normalization_variants():
     """GLM/OpenAI :arguments /dict,content None."""
-    from causallens.agents.llm import LLMClient
+    from intervense.agents.llm import LLMClient
 
     glm_style = {
         "content": None,
@@ -440,7 +440,7 @@ def test_llm_check_cli_registered(monkeypatch):
     for v in list(os.environ):
         if v.endswith("_API_KEY") or v.startswith("MIC_LLM"):
             monkeypatch.delenv(v, raising=False)
-    from causallens.cli import main
+    from intervense.cli import main
 
     with pytest.raises(SystemExit) as ei:
         main(["llm-check"])
@@ -449,8 +449,8 @@ def test_llm_check_cli_registered(monkeypatch):
 
 def test_torch_activation_patching():
     torch = pytest.importorskip("torch")
-    from causallens.demos import FinanceMLP
-    from causallens.drivers.torch_model import TorchDriver
+    from intervense.demos import FinanceMLP
+    from intervense.drivers.torch_model import TorchDriver
 
     net, feats, bg, auc = FinanceMLP.train(epochs=40)
     drv = TorchDriver(net, feats, bg, name="mlp_test")

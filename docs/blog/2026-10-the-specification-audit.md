@@ -38,7 +38,7 @@ Simmons, Nelson 2020) and multiverse robustness have done this for
 regression coefficients in the social sciences for years. What was
 missing is the application to do-contrasts of black-box models, with
 chance-band discipline and minimal flip sets as an audit product. That
-intersection is what CausalLens ships.
+intersection is what Intervense ships.
 
 ## What it did to our own finding
 

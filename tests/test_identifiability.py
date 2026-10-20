@@ -16,8 +16,8 @@ from sklearn.linear_model import LinearRegression
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis.identifiability import HAS_DOWHY, identify_real_effect
-from causallens.drivers import detect_driver
+from intervense.analysis.identifiability import HAS_DOWHY, identify_real_effect
+from intervense.drivers import detect_driver
 
 pytestmark = pytest.mark.skipif(not HAS_DOWHY, reason="DoWhy is not installed")
 
@@ -70,7 +70,7 @@ def test_unknown_names_rejected(confounded_driver):
 
 
 def test_session_wiring(confounded_driver):
-    from causallens.core import MicSession
+    from intervense.core import MicSession
 
     session = MicSession(confounded_driver)
     out = session.identify_real_effect("x")

@@ -15,7 +15,7 @@ _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # ================= Investigator:hypothesis =================
 
 def test_tracker_formation_normalizes():
-    from causallens.agents.investigator import HypothesisTracker
+    from intervense.agents.investigator import HypothesisTracker
 
     t = HypothesisTracker()
     snap = t.form(["H", "H", "H"])
@@ -25,7 +25,7 @@ def test_tracker_formation_normalizes():
 
 
 def test_tracker_bayesian_direction_and_clamp():
-    from causallens.agents.investigator import HypothesisTracker
+    from intervense.agents.investigator import HypothesisTracker
 
     t = HypothesisTracker()
     t.form(["A", "B"])
@@ -41,7 +41,7 @@ def test_tracker_bayesian_direction_and_clamp():
 
 
 def test_tracker_verdict_threshold_and_inconclusive():
-    from causallens.agents.investigator import HypothesisTracker
+    from intervense.agents.investigator import HypothesisTracker
 
     t = HypothesisTracker()
     t.form(["A", "B"])
@@ -61,9 +61,9 @@ def test_tracker_verdict_threshold_and_inconclusive():
 # ================= investigator( LLM) =================
 
 def test_session_investigate_finance():
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
     pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json"))
@@ -80,9 +80,9 @@ def test_session_investigate_finance():
 
 
 def test_session_hypothesis_tools_roundtrip():
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
     session = MicSession(detect_driver(model, feats, bg), ConceptPack())
@@ -103,7 +103,7 @@ def test_session_hypothesis_tools_roundtrip():
 def test_credit_demo_dirty_path():
     pytest.importorskip("lightgbm")
     try:
-        from causallens.demos import train_credit_demo
+        from intervense.demos import train_credit_demo
 
         model, feats, bg, auc = train_credit_demo()
     except Exception as e: # (OpenML )
@@ -115,8 +115,8 @@ def test_credit_demo_dirty_path():
     assert any(f.startswith("was_missing_") for f in feats) # feature
     assert "checking_status" in feats and "purpose" in feats # feature
 
-    from causallens.core import ConceptPack, MicSession
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.drivers import detect_driver
 
     pack = ConceptPack.load(os.path.join(_HERE, "concepts", "credit.json"))
     session = MicSession(detect_driver(model, feats, bg, name="credit"), pack)
@@ -134,7 +134,7 @@ def test_auditor_playbook_names_the_audit_gates():
     """The auditor prompt must keep the three discipline gates:
     forensics before modeling claims, shortcut_diff after the first
     attribution, specification_audit before quoting any effect."""
-    from causallens.agents.prompts import AUDITOR
+    from intervense.agents.prompts import AUDITOR
 
     for tool in ("data_forensics", "shortcut_diff", "specification_audit"):
         assert tool in AUDITOR

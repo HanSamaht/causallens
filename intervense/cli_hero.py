@@ -1,4 +1,4 @@
-"""`python -m causallens hero`: a self-contained end-to-end demo.
+"""`python -m intervense hero`: a self-contained end-to-end demo.
 
 Runs a backtest engine interrogation in one pass: baseline replay, a
 fill semantics intervention, a slippage stress test, and a
@@ -10,13 +10,13 @@ from __future__ import annotations
 
 def run_hero() -> None:
     """Run the hero demo."""
-    from causallens.backtest import make_synthetic_4h
-    from causallens.core import ConceptPack, MicSession
-    from causallens.drivers.backtest import BacktestDriver
+    from intervense.backtest import make_synthetic_4h
+    from intervense.core import ConceptPack, MicSession
+    from intervense.drivers.backtest import BacktestDriver
 
     line = "=" * 64
     print(line)
-    print(" CausalLens causal reasoning engine, backtest engine interrogation")
+    print(" Intervense causal reasoning engine, backtest engine interrogation")
     print(" Correlation tells you what happens together;")
     print(" causality tells you what happens when you intervene")
     print(line)
@@ -58,7 +58,7 @@ def run_hero() -> None:
     print(" This was not attribution, it was intervention reasoning over an engine")
     print(" with inputs, outputs, and explicit assumptions. The same loop applies")
     print(" to any model, backtest engine, or decision log.")
-    print(" Next: python -m causallens report --demo finance --concepts concepts/finance.json")
+    print(" Next: python -m intervense report --demo finance --concepts concepts/finance.json")
     print(line)
 
 

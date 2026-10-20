@@ -14,12 +14,12 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis.crosscoder import (
+from intervense.analysis.crosscoder import (
     collect_multilayer_hidden,
     train_crosscoder,
 )
-from causallens.demos import make_finance_data
-from causallens.drivers import detect_driver
+from intervense.demos import make_finance_data
+from intervense.drivers import detect_driver
 
 torch = pytest.importorskip("torch")
 
@@ -63,7 +63,7 @@ def test_train_crosscoder_reconstructs_both_sources(mlp_driver):
 
 
 def test_crosscoder_features_tags_and_verifies(mlp_driver):
-    from causallens.core import MicSession
+    from intervense.core import MicSession
 
     session = MicSession(mlp_driver)
     out = session.crosscoder_features(layers=["0", "2"], epochs=80, n=80, top_k=5)
@@ -96,7 +96,7 @@ def test_single_hidden_layer_model_rejected():
         loss.backward()
         opt.step()
     driver = detect_driver(net, [f"f{i}" for i in range(X.shape[1])], X, name="mlp1")
-    from causallens.core import MicSession
+    from intervense.core import MicSession
 
     session = MicSession(driver)
     with pytest.raises(ValueError, match="at least 2 hidden layers"):
@@ -107,7 +107,7 @@ def test_shared_feature_kinds_are_consistent(mlp_driver):
     """decoder_shares must agree with the shared/specific label."""
     hidden = collect_multilayer_hidden(mlp_driver, ["0", "2"], n=60)
     cc = train_crosscoder(hidden, expand=4, epochs=60)
-    from causallens.analysis.crosscoder import _feature_source_profile
+    from intervense.analysis.crosscoder import _feature_source_profile
 
     checked = 0
     for k in range(cc["n_features"]):

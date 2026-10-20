@@ -26,7 +26,7 @@ jobs:
       - name: Full test suite
         run: python -m pytest tests/ -q
       - name: Self-validation probes
-        run: python -m causallens probe
+        run: python -m intervense probe
 
   kaggle-smoke:
     name: Kaggle artifact smoke (needs KAGGLE_MODELS_DIR on self-hosted)

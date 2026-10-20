@@ -13,8 +13,8 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis.phrase_cf import ANTONYMS, phrase_counterfactual
-from causallens.drivers.text import TextDriver
+from intervense.analysis.phrase_cf import ANTONYMS, phrase_counterfactual
+from intervense.drivers.text import TextDriver
 
 
 class LexiconScorer(TextDriver):

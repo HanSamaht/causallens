@@ -27,8 +27,8 @@ warnings.filterwarnings("ignore")
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from causallens.analysis.specification_audit import specification_audit
-from causallens.drivers import detect_driver
+from intervense.analysis.specification_audit import specification_audit
+from intervense.drivers import detect_driver
 
 TRACK = ["total_time", "max_speed", "first_step_yds_0p5s", "accel_first_1s",
          "peak_accel", "path_efficiency", "bend_rate_deg_per_s", "arc_speed",

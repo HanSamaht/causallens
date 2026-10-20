@@ -21,9 +21,9 @@ import pandas as pd
 warnings.filterwarnings("ignore")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import MicSession
-from causallens.drivers import detect_driver
-from causallens.drivers.timeseries import TimeSeriesDriver
+from intervense.core import MicSession
+from intervense.drivers import detect_driver
+from intervense.drivers.timeseries import TimeSeriesDriver
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KAG = os.environ.get("KAGGLE_MODELS_DIR", os.path.join(HERE, "kaggle_models"))

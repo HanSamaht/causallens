@@ -15,9 +15,9 @@ _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @pytest.fixture(scope="module")
 def geo_session():
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_geo_demo
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_geo_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, _ = train_geo_demo()
     pack = ConceptPack.load(os.path.join(_HERE, "concepts", "geo.json"))
@@ -25,7 +25,7 @@ def geo_session():
 
 
 def test_ask_deterministic_scale(geo_session):
-    from causallens.ask import AskEngine
+    from intervense.ask import AskEngine
 
     ans = AskEngine(geo_session, llm=None).ask("if precipitation increases by 50%, how does landslide risk change for the typical sample?")
     for kw in ["reasoning", "do(", "answer", "boundary"]:
@@ -35,14 +35,14 @@ def test_ask_deterministic_scale(geo_session):
 
 
 def test_ask_deterministic_quantile_and_sample(geo_session):
-    from causallens.ask import AskEngine
+    from intervense.ask import AskEngine
 
     ans = AskEngine(geo_session, llm=None).ask("if slope rises to the 90th percentile,how does risk change for the safest sample?")
     assert "do(" in ans
 
 
 def test_ask_deterministic_unparseable(geo_session):
-    from causallens.ask import AskEngine
+    from intervense.ask import AskEngine
 
     with pytest.raises(ValueError):
         AskEngine(geo_session, llm=None).ask("what is the weather today")
@@ -50,7 +50,7 @@ def test_ask_deterministic_unparseable(geo_session):
 
 def test_ask_only_mentioned_features(geo_session):
     """:resultinterventionproblemfeature."""
-    from causallens.ask import AskEngine
+    from intervense.ask import AskEngine
 
     eng = AskEngine(geo_session, llm=None)
     plan = {"assignments": [
@@ -64,10 +64,10 @@ def test_ask_only_mentioned_features(geo_session):
 # ================= =================
 
 def test_multiclass_iris_full_pipeline():
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_iris_demo
-    from causallens.drivers import detect_driver
-    from causallens.analysis import search_counterfactuals
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_iris_demo
+    from intervense.drivers import detect_driver
+    from intervense.analysis import search_counterfactuals
 
     model, feats, bg, acc = train_iris_demo()
     assert acc > 0.9
@@ -98,10 +98,10 @@ def test_multiclass_iris_full_pipeline():
 
 def test_binary_regression_unchanged(finance_env=None):
     """:."""
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
-    from causallens.analysis import search_counterfactuals
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
+    from intervense.analysis import search_counterfactuals
 
     model, feats, bg, _ = train_finance_demo()
     drv = detect_driver(model, feats, bg, name="fin_guard")
@@ -114,14 +114,14 @@ def test_binary_regression_unchanged(finance_env=None):
 # ================= concept pack =================
 
 def test_draft_fallback_without_llm():
-    from causallens.concepts_draft import draft_concept_pack
+    from intervense.concepts_draft import draft_concept_pack
 
     pack = draft_concept_pack(["f1", "f2"], llm=None, domain_hint="test")
     assert pack["features"]["f1"]["concept"] == "f1" # LLM feature
 
 
 def test_attach_concepts_written(tmp_path):
-    from causallens.concepts_draft import draft_concept_pack
+    from intervense.concepts_draft import draft_concept_pack
 
     # LLM( JSON)verification
     class FakeLLM:

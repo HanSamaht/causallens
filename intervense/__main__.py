@@ -1,4 +1,4 @@
-from causallens.cli import main
+from intervense.cli import main
 
 if __name__ == "__main__":
     main()

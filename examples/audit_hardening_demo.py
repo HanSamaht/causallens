@@ -27,10 +27,10 @@ warnings.filterwarnings("ignore")
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from causallens.analysis.data_forensics import data_forensics
-from causallens.analysis.shortcut_diff import shortcut_diff
-from causallens.analysis.specification_audit import specification_audit
-from causallens.drivers import detect_driver
+from intervense.analysis.data_forensics import data_forensics
+from intervense.analysis.shortcut_diff import shortcut_diff
+from intervense.analysis.specification_audit import specification_audit
+from intervense.drivers import detect_driver
 
 
 def part1_fold_stability():

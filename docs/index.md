@@ -1,8 +1,8 @@
-# CausalLens
+# Intervense
 
 Make all black-box models transparent.
 
-CausalLens is a causal reasoning engine that interrogates any model with a
+Intervense is a causal reasoning engine that interrogates any model with a
 `predict` function. It does not passively explain; it runs intervention
 experiments, performs Bayesian hypothesis testing, and enforces evidence
 chain discipline.
@@ -17,24 +17,24 @@ You give it a model file and background data. It tells you:
 - Whether the audit trail is intact, by a chain hashed evidence ledger
 
 Correlation tells you what happens together. Causality tells you what happens
-when you intervene. CausalLens does the latter.
+when you intervene. Intervense does the latter.
 
 ## Install
 
 ```
-pip install causallens
+pip install intervense
 ```
 
-Optional extras: `causallens[torch]` for activation patching and circuit
-discovery, `causallens[causal-learn]` for structure discovery backends,
-`causallens[all]` for everything.
+Optional extras: `intervense[torch]` for activation patching and circuit
+discovery, `intervense[causal-learn]` for structure discovery backends,
+`intervense[all]` for everything.
 
 ## The 60-second tour
 
 ```python
-from causallens.core import MicSession
-from causallens.demos import train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.core import MicSession
+from intervense.demos import train_finance_demo
+from intervense.drivers import detect_driver
 
 model, feats, background, auc = train_finance_demo()
 session = MicSession(detect_driver(model, feats, background))

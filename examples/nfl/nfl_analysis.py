@@ -8,7 +8,7 @@ Full reproducible pipeline for the analysis. Data files stay local
   2. sensor forty vs handheld comparison with movement-aligned start
   3. in-game pressure productivity with the host's NA semantics
   4. models for pressure rate, attribution, interventions,
-     identifiability via CausalLens
+     identifiability via Intervense
 
 Headline findings this pipeline reproduces:
 
@@ -127,9 +127,9 @@ def step4_analysis():
     from sklearn.preprocessing import StandardScaler
 
     sys.path.insert(0, "../..")
-    from causallens.analysis.identifiability import identify_real_effect
-    from causallens.core import MicSession
-    from causallens.drivers import detect_driver
+    from intervense.analysis.identifiability import identify_real_effect
+    from intervense.core import MicSession
+    from intervense.drivers import detect_driver
 
     m = pd.read_csv("full_cohort.csv")
     # five of ten tracking features drift across 2023-2025 (protocol
@@ -221,7 +221,7 @@ def step4_analysis():
     print(f"    do(max_speed p10->p90) lean model: {do_effect(['edge','draft_overall_pick','max_speed']):+.5f}")
     print(f"    do(max_speed p10->p90) full model: {do_effect(cols):+.5f}  <- collinearity collapses the effect")
 
-    # CausalLens: attribution stability on the lean model
+    # Intervense: attribution stability on the lean model
     lean_cols = ["edge", "draft_overall_pick", "max_speed", "accel_first_1s",
                  "forty", "ngs_college_production_score"]
     pipe = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),

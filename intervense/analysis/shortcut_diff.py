@@ -108,7 +108,7 @@ def shortcut_diff(
     """Diff the model's interventional reliance against the world graph.
 
     Args:
-        driver: any CausalLens driver (the model is only queried
+        driver: any Intervense driver (the model is only queried
             through predict).
         y: the real outcome aligned with driver.background. Discovery
             runs on the background plus this column; NaN inputs must be

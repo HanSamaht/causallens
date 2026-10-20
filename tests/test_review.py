@@ -16,9 +16,9 @@ _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @pytest.fixture(scope="module")
 def agent_session():
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import AGENT_LOG_FEATURES, make_agent_logs
-    from causallens.drivers.decision_log import DecisionLogDriver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import AGENT_LOG_FEATURES, make_agent_logs
+    from intervense.drivers.decision_log import DecisionLogDriver
 
     X, y = make_agent_logs(n=2500)
     drv = DecisionLogDriver(X, y, AGENT_LOG_FEATURES, name="agent_test")
@@ -47,7 +47,7 @@ def test_decision_log_interrogation_finds_hidden_bias(agent_session):
 
 
 def test_decision_log_ask_carries_fidelity_boundary(agent_session):
-    from causallens.ask import AskEngine
+    from intervense.ask import AskEngine
 
     ans = AskEngine(agent_session, llm=None).ask("if debt_ratio increases by 50%, how does approval probability change for the typical sample?")
     assert "agreement" in ans.lower() or "boundary" in ans.lower() or len(ans) > 50 # boundary
@@ -56,7 +56,7 @@ def test_decision_log_ask_carries_fidelity_boundary(agent_session):
 
 
 def test_decision_log_counterfactual(agent_session):
-    from causallens.analysis import search_counterfactuals
+    from intervense.analysis import search_counterfactuals
 
     drv = agent_session.driver
     idx = int(np.argmax(drv.predict(drv.background)))
@@ -68,9 +68,9 @@ def test_decision_log_counterfactual(agent_session):
 
 @pytest.fixture(scope="module")
 def fin_session():
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
     pack = ConceptPack.load(os.path.join(_HERE, "concepts", "finance.json"))
@@ -78,7 +78,7 @@ def fin_session():
 
 
 def test_graph_export_edit_apply(tmp_path, fin_session):
-    from causallens.core.graph_review import apply_corrections, export_graph
+    from intervense.core.graph_review import apply_corrections, export_graph
 
     out = tmp_path / "g.json"
     info = export_graph(fin_session, str(out))

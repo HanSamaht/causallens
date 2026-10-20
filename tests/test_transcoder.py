@@ -14,14 +14,14 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.demos import make_finance_data
+from intervense.demos import make_finance_data
 
 torch = pytest.importorskip("torch")
 
 
 @pytest.fixture(scope="module")
 def mlp_driver():
-    from causallens.drivers import detect_driver
+    from intervense.drivers import detect_driver
 
     X, y = make_finance_data(1200)
     Xt = torch.tensor(X, dtype=torch.float32)
@@ -43,7 +43,7 @@ def mlp_driver():
 
 
 def test_transcoder_trains_and_tags(mlp_driver):
-    from causallens.analysis.transcoder import transcoder_features
+    from intervense.analysis.transcoder import transcoder_features
 
     out = transcoder_features(mlp_driver, block=("0", "2"), epochs=80, n=80, top_k=5)
     assert out["block"] == {"input": "0", "output": "2"}
@@ -60,7 +60,7 @@ def test_transcoder_trains_and_tags(mlp_driver):
 
 
 def test_transcoder_unwinds_patch_plan(mlp_driver):
-    from causallens.core import MicSession
+    from intervense.core import MicSession
 
     session = MicSession(mlp_driver)
     session.transcoder_features(block=("0", "2"), epochs=30, n=40, top_k=3)
@@ -70,18 +70,18 @@ def test_transcoder_unwinds_patch_plan(mlp_driver):
 def test_transcoder_single_module_rejected():
     torch.manual_seed(1)
     net = torch.nn.Sequential(torch.nn.Linear(4, 8), torch.nn.ReLU())
-    from causallens.drivers import detect_driver
+    from intervense.drivers import detect_driver
 
     driver = detect_driver(net, ["a", "b", "c", "d"],
                            np.random.default_rng(0).normal(size=(30, 4)), name="one")
-    from causallens.analysis.transcoder import transcoder_features
+    from intervense.analysis.transcoder import transcoder_features
 
     with pytest.raises(ValueError, match="block"):
         transcoder_features(driver, epochs=5, n=10)
 
 
 def test_crosscoder_rows_carry_examples(mlp_driver):
-    from causallens.analysis.crosscoder import crosscoder_features
+    from intervense.analysis.crosscoder import crosscoder_features
 
     out = crosscoder_features(mlp_driver, layers=["0", "2"], epochs=40, n=60, top_k=3)
     for f in out["features"]:

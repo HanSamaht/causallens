@@ -8,7 +8,7 @@ Decomposes the total effect of an input change into:
 Reference: Mueller et al. 2026 "The Quest for the Right Mediator",
 Pearl (2001) "Direct and Indirect Effects".
 
-Uses CausalLens's existing patch_activation() infrastructure.
+Uses Intervense's existing patch_activation() infrastructure.
 """
 from __future__ import annotations
 

@@ -14,16 +14,16 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis.attribution_ci import attribution_with_ci
-from causallens.demos import train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.analysis.attribution_ci import attribution_with_ci
+from intervense.demos import train_finance_demo
+from intervense.drivers import detect_driver
 
 _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 @pytest.fixture(scope="module")
 def session():
-    from causallens.core import MicSession
+    from intervense.core import MicSession
 
     model, feats, bg, _ = train_finance_demo()
     return MicSession(detect_driver(model, feats, bg, name="fin_ci"))

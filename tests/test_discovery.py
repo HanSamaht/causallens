@@ -15,10 +15,10 @@ from sklearn.linear_model import LogisticRegression
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis import build_causal_graph, discovery_edges
-from causallens.analysis.discovery import HAS_CAUSAL_LEARN
-from causallens.demos import train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.analysis import build_causal_graph, discovery_edges
+from intervense.analysis.discovery import HAS_CAUSAL_LEARN
+from intervense.demos import train_finance_demo
+from intervense.drivers import detect_driver
 
 pytestmark = pytest.mark.skipif(
     not HAS_CAUSAL_LEARN, reason="causal-learn is not installed"
@@ -89,7 +89,7 @@ def test_build_causal_graph_without_discovery_unchanged(chain_driver):
 def test_session_causal_graph_discovery():
     model, feats, bg, _ = train_finance_demo()
     driver = detect_driver(model, feats, bg, name="fin_discovery")
-    from causallens.core import MicSession
+    from intervense.core import MicSession
 
     session = MicSession(driver)
     out = session.get_causal_graph(discovery="pc")

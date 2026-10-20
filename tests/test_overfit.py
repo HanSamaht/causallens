@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from causallens.analysis.lookahead import lookahead_scan
-from causallens.analysis.overfit import _norm_cdf, _norm_ppf, deflated_sharpe, sharpe_stats
+from intervense.analysis.lookahead import lookahead_scan
+from intervense.analysis.overfit import _norm_cdf, _norm_ppf, deflated_sharpe, sharpe_stats
 
 
 def test_norm_funs_reciprocal():

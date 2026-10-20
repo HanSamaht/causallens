@@ -15,8 +15,8 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import MicSession
-from causallens.drivers import detect_driver
+from intervense.core import MicSession
+from intervense.drivers import detect_driver
 
 torch = pytest.importorskip("torch")
 
@@ -120,7 +120,7 @@ def test_conv1d_transcoder_semantics():
     (1, T, H) took the last channel instead, silently producing
     garbage features and zero causal effects.
     """
-    from causallens.analysis.crosscoder import flat_last_activation
+    from intervense.analysis.crosscoder import flat_last_activation
 
     a = np.zeros((1, 64, 20), dtype=float)
     a[0, 3, :] = np.arange(1, 21)  # channel 3 has known mean 10.5

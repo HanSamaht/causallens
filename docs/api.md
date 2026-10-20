@@ -4,7 +4,7 @@ The main entry point is `MicSession`. Everything runs through it; the
 analysis modules underneath are importable for advanced use.
 
 ```python
-from causallens.core import MicSession, ConceptPack
+from intervense.core import MicSession, ConceptPack
 ```
 
 ## MicSession
@@ -147,7 +147,7 @@ MicSession(driver, pack=None)
 ## Drivers
 
 ```python
-from causallens.drivers import detect_driver
+from intervense.drivers import detect_driver
 ```
 
 `detect_driver(model, feature_names, background, name="model")` returns
@@ -161,19 +161,19 @@ logs, and text classifiers (`TextDriver`).
 For advanced use the layers are importable directly:
 
 ```python
-from causallens.analysis import build_causal_graph, discovery_edges, explain_sample
-from causallens.analysis.temporal_causal import granger_pairwise
-from causallens.analysis.crosscoder import train_crosscoder, crosscoder_model_diff
+from intervense.analysis import build_causal_graph, discovery_edges, explain_sample
+from intervense.analysis.temporal_causal import granger_pairwise
+from intervense.analysis.crosscoder import train_crosscoder, crosscoder_model_diff
 ```
 
 ## Agents and server
 
 ```python
-from causallens.agents import LLMClient
-from causallens.agents.interrogator import Interrogator
+from intervense.agents import LLMClient
+from intervense.agents.interrogator import Interrogator
 
 interrogator = Interrogator(session, llm=LLMClient(), role="auditor")
 print(interrogator.ask("which feature dominates the decisions"))
 ```
 
-MCP server: `python -m causallens serve --model model.pkl --background bg.csv`
+MCP server: `python -m intervense serve --model model.pkl --background bg.csv`

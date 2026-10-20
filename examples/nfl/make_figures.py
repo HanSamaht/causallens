@@ -149,8 +149,8 @@ full = do_effect(full_cols)
 import sys as _sys
 
 _sys.path.insert(0, "../..")
-from causallens.analysis.specification_audit import specification_audit as _sa
-from causallens.drivers import detect_driver as _dd
+from intervense.analysis.specification_audit import specification_audit as _sa
+from intervense.drivers import detect_driver as _dd
 
 _full_pipe = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),
                            RidgeCV(alphas=[0.1, 1, 10, 100]))
@@ -192,8 +192,8 @@ plt.close(fig)
 # ---- Fig 6: attribution confidence ----
 import sys
 sys.path.insert(0, "../..")
-from causallens.core import MicSession
-from causallens.drivers import detect_driver
+from intervense.core import MicSession
+from intervense.drivers import detect_driver
 
 lean_cols = ["edge_f", "draft_overall_pick", "max_speed", "accel_first_1s",
              "forty", "ngs_college_production_score"]

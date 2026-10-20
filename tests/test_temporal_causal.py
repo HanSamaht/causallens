@@ -14,7 +14,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis.temporal_causal import (
+from intervense.analysis.temporal_causal import (
     granger_pairwise,
     pcmci_edges,
     temporal_causal_graph,
@@ -109,9 +109,9 @@ def test_negative_control_independent_channels():
 
 def test_end_to_end_with_trained_ts_model():
     pytest.importorskip("torch")
-    from causallens.core import MicSession
-    from causallens.demos import train_timeseries_demo
-    from causallens.drivers.timeseries import TimeSeriesDriver
+    from intervense.core import MicSession
+    from intervense.demos import train_timeseries_demo
+    from intervense.drivers.timeseries import TimeSeriesDriver
 
     model, feats, bg, _ = train_timeseries_demo(epochs=10)
     driver = TimeSeriesDriver(model, feats, bg, name="ts_temporal")
@@ -153,9 +153,9 @@ def test_pcmci_finds_conditional_link():
 @pytest.mark.skipif(not _tigramite_available(), reason="tigramite is not installed")
 def test_pcmci_through_session():
     pytest.importorskip("torch")
-    from causallens.core import MicSession
-    from causallens.demos import train_timeseries_demo
-    from causallens.drivers.timeseries import TimeSeriesDriver
+    from intervense.core import MicSession
+    from intervense.demos import train_timeseries_demo
+    from intervense.drivers.timeseries import TimeSeriesDriver
 
     model, feats, bg, _ = train_timeseries_demo(epochs=5)
     driver = TimeSeriesDriver(model, feats, bg, name="ts_pcmci")

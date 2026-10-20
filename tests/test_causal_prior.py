@@ -14,9 +14,9 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import MicSession
-from causallens.demos import FINANCE_FEATURES, train_finance_demo
-from causallens.drivers import detect_driver
+from intervense.core import MicSession
+from intervense.demos import FINANCE_FEATURES, train_finance_demo
+from intervense.drivers import detect_driver
 
 _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -90,7 +90,7 @@ def test_feature_to_feature_edge_verdicts(session):
 
 
 def test_interrogator_exposes_prior_tools(session):
-    from causallens.agents.interrogator import Interrogator
+    from intervense.agents.interrogator import Interrogator
 
     inter = Interrogator(session)
     names = {t["function"]["name"] for t in inter.tool_schemas()}

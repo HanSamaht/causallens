@@ -1,8 +1,8 @@
-site_name: CausalLens
+site_name: Intervense
 site_description: Make all black-box models transparent through causal interrogation
-site_url: https://hansamaht.github.io/causallens/
-repo_url: https://github.com/HanSamaht/causallens
-repo_name: HanSamaht/causallens
+site_url: https://hansamaht.github.io/intervense/
+repo_url: https://github.com/HanSamaht/intervense
+repo_name: HanSamaht/intervense
 theme:
   name: material
   palette:

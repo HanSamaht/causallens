@@ -174,7 +174,7 @@ def specification_audit(
     closed-form path, which makes the curve exact.
 
     Args:
-        driver: a CausalLens driver whose model is an sklearn estimator
+        driver: a Intervense driver whose model is an sklearn estimator
             or pipeline (must support clone, fit, predict).
         treatment: feature to audit.
         y: outcome vector aligned with driver.background.

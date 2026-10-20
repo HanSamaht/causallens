@@ -15,9 +15,9 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import MicSession
-from causallens.demos import make_finance_data
-from causallens.drivers import detect_driver
+from intervense.core import MicSession
+from intervense.demos import make_finance_data
+from intervense.drivers import detect_driver
 
 torch = pytest.importorskip("torch")
 

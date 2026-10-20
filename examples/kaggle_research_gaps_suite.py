@@ -20,8 +20,8 @@ import pandas as pd
 warnings.filterwarnings("ignore")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.core import MicSession
-from causallens.drivers import detect_driver
+from intervense.core import MicSession
+from intervense.drivers import detect_driver
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KAG = os.environ.get("KAGGLE_MODELS_DIR", os.path.join(HERE, "kaggle_models"))
@@ -116,7 +116,7 @@ def section_pcmci():
             lengths = torch.full((x.shape[0],), x.shape[1], dtype=torch.long)
             return self.core(x, lengths)[:, 0:1]
 
-    from causallens.drivers.timeseries import TimeSeriesDriver
+    from intervense.drivers.timeseries import TimeSeriesDriver
 
     rng = np.random.default_rng(3)
     n, T, F = 120, 40, 17
@@ -144,7 +144,7 @@ def section_pcmci():
 def section_transcoder():
     import torch
 
-    from causallens.drivers import detect_driver as dd
+    from intervense.drivers import detect_driver as dd
 
     class ProteinCNNSimple(torch.nn.Module):
         def __init__(self):

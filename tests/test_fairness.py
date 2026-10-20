@@ -6,14 +6,14 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from causallens.analysis.fairness import counterfactual_fairness_check
+from intervense.analysis.fairness import counterfactual_fairness_check
 
 
 def test_no_flip_when_feature_irrelevant():
     """Model that ignores the protected feature should pass."""
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
     drv = detect_driver(model, feats, bg, name="fin")
@@ -29,9 +29,9 @@ def test_no_flip_when_feature_irrelevant():
 
 def test_flip_when_feature_drives_prediction():
     """Changing a high-attribution feature should produce flips."""
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
     drv = detect_driver(model, feats, bg, name="fin")
@@ -56,7 +56,7 @@ def test_credit_age_fairness():
     except FileNotFoundError:
         pytest.skip("Credit model files not available")
 
-    from causallens.drivers import detect_driver
+    from intervense.drivers import detect_driver
 
     drv = detect_driver(model, list(bg.columns), bg.values, name="credit")
     result = counterfactual_fairness_check(

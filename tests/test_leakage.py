@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from causallens.analysis.leakage import duplicate_overlap, label_distribution_check, single_feature_leak_scan
+from intervense.analysis.leakage import duplicate_overlap, label_distribution_check, single_feature_leak_scan
 
 
 def test_duplicate_overlap_clean_and_contaminated():
@@ -42,9 +42,9 @@ def test_label_check():
 
 
 def test_session_tools_wired():
-    from causallens.core import ConceptPack, MicSession
-    from causallens.demos import train_finance_demo
-    from causallens.drivers import detect_driver
+    from intervense.core import ConceptPack, MicSession
+    from intervense.demos import train_finance_demo
+    from intervense.drivers import detect_driver
 
     model, feats, bg, _ = train_finance_demo()
     s = MicSession(detect_driver(model, feats, bg), ConceptPack())

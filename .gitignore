@@ -18,3 +18,19 @@ examples/nfl/*.log
 examples/nfl/enrichment/
 examples/nfl/dl_*.log
 *.kaggle-partial
+
+# local-only workspaces, never push
+nfl_market
+nfl_kernel_push
+nfl_kernel_logs
+nfl_submission
+.zcode
+examples/nfl/figures_local
+examples/nfl/detect_ol_chains.py
+examples/nfl/download_game_tracking.py
+examples/nfl/extract_game_trajectories.py
+examples/nfl/make_mining_figures.py
+examples/nfl/BUG_REGISTRY.md
+examples/nfl/figures/fig7_trajectory_spaghetti.png
+examples/nfl/figures/fig8_mediation_path.png
+examples/nfl/figures/fig9_fe_forest.png

@@ -39,7 +39,7 @@ corrected our own sign flip claim on the way.
 
 [Read the post](2026-10-the-attribution-that-failed.md)
 
-Why CausalLens runs experiments instead of explanations, told through a
+Why Intervense runs experiments instead of explanations, told through a
 lending model whose headline number collapsed under do(age := 60).
 
 ## 2026-10: Seven causal upgrades and the Kaggle models that tested them
