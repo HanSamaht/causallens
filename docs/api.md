@@ -48,6 +48,9 @@ MicSession(driver, pack=None)
 | `double_ml_effect(treatment, y, n_folds=5)` | cross-fitted partially linear effect, robust SE, naive comparison |
 | `cate_heterogeneity(treatment, y, min_leaf=15)` | per-row effect contrasts, depth-2 subgroup rules, stability |
 | `omitted_variable_sensitivity(treatment, y)` | Oster delta, bias-adjusted bound, robust or fragile verdict |
+| `panel_fixed_effects(df, outcome, features, group)` | within-unit coefficients with cluster-robust SEs |
+| `mediation_chain(df, treatment, mediator, outcome)` | standardized a times b with bootstrap CI and suppression guard |
+| `holdout_evaluation(df, outcome, features, group)` | group-level holdout AUC, Brier, calibration, prior baseline |
 | `specification_audit(treatment, y, max_specs=200, sample_weight=None, groups=None, estimator_factory=None)` | refit the model family across control subsets; sign stability, minimal flip sets, chance band verdict, per cohort effect heterogeneity, non sklearn families via factory |
 | `shortcut_diff(y, method="pc", edges=None, n_perm=20, n_graph_boot=10)` | classify every relied upon feature against the world graph; reliance at risk, permutation p values, classification stability under graph bootstrap |
 | `data_forensics(df, groups=None, other_df=None, key=None)` | pre modeling audit: mechanism hints across numeric, categorical, and datetime witnesses, MNAR tipping, numeric and composition drift, join coverage |

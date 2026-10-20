@@ -74,6 +74,7 @@ def data_forensics(
     key: str | list[str] | None = None,
     alpha: float = 0.05,
     max_assoc_columns: int = 10,
+    assertions: list[dict] | None = None,
 ) -> dict:
     """One call audit of a dataframe before any modeling happens.
 
@@ -88,6 +89,12 @@ def data_forensics(
             Wallis flags, Bonferroni corrected per section.
         max_assoc_columns: numeric columns tested against each partly
             missing column, runtime guard.
+        assertions: declarative plausibility gates, each
+            {"name", "column", "statistic" (median/mean/max/min/
+            fraction), "op" (< <= > >=), "value", optional
+            "where": [column, value] subset}. Violations surface as
+            HIGH findings; the pattern caught a features-vs-random-
+            players bug that manual review had missed.
 
     Returns:
         Dict with the five sections plus a severity ordered verdict.
@@ -296,6 +303,46 @@ def data_forensics(
                              "standardize within group before pooling"),
                 })
 
+    # ---- plausibility assertions: domain truths the data must obey
+    violations = []
+    for spec in (assertions or []):
+        try:
+            sub = df
+            where = spec.get("where")
+            if where:
+                col_w, val_w = where
+                sub = sub[sub[col_w] == val_w]
+            if len(sub) == 0 or spec["column"] not in sub.columns:
+                violations.append({"name": spec.get("name", "?"),
+                                   "error": "empty subset or unknown column"})
+                continue
+            s = sub[spec["column"]].dropna()
+            stat_fn = {"median": np.median, "mean": np.mean,
+                       "max": np.max, "min": np.min,
+                       "fraction": lambda v: float((v > 0).mean())}
+            stat = float(stat_fn[spec["statistic"]](s.astype(float)))
+            ops = {"<": lambda a, b: a < b, "<=": lambda a, b: a <= b,
+                   ">": lambda a, b: a > b, ">=": lambda a, b: a >= b}
+            ok = ops[spec["op"]](stat, float(spec["value"]))
+            if not ok:
+                violations.append({
+                    "name": spec.get("name", spec["column"]),
+                    "statistic": f'{spec["statistic"]}({spec["column"]}'
+                                 f'{f" where {where[0]}=={where[1]}" if where else ""})'
+                                 f' = {stat:.4f}',
+                    "requirement": f'{spec["op"]} {spec["value"]}',
+                })
+        except Exception as e:  # noqa: BLE001 - malformed assertion
+            violations.append({"name": spec.get("name", "?"),
+                               "error": f"{type(e).__name__}: {e}"})
+    for v in violations:
+        findings.append({
+            "severity": "HIGH",
+            "text": (f"PLAUSIBILITY VIOLATION [{v['name']}]: "
+                     f"{v.get('statistic', v.get('error', ''))} "
+                     f"required {v.get('requirement', 'valid')}"),
+        })
+
     # ---- join audit
     join_audit = None
     if other_df is not None:
@@ -364,6 +411,8 @@ def data_forensics(
         "mechanism": mechanism,
         "drift": drift[:20],
         "join_audit": join_audit,
+        "plausibility": ({"checked": len(assertions or []),
+                          "violations": violations} if assertions else None),
         "n_findings": len(findings),
         "verdict": verdict,
         "method": "descriptive_plus_rank_tests",

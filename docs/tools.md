@@ -29,6 +29,9 @@ mentally to the [API reference](api.md).
 | `double_ml_effect` | cross-fitted double ML | observational effect with robust inference, confounding gap vs naive OLS laid bare |
 | `cate_heterogeneity` | per-row contrasts plus subgroup tree | who the effect works for, readable subgroups with bootstrap stability |
 | `omitted_variable_sensitivity` | Oster delta | how strong an unobservable would need to be to kill the finding |
+| `panel_fixed_effects` | within-transformation OLS + cluster sandwich | within-unit effects with honest p-values, stable quality absorbed |
+| `mediation_chain` | standardized path bootstrap | a times b with the suppression guard, no fake shares |
+| `holdout_evaluation` | group-level holdout | entire levels held out, AUC Brier calibration, prior baseline |
 | `specification_audit` | specification curve | sign stability across control subsets, minimal flip sets, cohort fold stability, estimator_factory for non sklearn families |
 | `shortcut_diff` | two graph diff | reliance classified against the discovered world graph, permutation nulls per share, classification stability under graph bootstrap |
 | `temporal_causal_graph` | interventional plus discovery | Granger or PCMCI lagged channel causes with model reliance per lag |

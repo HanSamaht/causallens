@@ -1,6 +1,6 @@
 # Intervense Technical Report
 
-Version 0.17.0, October 2026
+Version 0.18.0, October 2026
 
 ## Abstract
 
@@ -325,7 +325,40 @@ without double_ml_effect, no targeting claim without
 cate_heterogeneity, and no robustness claim without
 omitted_variable_sensitivity.
 
-## 13. Benchmarks
+## 13. Analysis pattern absorption in 0.18.0
+
+The NFL competition exposed the attribution split: the framework
+verified findings, but the heavy analysis patterns (panel fixed
+effects, mediation chains, holdout evaluation) were bespoke code.
+This release absorbs all four patterns as first-class calls.
+
+panel_fixed_effects: within-transformation by group, OLS on the
+demeaned data, cluster-robust sandwich with the finite sample
+correction. The NFL 35,646-rep within-player analysis is now one
+call. Planted ground truth: recovers the within effect, absorbs
+between-unit confounding, and warns when cluster count is a rumor.
+
+mediation_chain: standardized a, b, direct, and total paths with
+bootstrap intervals on the indirect effect, plus the suppression
+guard learned from our own shipped-overclaim: when the total effect
+is weak or opposite-signed relative to the indirect path, no
+percentage is claimed.
+
+holdout_evaluation: entire group levels held out, scored with AUC,
+Brier, log loss, calibration quintiles, and the prior-only baseline.
+The verdict reads both the lift and the top-quintile calibration.
+
+Plausibility assertions in data_forensics: declarative domain-truth
+gates (name, column, statistic, comparison, optional subset filter)
+checked at forensic time. The pattern caught a features-vs-random-
+players bug in the NFL analysis that manual review had missed.
+
+The auditor playbook now chains all of them: no within-unit claim
+without panel_fixed_effects, no mechanism claim without
+mediation_chain, no generalization claim without holdout_evaluation,
+and no domain-specific quantity without a plausibility assertion.
+
+## 14. Benchmarks
 
 - 125 tests, fast suite 95 in 69 seconds, slow suite 30 in 167 seconds
 - 24 real models across 15 domains interrogated during development,
@@ -337,7 +370,7 @@ omitted_variable_sensitivity.
 - Granger validated on synthetic VAR data: true link found at p below
   1e-6 with correct lag, reverse direction null, noise channel silent
 
-## 14. Known limits
+## 15. Known limits
 
 - Pairwise Granger remains the default; PCMCI needs the tigramite
   extra and conditions on the observed past only
@@ -352,7 +385,7 @@ omitted_variable_sensitivity.
 - Phrase counterfactual lexicons are English only and small
 - EIG planning relies on literal hypothesis to feature name matching
 
-## 15. Availability
+## 16. Availability
 
 AGPL-3.0, source at github.com/HanSamaht/intervense, package on PyPI as
 intervense, documentation hosted on GitHub Pages. Python 3.10 to 3.12,

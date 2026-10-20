@@ -6,8 +6,11 @@ from .faithfulness import aggregate_faithfulness, evaluate_faithfulness, explain
 from .data_forensics import data_forensics
 from .cate_heterogeneity import cate_heterogeneity
 from .double_ml import double_ml_effect
+from .holdout_evaluation import holdout_evaluation
 from .identifiability import identify_real_effect
+from .mediation_chain import mediation_chain
 from .omitted_variable import omitted_variable_sensitivity
+from .panel_fixed_effects import panel_fixed_effects
 from .shortcut_diff import shortcut_diff
 from .specification_audit import specification_audit
 
@@ -29,4 +32,7 @@ __all__ = [
     "cate_heterogeneity",
     "double_ml_effect",
     "omitted_variable_sensitivity",
+    "panel_fixed_effects",
+    "mediation_chain",
+    "holdout_evaluation",
 ]

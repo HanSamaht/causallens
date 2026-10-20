@@ -646,6 +646,20 @@ class Interrogator:
                 args["treatment"], s.datasets.get(args.get("y_ref", "y")),
                 n_folds=int(args.get("n_folds", 5)),
             ),
+            "panel_fixed_effects": lambda: s.panel_fixed_effects(
+                s.datasets[args["data_ref"]], args["outcome"],
+                args["features"], args["group"],
+                cluster=args.get("cluster"),
+            ),
+            "mediation_chain": lambda: s.mediation_chain(
+                s.datasets[args["data_ref"]], args["treatment"],
+                args["mediator"], args["outcome"],
+                n_boot=int(args.get("n_boot", 500)),
+            ),
+            "holdout_evaluation": lambda: s.holdout_evaluation(
+                s.datasets[args["data_ref"]], args["outcome"],
+                args["features"], args["group"],
+            ),
             "omitted_variable_sensitivity": lambda: s.omitted_variable_sensitivity(
                 args["treatment"], s.datasets.get(args.get("y_ref", "y")),
             ),

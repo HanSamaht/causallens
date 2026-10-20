@@ -547,8 +547,58 @@ class MicSession:
         result = _ovs(self.driver, treatment, y, r_max_factor=r_max_factor)
         return self._log("omitted_variable_sensitivity", result)
 
+    def panel_fixed_effects(self, df, outcome: str, features: list[str],
+                            group: str, cluster: str | None = None) -> dict:
+        """Within-group fixed effects with cluster-robust standard
+        errors; stable unit quality absorbed, honest p-values."""
+        from ..analysis.panel_fixed_effects import (
+            panel_fixed_effects as _pfe,
+        )
+
+        if isinstance(df, str):
+            df = self.datasets.get(df)
+        if df is None:
+            raise ValueError("df must be a DataFrame or a registered name")
+        result = _pfe(df, outcome, features, group, cluster=cluster)
+        return self._log("panel_fixed_effects", result)
+
+    def mediation_chain(self, df, treatment: str, mediator: str,
+                        outcome: str, controls: list[str] | None = None,
+                        n_boot: int = 2000, seed: int = 0) -> dict:
+        """Standardized a/b path mediation with bootstrap intervals
+        and the suppression guard: no share is claimed when the total
+        effect is too weak for a ratio to mean anything."""
+        from ..analysis.mediation_chain import mediation_chain as _mc
+
+        if isinstance(df, str):
+            df = self.datasets.get(df)
+        if df is None:
+            raise ValueError("df must be a DataFrame or a registered name")
+        result = _mc(df, treatment, mediator, outcome, controls=controls,
+                     n_boot=n_boot, seed=seed)
+        return self._log("mediation_chain", result)
+
+    def holdout_evaluation(self, df, outcome: str, features: list[str],
+                           group: str, holdout_groups: list | None = None,
+                           model_factory=None) -> dict:
+        """Group-level holdout: entire levels held out, AUC, Brier,
+        calibration, prior baseline, honest generalization."""
+        from ..analysis.holdout_evaluation import (
+            holdout_evaluation as _he,
+        )
+
+        if isinstance(df, str):
+            df = self.datasets.get(df)
+        if df is None:
+            raise ValueError("df must be a DataFrame or a registered name")
+        result = _he(df, outcome, features, group,
+                     holdout_groups=holdout_groups,
+                     model_factory=model_factory)
+        return self._log("holdout_evaluation", result)
+
     def data_forensics(self, df, groups=None, other_df=None,
-                       key=None, alpha: float = 0.05) -> dict:
+                       key=None, alpha: float = 0.05,
+                       assertions: list[dict] | None = None) -> dict:
         """One call audit of a dataframe before modeling begins.
 
         Constant and duplicate columns, missingness inventory with the
@@ -566,7 +616,7 @@ class MicSession:
         if df is None:
             raise ValueError("df must be a DataFrame or a registered dataset name")
         result = _dfx(df, groups=groups, other_df=other_df, key=key,
-                      alpha=alpha)
+                      alpha=alpha, assertions=assertions)
         return self._log("data_forensics", result)
 
     def temporal_causal_graph(self, max_lag: int = 4, alpha: float = 0.05,
