@@ -278,7 +278,7 @@ code("""import extract_game_trajectories as egt
 egt.main()""")
 
 code(f"""import numpy as np
-import statsmodels.api as sm
+import pandas as pd
 
 tp = pd.read_csv("game_trajectories_players.csv")
 pdf = pd.read_csv("game_trajectories_plays.csv")
@@ -291,66 +291,163 @@ d = pdf.dropna(subset=["get_off_time", "speed_at_1s"]).copy()
 d = d[d.pocket_time > 0.5]
 for c in ["pocket_time"] + feats:
     d[c] = d[c].fillna(d[c].median())
-    d[c] = (d[c] - d[c].mean()) / d[c].std()
-for c in ["pocket_time"] + feats:
-    d[c + "_w"] = d[c] - d.groupby("nfl_id")[c].transform("mean")
-m = sm.OLS(d.pressure_event - d.groupby("nfl_id").pressure_event.transform("mean"),
-           d[[c + "_w" for c in ["pocket_time"] + feats]]).fit(
-    cov_type="cluster", cov_kwds={{"groups": d.nfl_id}})
-print("within-player linear fixed effects (probability points per +1 SD,")
-print("pocket time controlled, cluster-robust):")
-for i, name in enumerate(feats):
-    b, se, p = m.params.iloc[i + 1], m.bse.iloc[i + 1], m.pvalues.iloc[i + 1]
-    print(f"  {{name:20s}} {{b:+.4f}}  se {{se:.4f}}  p {{p:.4f}}")
 
-# mediation: drill speed -> in-game speed at 1s -> pressure rate
+from intervense.analysis.panel_fixed_effects import panel_fixed_effects
+fe_out = panel_fixed_effects(d[["nfl_id", "pressure_event", "pocket_time"]
+                               + feats],
+                             outcome="pressure_event",
+                             features=["pocket_time"] + feats,
+                             group="nfl_id")
+print("within-player fixed effects (Intervense panel_fixed_effects):")
+for r in fe_out["features"][1:]:  # skip pocket_time control
+    star = " ***" if r["p_value"] < 0.001 else " *" if r["p_value"] < 0.05 else ""
+    print(f"  {{r['feature']:22s}} {{r['coef_within_per_sd']:+.4f}} "
+          f"(se {{r['se_cluster']:.4f}}, p {{r['p_value']:.4f}}){{star}}")
+
+# mediation: framework call replaces 30 lines of manual bootstrap
 ds = pd.read_csv("pass_rush_dataset.csv")
 gp = pd.read_csv("game_pressure.csv")[["nfl_id", "pressure_rate"]]
 years = pd.read_csv("combine_results.csv")[["nfl_id", "draft_year"]]
 mm = ds.merge(gp, on="nfl_id").merge(tp, on="nfl_id").merge(years, on="nfl_id", how="left")
 mm = mm[mm.n_plays >= 50]
-mm["edge"] = mm.nfl_position.isin(["DE", "OLB"]).astype(float)
 mm["max_speed"] = mm.groupby("draft_year").max_speed.transform(
     lambda s: (s - s.mean()) / s.std() if s.std() > 1e-12 else s * 0)
 
-rng = np.random.default_rng(0)
-d2 = mm.dropna(subset=["max_speed", "speed_at_1s_med", "pressure_rate"])
-zm = lambda v: (v - v.mean()) / (v.std() + 1e-12)
-X, M, Y = zm(d2.max_speed).values, zm(d2.speed_at_1s_med).values, zm(d2.pressure_rate).values
-def paths(x_, m_, y_):
-    a = np.polyfit(x_, m_, 1)[0]
-    coefs = np.linalg.lstsq(np.column_stack([x_, m_, np.ones(len(x_))]), y_, rcond=None)[0]
-    return a, coefs[1], np.polyfit(x_, y_, 1)[0]
-a, b, total = paths(X, M, Y)
-ab = []
-for _ in range(2000):
-    i = rng.integers(0, len(d2), len(d2))
-    try:
-        aa, bb, _ = paths(X[i], M[i], Y[i]); ab.append(aa * bb)
-    except Exception:
-        pass
-lo, hi = np.percentile(ab, [2.5, 97.5])
-print(f"\\nmediation drill speed -> speed@1s -> pressure:")
-print(f"  indirect a*b {{a*b:+.3f}} [{{lo:+.3f}}, {{hi:+.3f}}], "
-      f"share {{a*b/total:.0%}}, n={{len(d2)}}")
+from intervense.analysis.mediation_chain import mediation_chain
+med_df = mm[["max_speed", "speed_at_1s_med", "pressure_rate"]].dropna()
+med_out = mediation_chain(med_df, "max_speed", "speed_at_1s_med", "pressure_rate",
+                          n_boot=2000, seed=0)
+print(f"\\nmediation (Intervense mediation_chain):")
+print(f"  {{med_out['verdict'][:120]}}")
 
-# holdout: train 2023-24, test the whole 2025 season
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score
-from sklearn.pipeline import make_pipeline as mkp
-from sklearn.preprocessing import StandardScaler as SSC
-mech = feats
-tr, te = d[d.season < 2025], d[d.season == 2025]
-for name_, cols_ in [("pocket only", ["pocket_time"]),
-                     ("+mechanics", ["pocket_time"] + mech)]:
-    dc = d.copy()
-    for c in ["pocket_time"]:
-        dc[c] = dc[c].fillna(dc[c].median())
-    tr, te = dc[dc.season < 2025], dc[dc.season == 2025]
-    mdl = mkp(SSC(), LogisticRegression(max_iter=2000, C=0.5))
-    mdl.fit(tr[cols_], tr.pressure_event)
-    auc = roc_auc_score(te.pressure_event, mdl.predict_proba(te[cols_])[:, 1])
-    print(f"holdout-2025 {{name_:12s}} AUC = {{auc:.3f}} ({{len(te):,}} reps)")""")
+# named players: speed transfer leaders and laggards
+p_players = pd.read_csv("players.csv")[["nfl_id", "display_name"]]
+m_named = mm.merge(p_players, on="nfl_id", how="left")
+m_named["game_z"] = ((m_named.speed_at_1s_med - m_named.speed_at_1s_med.mean())
+                     / m_named.speed_at_1s_med.std())
+m_named["transfer"] = m_named.game_z - m_named.max_speed
+hi_drill = m_named[m_named.max_speed > 0.5].dropna(
+    subset=["display_name", "transfer"]).sort_values("transfer", ascending=False)
+print()
+print("speed transfer leaders (drill speed becomes game speed):")
+for _, r in hi_drill.head(5).iterrows():
+    print(f"  {{str(r.display_name):25s}} {{r.nfl_position:4s}} "
+          f"drill {{r.max_speed:+.2f}} game {{r.game_z:+.2f}} "
+          f"pressure {{r.pressure_rate:.1%}}")
+print("speed transfer laggards (fast in drills, not in games):")
+for _, r in hi_drill.tail(5).sort_values("transfer").iterrows():
+    print(f"  {{str(r.display_name):25s}} {{r.nfl_position:4s}} "
+          f"drill {{r.max_speed:+.2f}} game {{r.game_z:+.2f}} "
+          f"pressure {{r.pressure_rate:.1%}}")
+
+# mechanics archetype matrix: speed transfer x efficiency transfer
+m_named["game_eff_z"] = ((m_named.path_efficiency_med - m_named.path_efficiency_med.mean())
+                          / m_named.path_efficiency_med.std())
+m_named["path_eff_z"] = m_named.groupby("draft_year").path_efficiency.transform(
+    lambda s: (s - s.mean()) / s.std() if s.std() > 1e-12 else s * 0)
+m_named["eff_transfer"] = m_named.game_eff_z - m_named.path_eff_z
+conds = [
+    (m_named.transfer > 0) & (m_named.eff_transfer > 0),
+    (m_named.transfer > 0) & (m_named.eff_transfer <= 0),
+    (m_named.transfer <= 0) & (m_named.eff_transfer > 0),
+    (m_named.transfer <= 0) & (m_named.eff_transfer <= 0),
+]
+arch = ["Complete Transcoder", "Speed-Only", "Technique Salvage", "System Mismatch"]
+m_named["archetype"] = np.select(conds, arch, default="Unknown")
+print()
+print("=== mechanics archetype matrix (speed_T x efficiency_T) ===")
+for label in arch:
+    sub = m_named[m_named.archetype == label]
+    print(f"  {{label:22s}} n={{len(sub):3d}}  avg pressure {{sub.pressure_rate.mean():.1%}}")
+hi_arch = m_named[m_named.max_speed > 0].nlargest(3, "pressure_rate")
+for _, r in hi_arch.iterrows():
+    print(f"    {{str(r.display_name):25s}} {{r.nfl_position:4s}} "
+          f"archetype {{r.archetype}}  pressure {{r.pressure_rate:.1%}}")
+
+# CATE: honest null from the framework
+from sklearn.ensemble import GradientBoostingRegressor
+from intervense.analysis.cate_heterogeneity import cate_heterogeneity as _cate
+mm["edge"] = mm.nfl_position.isin(["DE", "OLB"]).astype(float)
+d_c = mm[["pressure_rate", "edge", "draft_overall_pick", "max_speed"]].dropna()
+gbm_c = GradientBoostingRegressor(n_estimators=100, max_depth=3, random_state=0).fit(
+    d_c[["edge", "draft_overall_pick", "max_speed"]], d_c.pressure_rate)
+drv_c = detect_driver(gbm_c, ["edge", "draft_overall_pick", "max_speed"],
+                      d_c[["edge", "draft_overall_pick", "max_speed"]].to_numpy(),
+                      name="cate")
+cat_out = _cate(drv_c, "max_speed", d_c.pressure_rate, n_bootstrap=15, seed=0)
+print()
+print(f"CATE heterogeneity: {{cat_out['verdict'][:130]}}")
+
+# THE ONE-SECOND TEST
+from scipy.stats import spearmanr
+by_season = pdf.groupby(["nfl_id", "season"]).agg(
+    n=("play_id", "count"), pr=("pressure_event", "mean"),
+    speed=("speed_at_1s", "median")).reset_index()
+multi_s = by_season[by_season.n >= 30]
+print()
+print("=== THE ONE-SECOND TEST ===")
+print("year-to-year stability (2024 -> 2025):")
+for metric, label in [("speed", "speed@1s"), ("pr", "pressure rate")]:
+    a = multi_s[multi_s.season == 2024].set_index("nfl_id")[metric]
+    b = multi_s[multi_s.season == 2025].set_index("nfl_id")[metric]
+    common = a.index.intersection(b.index)
+    if len(common) >= 10:
+        r, p = spearmanr(a[common], b[common])
+        print(f"  {{label:18s}} r = {{r:+.3f}} (n={{len(common)}})")
+
+m_test = mm.copy()
+m_test["edge"] = m_test.nfl_position.isin(["DE", "OLB"]).astype(float)
+def partial_r(df, x, y, controls):
+    dd = df[[x, y] + controls].dropna()
+    Z = np.column_stack([dd[controls].values, np.ones(len(dd))])
+    resid = lambda v: v - Z @ np.linalg.lstsq(Z, v, rcond=None)[0]
+    return np.corrcoef(resid(dd[x].values), resid(dd[y].values))[0, 1]
+print()
+print("predictive power (partial r with pressure, ctrl edge+pick):")
+for label, col in [("speed@1s (game)", "speed_at_1s_med"),
+                    ("forty (stopwatch)", "forty"),
+                    ("max_speed (drill)", "max_speed"),
+                    ("path_eff (game)", "path_efficiency_med")]:
+    if col in m_test.columns:
+        r = partial_r(m_test, col, "pressure_rate", ["edge", "draft_overall_pick"])
+        print(f"  {{label:22s}} r = {{r:+.3f}}")
+
+# game FE: two-way fixed effects
+print()
+print("game fixed effects (absorbing OL, QB, game script):")
+import statsmodels.api as sm
+all_cols_fe = ["pressure_event", "pocket_time"] + feats
+d_fe = d[["nfl_id", "game_id"] + all_cols_fe].copy()
+for c in ["pocket_time"] + feats:
+    d_fe[c] = (d_fe[c] - d_fe[c].mean()) / d_fe[c].std()
+for c in all_cols_fe:
+    d_fe[c + "_p"] = d_fe[c] - d_fe.groupby("nfl_id")[c].transform("mean")
+for c in all_cols_fe:
+    d_fe[c + "_pg"] = d_fe[c + "_p"] - d_fe.groupby("game_id")[c + "_p"].transform("mean")
+y_fe = d_fe["pressure_event_pg"].to_numpy()
+X_fe = d_fe[[c + "_pg" for c in ["pocket_time"] + feats]].to_numpy()
+m_fe = sm.OLS(y_fe, X_fe).fit(cov_type="cluster",
+                               cov_kwds={{"groups": d_fe.nfl_id}})
+p_arr = np.asarray(m_fe.pvalues)
+b_arr = np.asarray(m_fe.params)
+for i, f in enumerate(feats):
+    survives = "SURVIVES" if p_arr[i + 1] < 0.05 else "drops"
+    print(f"  {{f:22s}} {{b_arr[i+1]:+.4f}} p={{p_arr[i+1]:.4f}} {{survives}}")
+print(f"  (n={{len(d_fe):,}}, {{d_fe.nfl_id.nunique()}} players, {{d_fe.game_id.nunique()}} games)")
+
+# holdout: framework call replaces the manual LODO loop
+from intervense.analysis.holdout_evaluation import holdout_evaluation
+d_hold = d[["season", "pressure_event", "pocket_time"] + feats].copy()
+for c in ["pocket_time"] + feats:
+    d_hold[c] = (d_hold[c] - d_hold[c].mean()) / d_hold[c].std()
+h1 = holdout_evaluation(d_hold, "pressure_rate" if False else "pressure_event",
+                        ["pocket_time"], group="season", holdout_groups=[2025])
+print(f"\\nholdout (Intervense holdout_evaluation):")
+print(f"  pocket only AUC = {{h1['auc']:.3f}}")
+h2 = holdout_evaluation(d_hold, "pressure_event",
+                        ["pocket_time"] + feats, group="season",
+                        holdout_groups=[2025])
+print(f"  + mechanics  AUC = {{h2['auc']:.3f}} ({{h2['n_test']:,}} reps, 2025 season)")""")
 
 md("""## Figures
 
@@ -370,14 +467,23 @@ import os
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
+from intervense.analysis.panel_fixed_effects import panel_fixed_effects
 
 os.makedirs("figures", exist_ok=True)
-C, C2 = "#3366cc", "#cc6633"
+plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11,
+                     "axes.titlesize": 13, "axes.labelsize": 11,
+                     "axes.spines.top": False, "axes.spines.right": False,
+                     "figure.facecolor": "white"})
+NAVY = "#1a365d"
+CORAL = "#e8532f"
+SLATE = "#64748b"
+GOLD = "#d69e2e"
+LIGHT = "#e2e8f0"
 
-# fig 7: travel-frame rush paths, pressure vs no pressure
+# ============ fig 7: travel-frame trajectory plot ============
 pdf = pd.read_csv("game_trajectories_plays.csv")
 sample = pdf[pdf.season == 2025].sample(160, random_state=3)
 keys = set(zip(sample.game_id.astype(int), sample.play_id.astype(int),
@@ -387,13 +493,16 @@ pres = dict(zip(zip(sample.game_id.astype(int), sample.play_id.astype(int),
 rows = []
 for chunk in pd.read_csv("game_tracking_2025.csv", chunksize=2_000_000,
                          low_memory=False,
-                         dtype={"x": np.float32, "y": np.float32}):
+                         dtype={"x": np.float32, "y": np.float32, "s": np.float32}):
     ids = list(zip(chunk.game_id.astype(int), chunk.play_id.astype(int),
                    chunk.nfl_id.astype(int)))
     rows.append(chunk[[k in keys for k in ids]])
 trj = pd.concat(rows, ignore_index=True)
-fig, ax = plt.subplots(figsize=(7.2, 6.2))
+
+fig, (ax, ax2) = plt.subplots(1, 2, figsize=(12, 5.5),
+                               gridspec_kw={"width_ratios": [3, 1]})
 plotted = 0
+n_pres = 0
 for (g, p, n), g_rush in trj.groupby(["game_id", "play_id", "nfl_id"]):
     key = (int(g), int(p), int(n))
     if key not in keys:
@@ -409,25 +518,55 @@ for (g, p, n), g_rush in trj.groupby(["game_id", "play_id", "nfl_id"]):
         continue
     x = g_rush.x.values[mk].astype(float)
     y = g_rush.y.values[mk].astype(float)
+    s = g_rush.s.values[mk].astype(float)
     bearing = np.arctan2(y[-1] - y[0], x[-1] - x[0])
     c_, s_ = np.cos(-bearing), np.sin(-bearing)
     fx = (x - x[0]) * c_ - (y - y[0]) * s_
     fy = (x - x[0]) * s_ + (y - y[0]) * c_
-    color = C2 if pres.get(key) else "#9db4d6"
-    ax.plot(fx, fy, color=color, lw=1.4 if pres.get(key) else 0.7,
-            alpha=0.9 if pres.get(key) else 0.45)
+    is_pressure = pres.get(key)
+    if is_pressure:
+        n_pres += 1
+        ax.plot(fx, fy, color=CORAL, lw=1.8, alpha=0.85, zorder=2)
+    else:
+        ax.plot(fx, fy, color=NAVY, lw=0.5, alpha=0.25, zorder=1)
     plotted += 1
-ax.set_xlabel("yards along the rush bearing")
-ax.set_ylabel("lateral yards (travel frame)")
-ax.set_title(f"{plotted} pass rush paths, 2025 season, first 3 seconds\\n"
-             "orange: rep produced pressure, blue: no pressure")
-ax.axhline(0, color="gray", lw=0.5)
+ax.set_xlabel("yards along the rush bearing", fontweight="bold")
+ax.set_ylabel("lateral yards (travel frame)", fontweight="bold")
+ax.axhline(0, color=SLATE, lw=0.5, ls="--", alpha=0.5)
+ax.set_xlim(-1, 12)
+patch_p = mpatches.Patch(color=CORAL, label=f"pressure ({n_pres} reps)")
+patch_n = mpatches.Patch(color=NAVY, alpha=0.3, label=f"no pressure ({plotted - n_pres} reps)")
+ax.legend(handles=[patch_p, patch_n], loc="upper right", fontsize=10, frameon=True)
+
+# inset: speed profile for one pressure rep
+speeds_p = []
+for (g, p, n), g_rush in trj.groupby(["game_id", "play_id", "nfl_id"]):
+    key = (int(g), int(p), int(n))
+    if key in keys and pres.get(key):
+        g_rush = g_rush.sort_values("time")
+        t0r = g_rush[g_rush.event == "ball_snap"]
+        if len(t0r):
+            t0 = pd.Timestamp(t0r.iloc[0].time)
+            t = (pd.to_datetime(g_rush.time) - t0).dt.total_seconds().values
+            mk = (t >= 0) & (t <= 3.0)
+            if mk.sum() > 15:
+                speeds_p.append((t[mk], g_rush.s.values[mk].astype(float)))
+                break
+if speeds_p:
+    t_s, s_s = speeds_p[0]
+    ax2.plot(t_s, s_s, color=CORAL, lw=2.2)
+    ax2.fill_between(t_s, s_s, alpha=0.15, color=CORAL)
+    ax2.set_xlabel("seconds from snap", fontweight="bold")
+    ax2.set_ylabel("speed (yd/s)", fontweight="bold")
+    ax2.set_title("one pressure rep", fontsize=11, style="italic")
+fig.suptitle(f"{plotted} pass rush paths, 2025 season, first 3 seconds",
+             fontsize=14, fontweight="bold", y=1.02)
 fig.tight_layout()
-fig.savefig("figures/fig7_trajectory_spaghetti.png", dpi=180,
+fig.savefig("figures/fig7_trajectory_spaghetti.png", dpi=200,
             bbox_inches="tight")
 plt.close(fig)
 
-# fig 8: mediation path diagram
+# ============ fig 8: mediation path diagram ============
 zm = lambda v: (v - v.mean()) / (v.std() + 1e-12)
 players_agg = pd.read_csv("game_trajectories_players.csv")
 ds2 = pd.read_csv("pass_rush_dataset.csv")
@@ -445,70 +584,105 @@ a3 = np.polyfit(X3, M3, 1)[0]
 co3 = np.linalg.lstsq(np.column_stack([X3, M3, np.ones(len(X3))]), Y3,
                       rcond=None)[0]
 tot3 = np.polyfit(X3, Y3, 1)[0]
-fig, ax = plt.subplots(figsize=(8.4, 3.4))
+
+from intervense.analysis.mediation_chain import mediation_chain
+mc = mediation_chain(d3[["max_speed", "speed_at_1s_med", "pressure_rate"]],
+                     "max_speed", "speed_at_1s_med", "pressure_rate",
+                     n_boot=2000, seed=0)
+
+fig, ax = plt.subplots(figsize=(9.5, 4.2))
 ax.axis("off")
-ax.text(0.06, 0.62, "Combine drill\\ntop speed", ha="center", va="center",
-        fontsize=11, bbox=dict(boxstyle="round", fc="#eef3fb", ec=C))
-ax.text(0.5, 0.62, "in-game speed\\nat 1 second", ha="center", va="center",
-        fontsize=11, bbox=dict(boxstyle="round", fc="#eef3fb", ec=C))
-ax.text(0.94, 0.62, "pressure rate", ha="center", va="center",
-        fontsize=11, bbox=dict(boxstyle="round", fc="#fbeee6", ec=C2))
-ax.annotate("", xy=(0.37, 0.62), xytext=(0.17, 0.62),
-            arrowprops=dict(arrowstyle="->", lw=1.6, color=C))
-ax.annotate("", xy=(0.86, 0.62), xytext=(0.63, 0.62),
-            arrowprops=dict(arrowstyle="->", lw=1.6, color=C))
-ax.annotate("", xy=(0.94, 0.30), xytext=(0.06, 0.30),
-            arrowprops=dict(arrowstyle="->", lw=1.2, color="#888888"))
-ax.text(0.27, 0.68, f"a = {a3:+.2f}", fontsize=10, color=C)
-ax.text(0.745, 0.68, f"b = {co3[1]:+.2f}", fontsize=10, color=C)
-ax.text(0.5, 0.16, f"total = {tot3:+.2f}", fontsize=10, color="#555555")
-ax.text(0.5, 0.90,
-        f"indirect a*b = {a3*co3[1]:+.2f}, 95% CI [+0.26, +0.52], "
-        f"{a3*co3[1]/tot3:.0%} of the total effect, n={len(d3)}",
-        ha="center", fontsize=10)
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+def box(x, y, text, fc, ec, fs=11):
+    ax.text(x, y, text, ha="center", va="center", fontsize=fs,
+            fontweight="bold", color=ec,
+            bbox=dict(boxstyle="round,pad=0.4", fc=fc, ec=ec, lw=2))
+def arrow(x1, y1, x2, y2, color, lw=2, style="->"):
+    ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
+                arrowprops=dict(arrowstyle=style, lw=lw, color=color,
+                                shrinkA=10, shrinkB=10))
+box(0.10, 0.65, "Combine drill\\ntop speed", "#eef2ff", NAVY)
+box(0.50, 0.65, "in-game speed\\nat 1 second", "#eef2ff", NAVY)
+box(0.90, 0.65, "pressure\\nrate", "#fff5f5", CORAL)
+arrow(0.17, 0.65, 0.43, 0.65, NAVY)
+arrow(0.57, 0.65, 0.83, 0.65, NAVY)
+arrow(0.10, 0.55, 0.90, 0.25, SLATE, lw=1.5)
+ax.text(0.27, 0.70, f"a = {a3:+.2f}***", fontsize=12, color=NAVY,
+        fontweight="bold", ha="center")
+ax.text(0.70, 0.70, f"b = {co3[1]:+.2f}***", fontsize=12, color=NAVY,
+        fontweight="bold", ha="center")
+ax.text(0.50, 0.13, f"direct = {mc['direct_path']:+.2f}", fontsize=11,
+        color=SLATE, ha="center")
+ax.text(0.50, 0.03, f"total = {tot3:+.2f}", fontsize=11, color=SLATE,
+        ha="center")
+share_pct = mc.get("mediated_share")
+share_str = f"{share_pct:.0%}" if share_pct is not None else "unstable"
+lo, hi = mc["indirect_ci95"]
+summary = (f"indirect a*b = {mc['indirect_ab']:+.2f}  "
+           f"95% CI [{lo:+.2f}, {hi:+.2f}]  |  "
+           f"{share_str} of total effect  |  n = {mc['n_rows']}")
+ax.text(0.50, 0.92, summary, ha="center", fontsize=11,
+        fontweight="bold", color=GOLD if lo > 0 else SLATE,
+        transform=ax.transAxes)
+ax.text(0.50, -0.02, "All variables standardized; CI from 2000 bootstrap resamples",
+        ha="center", fontsize=9, color=SLATE, style="italic",
+        transform=ax.transAxes)
 fig.tight_layout()
-fig.savefig("figures/fig8_mediation_path.png", dpi=180, bbox_inches="tight")
+fig.savefig("figures/fig8_mediation_path.png", dpi=200, bbox_inches="tight")
 plt.close(fig)
 
-# fig 9: within-player forest plot
+# ============ fig 9: professional forest plot ============
 feats = ["get_off_time", "speed_at_1s", "top_speed_window",
          "path_efficiency", "heading_change_rate", "bend_travel"]
 d4 = pd.read_csv("game_trajectories_plays.csv")
 d4 = d4.dropna(subset=["get_off_time", "speed_at_1s"])
 d4 = d4[d4.pocket_time > 0.5]
-for c in feats:
+for c in ["pocket_time"] + feats:
     d4[c] = d4[c].fillna(d4[c].median())
-    d4[c] = (d4[c] - d4[c].mean()) / d4[c].std()
-for c in feats:
-    d4[c + "_w"] = d4[c] - d4.groupby("nfl_id")[c].transform("mean")
-m4 = sm.OLS(d4.pressure_event - d4.groupby("nfl_id").pressure_event
-            .transform("mean"),
-            d4[[c + "_w" for c in feats]]).fit(
-    cov_type="cluster", cov_kwds={"groups": d4.nfl_id})
-names = {"get_off_time": "get-off time", "speed_at_1s": "speed at 1s",
-         "top_speed_window": "top speed before release",
+fe_out = panel_fixed_effects(
+    d4[["nfl_id", "pressure_event", "pocket_time"] + feats],
+    outcome="pressure_event", features=["pocket_time"] + feats,
+    group="nfl_id")
+names = {"get_off_time": "get-off time\\n(slower = less pressure)",
+         "speed_at_1s": "speed at 1 second",
+         "top_speed_window": "top speed\\nbefore release",
          "path_efficiency": "path efficiency",
-         "heading_change_rate": "heading change rate",
+         "heading_change_rate": "heading change\\nrate",
          "bend_travel": "travel-frame bend"}
-coefs, los, his, labels = [], [], [], []
+coefs, los, his, labels, pvals = [], [], [], [], []
 for i, f in enumerate(feats):
-    b_, se_ = m4.params.iloc[i], m4.bse.iloc[i]
-    coefs.append(b_); los.append(b_ - 1.96 * se_); his.append(b_ + 1.96 * se_)
-    labels.append(names[f])
+    r = fe_out["features"][i + 1]  # skip pocket_time
+    coefs.append(r["coef_within_per_sd"])
+    los.append(r["ci95"][0]); his.append(r["ci95"][1])
+    labels.append(names[f]); pvals.append(r["p_value"])
 order = np.argsort(coefs)
-fig, ax = plt.subplots(figsize=(7.4, 4.2))
-ax.errorbar([coefs[i] for i in order], np.arange(len(coefs)),
-            xerr=[[coefs[i] - los[i] for i in order],
-                  [his[i] - coefs[i] for i in order]],
-            fmt="o", color=C, capsize=3)
-ax.set_yticks(np.arange(len(coefs)))
-ax.set_yticklabels([labels[i] for i in order])
-ax.axvline(0.0, color="gray", lw=1)
-ax.set_xlabel("pressure probability points per +1 SD, within player "
-              "(2023-2025, 35,646 reps, cluster-robust)")
-ax.set_title("Same player, different rep: mechanics execution and pressure")
+fig, ax = plt.subplots(figsize=(8.5, 5))
+y_pos = np.arange(len(coefs))
+for idx, i in enumerate(order):
+    color = CORAL if pvals[i] < 0.001 else (GOLD if pvals[i] < 0.01 else NAVY)
+    star = "***" if pvals[i] < 0.001 else "**" if pvals[i] < 0.01 else "*" if pvals[i] < 0.05 else ""
+    ax.plot([los[i], his[i]], [idx, idx], color=color, lw=2.5, solid_capstyle="round")
+    ax.scatter(coefs[i], idx, color=color, s=80, zorder=3, marker="o")
+    ax.text(his[i] + 0.003, idx, f"{coefs[i]:+.3f}{star}",
+            va="center", fontsize=10, color=color, fontweight="bold")
+ax.axvline(0, color=SLATE, lw=1, ls="--", alpha=0.7, label="no effect")
+ax.set_yticks(y_pos)
+ax.set_yticklabels([labels[i] for i in order], fontsize=11)
+ax.set_xlabel("pressure probability points per +1 SD\\n(within player, pocket time controlled)",
+              fontweight="bold", fontsize=11)
+ax.set_title("Same player, different rep: mechanics execution and pressure odds",
+              fontsize=13, fontweight="bold")
+leg_el = [plt.Line2D([0], [0], color=CORAL, lw=2.5, label="p < 0.001"),
+          plt.Line2D([0], [0], color=GOLD, lw=2.5, label="p < 0.01"),
+          plt.Line2D([0], [0], color=NAVY, lw=2.5, label="p < 0.05")]
+ax.legend(handles=leg_el + [plt.Line2D([0], [0], color=SLATE, lw=1, ls="--",
+           label="zero")], loc="lower right", fontsize=9)
+ax.text(0.98, 0.02, f"n = {fe_out['n_rows']:,} reps, {fe_out['n_groups']} players, 2023-2025",
+        transform=ax.transAxes, ha="right", va="bottom", fontsize=9,
+        color=SLATE, style="italic")
 fig.tight_layout()
-fig.savefig("figures/fig9_fe_forest.png", dpi=180, bbox_inches="tight")
+fig.savefig("figures/fig9_fe_forest.png", dpi=200, bbox_inches="tight")
 plt.close(fig)
 print("fig7-9 saved")
 """)

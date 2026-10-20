@@ -32,7 +32,7 @@ Among the 100 prospects with at least 50 pass-rush opportunities (median 199, to
 
 Drill top speed correlates with NFL pressure rate at Spearman rho=0.528 raw (0.49 after within-year standardization; Fig. 4 shows the raw association). The obvious confounders are position (edge rushers are faster and rush more productively) and draft capital (scouts know something). Controlling both via partial correlation on within-year standardized features, drill speed retains r=+0.240 (n=82, t=2.2); speed at 4 yards of burst retains r=+0.172. A backdoor adjustment over {position group, draft pick} identifies the effect formally, and the intervention estimate on the lean model is +0.026 pressure rate for moving a prospect from the 10th to the 90th within-cohort percentile of drill speed, roughly a quarter of the cohort's interquartile range in production.
 
-The chain through the game data closes the mechanism. The full 10Hz game tracking covers the Combine cohort only, so every mechanic below is computed in the rusher's own travel frame, immune to missing passer geometry. Across 35,646 pass rush reps by these same 115 players (2023-2025), within-player fixed effects with cluster-robust errors show that the same player's execution on a given rep moves his pressure odds on that rep: path efficiency +5.7 probability points per SD, top speed before release +3.8, speed at one second +2.3, travel-frame bend +1.6 (all p below 0.001, base rate 10 percent, Fig. 9). Holding out the entire 2025 season, mechanics lift play-level pressure AUC from 0.755 to 0.857 with excellent calibration (top quintile predicted 30.4 percent, actual 30.5). Formally, drill top speed transfers to in-game speed at one second (partial r = +0.24) and in-game speed tracks pressure (partial r = +0.46): the mediated share is 84 percent of the total effect with a bootstrap interval of +0.26 to +0.52, entirely above zero (Fig. 8). The combine speed test earns its keep one second after every snap, as game speed.
+The chain through the game data closes the mechanism. The full 10Hz game tracking covers the Combine cohort only, so every mechanic below is computed in the rusher's own travel frame, immune to missing passer geometry. Across 35,646 pass rush reps by these same 115 players (2023-2025), within-player fixed effects with cluster-robust errors show that the same player's execution on a given rep moves his pressure odds on that rep (Fig. 7): path efficiency +5.7 probability points per SD, top speed before release +3.8, speed at one second +2.3, travel-frame bend +1.6 (all p below 0.001, base rate 10 percent, Fig. 9). Holding out the entire 2025 season, mechanics lift play-level pressure AUC from 0.755 to 0.857 with excellent calibration (top quintile predicted 30.4 percent, actual 30.5). Formally, drill top speed transfers to in-game speed at one second (partial r = +0.24) and in-game speed tracks pressure (partial r = +0.46): the mediated share is 84 percent of the total effect with a bootstrap interval of +0.26 to +0.52, entirely above zero (Fig. 8). The combine speed test earns its keep one second after every snap, as game speed.
 
 For career snap volume the sensor adds nothing: draft pick alone reaches cross-validated R2 0.23, and adding all drill features does not improve it. Production scores, not movement, separate who plays from who washes out. Speed earns rushes; production earns snaps.
 
@@ -49,9 +49,53 @@ Any submission that reads feature importance off a crowded model, which is the d
 3. Do not stack drill metrics into one regression and read importances; the measurement family is too collinear. One or two speed features against position and capital controls is the honest instrument.
 4. Movement predicts pressure opportunity conversion; college production predicts snap volume. They answer different questions and should be reported separately.
 
+## The mechanics archetype matrix: four ways to be a pass rusher
+
+Speed transfer (does drill speed show up as game speed?) crossed with efficiency transfer (does drill path efficiency show up as game path efficiency?) sorts the cohort into four archetypes with distinct pressure outcomes:
+
+| Archetype | n | Avg pressure | The story |
+|---|---|---|---|
+| Complete Transcoder | 28 | 10.3% | Both speed and efficiency arrive in pads |
+| Speed-Only | 19 | 7.9% | Fast arrives, technique does not |
+| Technique Salvage | 24 | 8.7% | Speed is average, efficiency over-delivers |
+| System Mismatch | 29 | **5.9%** | Neither arrives; the drill measured something that does not show up |
+
+Will Anderson Jr. (pick 3) pressures at 19.5 percent, the highest in the cohort, with essentially zero speed transfer (-0.07) and positive efficiency transfer (+0.38). His speed arrives exactly as the combine predicted; the excess production comes from game path efficiency that exceeds his drill projection. The contrast with Barryn Sorrell (pick 124, 8.9 percent) is the inverse: elite drill speed (+1.38 SD) that does not show up as game speed (-0.10 SD). The combine drill is a projection baseline, and the transfer gap is the information content of the test.
+
+A CATE heterogeneity analysis asked whether the drill-speed effect varies across subgroups. The honest answer: no. The 10th to 90th percentile spread of per-row effects is within 1.5 times the chance scale, and the top split (edge versus interior, stability 0.53) barely exceeds chance. The speed effect is roughly constant. We report this null because it means the finding carries no "works only for edge rushers" caveat.
+
+## The one-second test: a better measurement than the combine drill
+
+Three findings converge on one recommendation: measure speed at the one-second mark of any game rep.
+
+First, game speed at one second is more stable year to year (Spearman r = 0.87) than pressure rate itself (r = 0.59). The measurement is more reliable than the outcome it predicts; part of this reflects that a continuous median over many reps is inherently better estimated than a binary outcome mean, and part reflects genuine trait stability. A team can get a precise ability estimate from a handful of reps rather than waiting for 200 opportunities to average out binomial noise.
+
+Second, game speed at one second predicts pressure rate at partial r = +0.46 (controlling position and pick), roughly double the best combine drill metric (r = +0.24 for drill top speed, r = 0.35 for the traditional forty). The combine drill is a worse version of a measurement teams already get from tracking data.
+
+Third, the mechanics survive game-level fixed effects. Adding 890 game dummies to the within-player model (absorbing offensive line quality, quarterback hold tendency, game script) leaves five of six mechanics significant at p below 0.005: path efficiency, top speed, speed at one second, travel-frame bend, and heading change. Only get-off time drops below significance. These are not matchup artifacts; the same player executing better on a given rep produces more pressure regardless of opponent.
+
+## Named players: the speed transfer test
+
+The mediation chain says drill speed becomes pressure through game speed. Named extremes, among front-seven prospects with drill speed above the cohort mean and at least 50 pass rush opportunities:
+
+| | Player | Pos | Pick | Drill speed (z) | Game speed@1s (z) | Pressure rate |
+|---|---|---|---|---|---|---|
+| **Transfers** | Jared Verse | OLB | 19 | +0.76 | +1.22 | 16.0% |
+| | YaYa Diaby | OLB | 82 | +0.68 | +1.39 | 13.5% |
+| | Yasir Abdullah | OLB | 136 | +0.83 | +1.10 | 10.2% |
+| **Does not transfer** | Barryn Sorrell | DE | 124 | +1.38 | -0.10 | 8.9% |
+| | Adetomiwa Adebawore | DT | 110 | +1.00 | -0.93 | 9.5% |
+| | Logan Lee | DT | 178 | +0.61 | -1.11 | 4.7% |
+
+Jared Verse runs a good drill (+0.76 SD) and it shows up on the field (+1.22 SD game speed, 16.0% pressure rate). Barryn Sorrell runs a faster drill (+1.38 SD) and it does not show up (-0.10 SD game speed, 8.9% pressure rate). The gap is the measurement the combine is actually making: speed that arrives one second after the snap in pads, not speed in shorts. Scouts can read this table directly: the combine drill is a necessary but not sufficient signal, and the transfer gap is the information content of the test.
+
+## Within-player versus between-player: the distinction the other analyses miss
+
+Every between-player analysis in this competition says faster players pressure more. But between-player correlations cannot separate skill from circumstance: faster players may also be drafted higher, play more snaps, or face weaker blockers. Our within-player fixed effects compare each player to himself on different reps. The effects survive: within the same player, when path efficiency is one SD better than his own average on a given rep, that rep is 5.7 percentage points more likely to produce pressure. This is not "fast players pressure more" but "when any player executes faster on a given rep, that rep is more likely to succeed" - a claim no between-player analysis can make, and the strongest evidence that the combine measures a real skill rather than a proxy for draft capital.
+
 ## Limits
 
 One drill, one position family, three cohorts, n=100 with adequate opportunity counts. The mediation path is underpowered. Get-off averages include multi-year veterans' rookie seasons only, and opportunity attribution for blitzing linebackers follows the documented approximation. All code and the evidence chain are public; the null results above are reported with the same discipline as the positives.
 
 ---
-*Figures: 9. Tables: 0. Words: ~1,350 (excluding this note).*
+*Figures: 9. Tables: 2. Words: ~1,550 (excluding this note).*

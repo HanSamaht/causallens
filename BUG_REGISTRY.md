@@ -1,4 +1,14 @@
 
+## 2026-10: archetype efficiency transfer compared z-score to raw value
+
+The mechanics archetype matrix computed efficiency_transfer as
+game_efficiency_z minus raw drill path_efficiency (bounded 0 to 1),
+while speed_transfer correctly used within-year standardized drill
+speed. The mismatch made the efficiency threshold essentially random
+and the four-quadrant assignments invalid. Fixed by standardizing
+drill path_efficiency within year before differencing. Found during
+the pre-addition audit.
+
 ## 2026-10: six v0.17-0.18 tools absent from agent schemas
 
 cate_heterogeneity, double_ml_effect, omitted_variable_sensitivity,

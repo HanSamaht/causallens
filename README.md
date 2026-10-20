@@ -1,6 +1,5 @@
 # Intervense: Make All Black-Box Models Transparent
 
-[![PyPI](https://img.shields.io/pypi/v/intervense.svg)](https://pypi.org/project/intervense/)
 [![CI](https://github.com/HanSamaht/intervense/actions/workflows/ci.yml/badge.svg)](https://github.com/HanSamaht/intervense/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-teal.svg)](https://hansamaht.github.io/intervense/)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
