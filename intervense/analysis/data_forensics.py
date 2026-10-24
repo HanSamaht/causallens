@@ -49,7 +49,10 @@ def _numeric_view(df: pd.DataFrame) -> dict[str, np.ndarray]:
             out[c] = df[c].to_numpy(dtype=float)
         elif pd.api.types.is_datetime64_any_dtype(df[c]):
             s = df[c]
-            vals = s.astype("int64").to_numpy(dtype=float) / 1e9
+            # unit-independent epoch seconds: pandas 2 stores ns,
+            # pandas 3 defaults to us, so an int64 cast changes scale
+            deltas = (s - pd.Timestamp(0)) // pd.Timedelta(seconds=1)
+            vals = np.array(deltas, dtype="float64", copy=True)
             vals[s.isna().to_numpy()] = np.nan
             out[c] = vals
     return out

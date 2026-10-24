@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "intervense"
-version = "0.18.1"
+version = "0.18.2"
 description = "Make all black-box models transparent"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
